@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name            = "ta-trader"
+version         = "1.0.0"
+description     = "ADX/MACD/RSI/Bollinger Bands 기반 1개월 단위 기술적 분석 트레이딩 시스템"
+requires-python = ">=3.11"
+dependencies = [
+    "yfinance>=0.2.40",
+    "ta>=0.11.0",
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "matplotlib>=3.8",
+    "seaborn>=0.13",
+    "structlog>=24.1",
+    "click>=8.1",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "black>=24.0",
+    "isort>=5.13",
+    "mypy>=1.9",
+    "ruff>=0.4",
+]
+
+[project.scripts]
+ta-trader = "ta_trader.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length    = 100
+target-version = ["py311"]
+
+[tool.isort]
+profile        = "black"
+line_length    = 100
+src_paths      = ["src", "tests"]
+
+[tool.pytest.ini_options]
+testpaths  = ["tests"]
+addopts    = "-v --cov=src/ta_trader --cov-report=term-missing"
+
+[tool.mypy]
+python_version = "3.11"
+strict         = true
+ignore_missing_imports = true

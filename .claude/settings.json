@@ -1,0 +1,51 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ \"$(git -C \"$(git rev-parse --show-toplevel 2>/dev/null)\" branch --show-current 2>/dev/null)\" != \"main\" ] || echo '{\"block\": true, \"message\": \"main 브랜치에 직접 커밋할 수 없습니다. feature 브랜치를 사용하세요.\"}'>&2",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "MODIFIED=$(git -C \"$(git rev-parse --show-toplevel 2>/dev/null)\" diff --name-only 2>/dev/null | grep '\\.py$'); [ -z \"$MODIFIED\" ] || (cd \"$(git rev-parse --show-toplevel)\" && python -m py_compile $MODIFIED 2>&1 | head -5)",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(pytest:*)",
+      "Bash(black:*)",
+      "Bash(isort:*)",
+      "Bash(pip:*)",
+      "Bash(git:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf /*)",
+      "Bash(sudo:*)"
+    ]
+  },
+  "env": {
+    "TA_TRADER_ENV": "development",
+    "TA_TRADER_LOG_LEVEL": "INFO",
+    "TA_TRADER_REPORT_DIR": "reports",
+    "PYTHONPATH": "src"
+  }
+}

@@ -1,0 +1,18 @@
+# 관심 종목 목록
+# 한국: 종목코드.KS (KOSPI) / 종목코드.KQ (KOSDAQ)
+# 미국: 티커 심볼 그대로
+
+watchlist:
+  # ── 한국 KOSPI ─────────────────────
+  - "005930.KS"   # 삼성전자
+  - "000660.KS"   # SK하이닉스
+  - "005380.KS"   # 현대차
+  - "035720.KS"   # 카카오
+  - "035420.KS"   # NAVER
+
+  # ── 미국 ───────────────────────────
+  - "AAPL"        # Apple
+  - "NVDA"        # NVIDIA
+  - "MSFT"        # Microsoft
+  - "TSLA"        # Tesla
+  - "AMZN"        # Amazon
