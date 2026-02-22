@@ -50,8 +50,9 @@ ta_trader/
 │   ├── visualization/
 │   │   └── chart.py             ← 5패널 차트 (가격·MACD·RSI·ADX·점수)
 │   ├── utils/
-│   │   ├── logger.py            ← 로깅 설정
-│   │   └── formatter.py         ← 결과 출력 포매터
+│   │   ├── logger.py            ← 로깅 설정 (structlog)
+│   │   ├── formatter.py         ← 결과 출력 포매터 (LLM 섹션 포함)
+│   │   └── font.py              ← matplotlib 한글 폰트 자동 설정
 │   └── analyzer.py              ← 메인 MonthlyTradingAnalyzer (파사드)
 ├── tests/
 │   ├── conftest.py
@@ -70,6 +71,15 @@ ta_trader/
 ├── requirements.txt
 └── main.py                      ← CLI 진입점
 ```
+
+## 주요 클래스
+
+- MonthlyTradingAnalyzer  ← 메인 진입점 (ticker 입력 → TradingDecision 반환)
+- IndicatorCalculator     ← ta 라이브러리 기반 지표 계산
+- SignalAnalyzer          ← 지표별 신호 및 점수 산출
+- RiskManager             ← BB 기반 손절/익절가 자동 산출
+- ChartVisualizer         ← 5개 패널 차트 (가격·MACD·RSI·ADX·복합점수)
+- screen_portfolio()      ← 여러 종목 일괄 스크리닝 → DataFrame 반환
 
 ## 핵심 모듈 관계
 ```
@@ -122,6 +132,15 @@ main.py
 - KOSDAQ: `035420.KQ` (카카오)
 - 미국: `AAPL`, `NVDA`, `TSLA`
 
+## LLM 분석 모듈 (llm/)
+- **환경변수**: `ANTHROPIC_API_KEY` 필수, `TA_LLM_MODEL` (기본: claude-sonnet-4-20250514)
+- **LLMAnalyzer.analyze()**: 동기 호출 → LLMAnalysis 반환
+- **LLMAnalyzer.analyze_stream()**: 스트리밍 Generator → Iterator[str]
+- **PromptBuilder**: TradingDecision + DataFrame → 구조화된 프롬프트
+- **LLMAnalysis 필드**: overall_assessment, signal_rationale, key_risks, opportunities, action_plan, confidence
+- **TradingDecision.llm_analysis**: Optional[LLMAnalysis] — analyze_with_llm() 호출 시 채워짐
+- **JSON 강제 응답**: SYSTEM_PROMPT에서 JSON only 명시, 마크다운 fence 자동 제거
+
 ## 자주 쓰는 명령어
 ```bash
 # 단일 종목 분석
@@ -146,4 +165,5 @@ black src/ tests/ && isort src/ tests/
 ## 변경 이력
 - 2026-02-19: 초기 Claude Code 프로젝트 구조 설정
 - 2026-02-19: 차트에서 한국어 출력 오류 해결
-- 2026-02-21: LLM 분석 기능 추가
+- 2026-02-21: Claude LLM 분석 기능 추가
+- 2026-02-22: Gemini LLM 분석 기능 추가

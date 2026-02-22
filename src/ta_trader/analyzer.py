@@ -111,6 +111,7 @@ class MonthlyTradingAnalyzer:
 
     def analyze_with_llm(
         self,
+        provider:    str | None = None,
         api_key:     str | None = None,
         model:       str | None = None,
         recent_days: int = 10,
@@ -121,6 +122,7 @@ class MonthlyTradingAnalyzer:
         analyze() 를 내부적으로 먼저 호출하므로 별도 호출 불필요.
 
         Args:
+            provider:    'anthropic' | 'gemini' | None (None이면 환경변수/자동감지)
             api_key:     Anthropic API 키 (None이면 환경변수 ANTHROPIC_API_KEY 사용)
             model:       LLM 모델명 (None이면 환경변수 TA_LLM_MODEL 또는 기본값 사용)
             recent_days: 가격 추이 요약에 사용할 최근 일수
@@ -129,18 +131,13 @@ class MonthlyTradingAnalyzer:
         Returns:
             llm_analysis 필드가 채워진 TradingDecision
         """
-        from ta_trader.llm.analyzer import LLMAnalyzer
+        from ta_trader.llm.factory import create_llm_analyzer
 
         # 기술적 분석이 아직 실행되지 않았으면 실행
-        if self._calc is None:
-            decision = self.analyze()
-        else:
-            # 이미 analyze()가 호출된 경우 재실행하여 최신 decision 확보
-            decision = self.analyze()
-
+        decision = self.analyze()
         df = self._calc.dataframe
 
-        llm = LLMAnalyzer(api_key=api_key, model=model)
+        llm = create_llm_analyzer(provider=provider, api_key=api_key, model=model)
 
         if stream:
             print(f"\n{'─'*60}")
@@ -151,12 +148,13 @@ class MonthlyTradingAnalyzer:
                 print(chunk, end="", flush=True)
                 full_text += chunk
             print()
-            from ta_trader.llm.analyzer import LLMAnalyzer as _LA
-            llm_result = _LA._parse_response(full_text, llm._model)
+            llm_result = llm._parse_response(full_text, llm._model)
         else:
             llm_result = llm.analyze(decision, df, recent_days)
 
         decision.llm_analysis = llm_result
-        logger.info("LLM 분석 결과 첨부 완료", ticker=self.ticker,
+        logger.info("LLM 분석 결과 첨부 완료",
+                    ticker=self.ticker,
+                    provider=llm_result.provider,
                     confidence=llm_result.confidence)
         return decision

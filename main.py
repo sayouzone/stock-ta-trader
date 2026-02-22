@@ -25,7 +25,7 @@ from ta_trader.visualization.chart import ChartVisualizer
 
 
 @click.group()
-@click.version_option("1.0.1")
+@click.version_option("1.1.0")
 def cli() -> None:
     """TA Trader - ADX/MACD/RSI/Bollinger Bands 기반 트레이딩 분석 도구"""
 
@@ -40,9 +40,12 @@ def cli() -> None:
 @click.option("--save-report",is_flag=True,   help="분석결과를 reports/ 폴더에 저장")
 @click.option("--llm",        is_flag=True,   help="Anthropic Claude LLM 해석 추가 (ANTHROPIC_API_KEY 필요)")
 @click.option("--llm-stream", is_flag=True,   help="LLM 응답을 스트리밍으로 출력")
+@click.option("--llm-provider", default=None,
+              type=click.Choice(["anthropic", "gemini"], case_sensitive=False),
+              help="LLM Provider (기본값: 환경변수 자동 감지)")
 @click.option("--llm-model",  default=None,   help="LLM 모델명 (기본값: claude-sonnet-4-20250514)")
 def analyze(ticker: str, period: str, interval: str, save_chart: bool, no_chart: bool, save_report: bool,
-            llm: bool, llm_stream: bool, llm_model: str) -> None:
+            llm: bool, llm_stream: bool, llm_provider: str | None, llm_model: str | None) -> None:
     """단일 종목 기술적 분석
 
     TICKER: 종목 코드 (예: 005930.KS, AAPL)
@@ -56,7 +59,10 @@ def analyze(ticker: str, period: str, interval: str, save_chart: bool, no_chart:
     
     if llm or llm_stream:
         try:
-            decision = analyzer.analyze_with_llm(model=llm_model, stream=llm_stream)
+            decision = analyzer.analyze_with_llm(
+                provider=llm_provider,
+                model=llm_model, 
+                stream=llm_stream)
         except Exception as e:
             click.echo(f"⚠ LLM 분석 실패: {e}", err=True)
             click.echo("  기술적 분석만 출력합니다.\n", err=True)

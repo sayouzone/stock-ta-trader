@@ -20,6 +20,7 @@ class LLMAnalysis:
         opportunities      : 기회 요인 목록
         action_plan        : 구체적 액션 플랜 (진입/청산 조건 포함)
         confidence         : LLM 신뢰도 (0.0 ~ 1.0)
+        provider           : LLM 제공자 ('anthropic' | 'gemini')
         model              : 사용된 LLM 모델명
         raw_response       : LLM 원문 응답 (디버깅용)
     """
@@ -29,6 +30,7 @@ class LLMAnalysis:
     opportunities:      list[str] = field(default_factory=list)
     action_plan:        str = ""
     confidence:         float = 0.0
+    provider:           str = ""
     model:              str = ""
     raw_response:       str = ""
 
@@ -40,5 +42,6 @@ class LLMAnalysis:
             "opportunities":      self.opportunities,
             "action_plan":        self.action_plan,
             "confidence":         self.confidence,
+            "provider":           self.provider,
             "model":              self.model,
         }
