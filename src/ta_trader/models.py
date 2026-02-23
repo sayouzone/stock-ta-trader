@@ -35,6 +35,15 @@ class MarketRegime(Enum):
     STRONG_TREND = "강한추세"
     WEAK_TREND   = "약한추세"
     SIDEWAYS     = "횡보"
+    VOLATILE     = "변동성확대"
+
+
+class StrategyType(Enum):
+    """체제별 적용 전략"""
+    TREND_FOLLOWING    = "추세추종"
+    MEAN_REVERSION     = "평균회귀"
+    BREAKOUT_MOMENTUM  = "돌파모멘텀"
+    ADAPTIVE_DEFAULT   = "적응형기본"
 
 
 @dataclass
@@ -77,11 +86,13 @@ class TradingDecision:
     date:              str
     current_price:     float
     market_regime:     MarketRegime
+    strategy_type:     StrategyType
     composite_score:   float           # -100 ~ +100
     final_signal:      Signal
     indicators:        list[IndicatorResult]           = field(default_factory=list)
     risk:              Optional[RiskLevels]            = None
     summary:           str                             = ""
+    regime_detail:     str                             = ""
     llm_analysis:      Optional["LLMAnalysis"]         = None
 
     @property
@@ -104,6 +115,7 @@ class TradingDecision:
             "Date":        self.date,
             "Price":       self.current_price,
             "Regime":      self.market_regime.value,
+            "Strategy":    self.strategy_type.value,
             "Score":       self.composite_score,
             "Signal":      self.final_signal.value,
             "StopLoss":    self.stop_loss,

@@ -76,8 +76,10 @@ class PromptBuilder:
             f"- 분석 기준일: {d.date}\n"
             f"- 현재가: {d.current_price:,.2f}\n"
             f"- 시장 국면: {d.market_regime.value}\n"
+            f"- 적용 전략: {d.strategy_type.value}\n"
             f"- 복합 점수: {d.composite_score:+.2f} / ±100\n"
             f"- 최종 신호: **{d.final_signal.value}**"
+            + (f"\n- 체제 판별 근거: {d.regime_detail}" if d.regime_detail else "")
         )
 
     @staticmethod

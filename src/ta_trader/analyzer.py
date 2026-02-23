@@ -69,8 +69,12 @@ class MonthlyTradingAnalyzer:
         bb_result   = BollingerAnalyzer().analyze(latest)
 
         # 4. 복합 신호 합산
-        score, signal, regime = SignalComposer().compose(
-            adx_result, rsi_result, macd_result, bb_result
+        composer = SignalComposer()
+        score, signal, regime_ctx = composer.compose_with_strategy(
+            adx_result, rsi_result, macd_result, bb_result,
+            row=latest,
+            prev_row=prev,
+            prev_rows=df,
         )
 
         # 5. 리스크 관리
@@ -78,7 +82,9 @@ class MonthlyTradingAnalyzer:
         risk    = RiskManager().calculate(price, latest, signal)
         date    = str(df.index[-1].date())
         summary = (
-            f"시장 국면: {regime.value} | 복합 점수: {score:+.1f} | "
+            f"시장 국면: {regime_ctx.regime.value} | "
+            f"적용 전략: {regime_ctx.strategy.value} | "
+            f"복합 점수: {score:+.1f} | "
             f"최종 신호: {signal.value} | RR: 1:{risk.risk_reward_ratio} | "
             f"{_SIGNAL_SUMMARY[signal.value]}"
         )
@@ -86,9 +92,11 @@ class MonthlyTradingAnalyzer:
         logger.info(
             "분석 완료",
             ticker=self.ticker,
+            name=name,
             signal=signal.value,
             score=score,
-            regime=regime.value,
+            regime=regime_ctx.regime.value,
+            strategy=regime_ctx.strategy.value,
         )
 
         return TradingDecision(
@@ -96,12 +104,14 @@ class MonthlyTradingAnalyzer:
             name            = name,
             date            = date,
             current_price   = price,
-            market_regime   = regime,
+            market_regime   = regime_ctx.regime,
+            strategy_type   = regime_ctx.strategy,
             composite_score = score,
             final_signal    = signal,
             indicators      = [adx_result, rsi_result, macd_result, bb_result],
             risk            = risk,
             summary         = summary,
+            regime_detail   = regime_ctx.detail,
         )
 
     @property
@@ -122,7 +132,7 @@ class MonthlyTradingAnalyzer:
         analyze() 를 내부적으로 먼저 호출하므로 별도 호출 불필요.
 
         Args:
-            provider:    'anthropic' | 'gemini' | None (None이면 환경변수/자동감지)
+            provider:    'anthropic' | 'google' | None (None이면 환경변수/자동감지)
             api_key:     Anthropic API 키 (None이면 환경변수 ANTHROPIC_API_KEY 사용)
             model:       LLM 모델명 (None이면 환경변수 TA_LLM_MODEL 또는 기본값 사용)
             recent_days: 가격 추이 요약에 사용할 최근 일수
@@ -155,6 +165,7 @@ class MonthlyTradingAnalyzer:
         decision.llm_analysis = llm_result
         logger.info("LLM 분석 결과 첨부 완료",
                     ticker=self.ticker,
+                    name=name,
                     provider=llm_result.provider,
                     confidence=llm_result.confidence)
         return decision

@@ -1,20 +1,29 @@
 """
 ta_trader/signals/composer.py
-개별 지표 점수를 가중 합산하여 복합 신호 생성
+체제별 전략 자동 전환 기반 복합 신호 생성
+
+기존 가중치 방식에 더해, 각 시장 체제에 맞는 전략을 자동으로
+선택하고 전략별 보정 점수를 산출합니다.
 """
 
 from __future__ import annotations
 
+from typing import Optional
+
+import pandas as pd
+
 from ta_trader.constants import (
     SCORE_BUY, SCORE_SELL, SCORE_STRONG_BUY, SCORE_STRONG_SELL,
 )
-from ta_trader.models import IndicatorResult, MarketRegime, Signal, WeightSet
-from ta_trader.signals.regime import classify_regime, get_weights
+from ta_trader.models import IndicatorResult, MarketRegime, Signal, StrategyType, WeightSet
+from ta_trader.signals.regime import RegimeContext, classify_regime, detect_regime, get_weights
+from ta_trader.signals.strategy import BaseStrategy, create_strategy
 
 
 class SignalComposer:
     """
-    4개 지표 결과를 받아 시장 국면에 맞는 가중치로 복합 점수를 계산합니다.
+    4개 지표 결과를 받아 시장 체제를 판별하고,
+    체제에 맞는 전략을 자동 선택하여 복합 점수를 계산합니다.
     """
 
     def compose(
@@ -25,6 +34,10 @@ class SignalComposer:
         bb_result: IndicatorResult,
     ) -> tuple[float, Signal, MarketRegime]:
         """
+        레거시 호환 인터페이스 (기존 코드와 동일한 시그니처).
+        내부적으로 compose_with_strategy()를 호출하되,
+        row/prev_row 없이 기본 가중치만 사용합니다.
+
         Returns:
             (composite_score, final_signal, market_regime)
         """
@@ -38,6 +51,48 @@ class SignalComposer:
         )
         signal = self._score_to_signal(score)
         return round(score, 2), signal, regime
+
+    def compose_with_strategy(
+        self,
+        adx_result: IndicatorResult,
+        rsi_result: IndicatorResult,
+        macd_result: IndicatorResult,
+        bb_result: IndicatorResult,
+        row: pd.Series,
+        prev_row: Optional[pd.Series] = None,
+        prev_rows: Optional[pd.DataFrame] = None,
+    ) -> tuple[float, Signal, RegimeContext]:
+        """
+        체제 자동 판별 + 전략 자동 선택 + 보정 점수 산출.
+
+        Args:
+            adx_result:  ADX 분석 결과
+            rsi_result:  RSI 분석 결과
+            macd_result: MACD 분석 결과
+            bb_result:   Bollinger Bands 분석 결과
+            row:         최신 DataFrame 행 (체제 판별에 필요)
+            prev_row:    직전 DataFrame 행 (크로스/반전 감지에 필요)
+            prev_rows:   최근 N일 DataFrame (스퀴즈 지속 확인)
+
+        Returns:
+            (composite_score, final_signal, regime_context)
+        """
+        # 1. 체제 판별
+        regime_ctx = detect_regime(row, prev_rows)
+
+        # 2. 전략 자동 선택
+        strategy = create_strategy(regime_ctx)
+
+        # 3. 전략별 보정 점수 산출
+        score = strategy.score(
+            adx_result, rsi_result, macd_result, bb_result,
+            regime_ctx, row, prev_row,
+        )
+
+        # 4. 점수 → 신호 변환
+        signal = strategy.score_to_signal(score)
+
+        return round(score, 2), signal, regime_ctx
 
     @staticmethod
     def _weighted_score(

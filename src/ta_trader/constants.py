@@ -56,6 +56,40 @@ ATR_TAKE_PROFIT_MULTIPLIER: float = 3.0
 DEFAULT_STOP_LOSS_PCT: float = 0.03    # 3%
 DEFAULT_TAKE_PROFIT_PCT: float = 0.05  # 5%
 
+# ── 체제 판별 임계값 ──────────────────────────────────────
+BB_BANDWIDTH_SQUEEZE: float = 4.0     # BandWidth ≤ 4% → 스퀴즈(변동성 수축)
+BB_BANDWIDTH_EXPAND: float = 10.0     # BandWidth ≥ 10% → 변동성 확대
+
+# ── 추세추종 전략 가중치 (합계 = 100) ─────────────────────
+STRATEGY_TREND_ADX: int   = 25
+STRATEGY_TREND_RSI: int   = 15
+STRATEGY_TREND_MACD: int  = 45
+STRATEGY_TREND_BB: int    = 15
+
+# ── 평균회귀 전략 가중치 (합계 = 100) ─────────────────────
+STRATEGY_REVERT_ADX: int  = 5
+STRATEGY_REVERT_RSI: int  = 40
+STRATEGY_REVERT_MACD: int = 15
+STRATEGY_REVERT_BB: int   = 40
+
+# ── 돌파모멘텀 전략 가중치 (합계 = 100) ───────────────────
+STRATEGY_BREAKOUT_ADX: int  = 30
+STRATEGY_BREAKOUT_RSI: int  = 20
+STRATEGY_BREAKOUT_MACD: int = 30
+STRATEGY_BREAKOUT_BB: int   = 20
+
+# ── 추세추종: MACD 크로스 보너스 ──────────────────────────
+TREND_MACD_CROSS_BONUS: float = 15.0
+TREND_DI_CONFIRM_BONUS: float = 10.0
+
+# ── 평균회귀: BB 반등 보너스 ──────────────────────────────
+REVERT_BB_BOUNCE_BONUS: float = 15.0
+REVERT_RSI_REVERSAL_BONUS: float = 10.0
+
+# ── 돌파모멘텀: 스퀴즈 돌파 보너스 ────────────────────────
+BREAKOUT_SQUEEZE_BONUS: float = 20.0
+BREAKOUT_VOLUME_BONUS: float = 10.0
+
 # ── 데이터 수집 기본값 ────────────────────────────────────
 DEFAULT_PERIOD: str = "6mo"
 DEFAULT_INTERVAL: str = "1d"

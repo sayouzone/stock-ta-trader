@@ -9,6 +9,21 @@ watchlist:
   - "005380.KS"   # 현대차
   - "035720.KS"   # 카카오
   - "035420.KS"   # NAVER
+  # ── 보유종목 ─────────────────────
+  - "001680.KS"   # 대상
+  - "005680.KS"   # 삼영전자
+  - "007070.KS"   # GS리테일
+  - "008490.KS"   # 서흥
+  - "016580.KS"   # 환인제약
+  - "040420.KS"   # 정상제이엘에스
+  - "079550.KS"   # LIG넥스원
+  # ── 종목 검토 ─────────────────────
+  - "012450.KS"   # 한화에어로스페이스
+  - "064350.KS"   # 현대로템
+  - "009150.KS"   # 삼성전기
+  - "452430.KS"   # 사피엔반도체
+  - "042660.KS"   # 한화오션
+  - "298050.KS"   # HS효성첨단소재
 
   # ── 미국 ───────────────────────────
   - "AAPL"        # Apple
@@ -16,3 +31,19 @@ watchlist:
   - "MSFT"        # Microsoft
   - "TSLA"        # Tesla
   - "AMZN"        # Amazon
+  # ── 보유종목 ─────────────────────
+  - "DOW"         # Dow Inc
+  - "NNDM"        # Nano Dimension Ltd
+  - "INVU"        # Investview Inc. Common Stock
+  - "IONQ"        # IONQ Inc
+  - "MVIS"        # Microvision Inc
+  - "ARKG"        # ARK Genomic Revolution ETF
+  - "SPY"         # SPDR S&P 500 Trust ETF
+  # ── 배당 보유종목 ─────────────────────
+  - "JEPI"        # JPMorgan Equity Premium Income ETF
+  - "AGNC"        # AGNC Investment Corp
+  - "KBWY"        # Invesco KBW Premium Yield Equity REIT ETF
+  - "RA"          # Brookfield Real Assets Income Fund Inc
+  - "QYLD"        # Global X NASDAQ 100 Covered Call ETF
+  # ── 종목 검토 ─────────────────────
+  - "PLTR"        # Palantir Technologies Inc

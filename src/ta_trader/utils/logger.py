@@ -3,7 +3,7 @@ ta_trader/utils/logger.py
 structlog 기반 구조화 로깅 설정
 
 Notes:
-    - stdlib.PrintLoggerFactory 는 .name 속성이 없어 add_logger_name 과 충돌.
+    - PrintLoggerFactory 는 .name 속성이 없어 add_logger_name 과 충돌.
     - stdlib.LoggerFactory 를 사용하면 표준 logging.Logger 를 백엔드로 써서 .name 을 지원.
 """
 

@@ -7,7 +7,7 @@ ta_trader/llm/analyzer.py
 
     from ta_trader.llm.factory import create_llm_analyzer          # 권장
     from ta_trader.llm.anthropic_analyzer import AnthropicAnalyzer # 직접 지정
-    from ta_trader.llm.gemini_analyzer import GeminiAnalyzer       # 직접 지정
+    from ta_trader.llm.google_analyzer import GoogleAnalyzer       # 직접 지정
 """
 
 from ta_trader.llm.anthropic_analyzer import AnthropicAnalyzer

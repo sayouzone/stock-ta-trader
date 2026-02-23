@@ -1,5 +1,5 @@
 """
-ta_trader/llm/gemini_analyzer.py
+ta_trader/llm/google_analyzer.py
 Google Gemini API Provider (google-genai SDK)
 
 환경변수:
@@ -28,11 +28,12 @@ from ta_trader.utils.logger import get_logger
 logger = get_logger(__name__)
 
 #_DEFAULT_MODEL      = "gemini-2.0-flash"
-_DEFAULT_MODEL      = "gemini-3.0-pro"
-_DEFAULT_MAX_TOKENS = 1500
+_DEFAULT_MODEL      = "gemini-3-pro-preview"
+#_DEFAULT_MAX_TOKENS = 1500
+_DEFAULT_MAX_TOKENS = 8192
 
 
-class GeminiAnalyzer(BaseLLMAnalyzer):
+class GoogleAnalyzer(BaseLLMAnalyzer):
     """
     Google Gemini API 기반 LLM 분석기.
 
@@ -66,7 +67,7 @@ class GeminiAnalyzer(BaseLLMAnalyzer):
 
     @property
     def provider_name(self) -> str:
-        return "gemini"
+        return "google"
 
     def _call_api(self, system: str, prompt: str) -> str:
         config = types.GenerateContentConfig(

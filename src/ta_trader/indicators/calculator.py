@@ -69,6 +69,7 @@ class IndicatorCalculator:
         self._df["bb_middle"] = ind.bollinger_mavg()
         self._df["bb_lower"]  = ind.bollinger_lband()
         self._df["bb_pct"]    = ind.bollinger_pband()   # 0=하단, 1=상단
+        self._df["bb_width"]  = ind.bollinger_wband() * 100  # BandWidth %
 
     def _add_adx(self) -> None:
         ind = ADXIndicator(

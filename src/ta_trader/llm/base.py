@@ -78,7 +78,7 @@ class BaseLLMAnalyzer(ABC):
     @property
     @abstractmethod
     def provider_name(self) -> str:
-        """Provider 식별자 ('anthropic' | 'gemini')"""
+        """Provider 식별자 ('anthropic' | 'google')"""
 
     @abstractmethod
     def _call_api(self, system: str, prompt: str) -> str:

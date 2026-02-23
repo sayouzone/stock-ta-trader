@@ -27,7 +27,7 @@ from ta_trader.llm.base import BaseLLMAnalyzer
 # 지원 Provider 등록 테이블
 _PROVIDERS: dict[str, str] = {
     "anthropic": "ta_trader.llm.anthropic_analyzer.AnthropicAnalyzer",
-    "gemini":    "ta_trader.llm.gemini_analyzer.GeminiAnalyzer",
+    "google":    "ta_trader.llm.google_analyzer.GoogleAnalyzer",
 }
 
 
@@ -41,7 +41,7 @@ def create_llm_analyzer(
     LLM 분석기 인스턴스를 생성합니다.
 
     Args:
-        provider:   'anthropic' | 'gemini' | None
+        provider:   'anthropic' | 'google' | None
                     None이면 환경변수 TA_LLM_PROVIDER 확인 후
                     설정된 API 키 기준으로 자동 선택합니다.
         api_key:    해당 Provider의 API 키 (None이면 환경변수 사용)
@@ -85,7 +85,7 @@ def _auto_detect_provider() -> str:
     if os.getenv("ANTHROPIC_API_KEY"):
         return "anthropic"
     if os.getenv("GEMINI_API_KEY"):
-        return "gemini"
+        return "google"
     raise TATraderError(
         "LLM API 키가 설정되지 않았습니다.\n"
         "  Anthropic: export ANTHROPIC_API_KEY='sk-ant-...'\n"

@@ -16,6 +16,7 @@ def make_decision(decision: TradingDecision) -> str:
         f"  |  현재가: {decision.current_price:,.2f}\n"
         f"{bar}\n"
         f"  시장 국면    : {decision.market_regime.value}\n"
+        f"  적용 전략    : {decision.strategy_type.value}\n"
         f"  복합 점수    : {decision.composite_score:+.2f}  (-100 ~ +100)\n"
         f"  최종 신호    : ★  {decision.final_signal.value}  ★\n"
     )
@@ -36,6 +37,9 @@ def make_decision(decision: TradingDecision) -> str:
 
     if decision.summary:
         decision_str += f"\n  📝 {decision.summary}\n"
+
+    if decision.regime_detail:
+        decision_str += f"\n  🔄 체제 판별: {decision.regime_detail}\n"
 
     # ── LLM 분석 섹션 ──────────────────────────────────
     if decision.llm_analysis:

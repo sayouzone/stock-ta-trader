@@ -25,7 +25,7 @@ from ta_trader.visualization.chart import ChartVisualizer
 
 
 @click.group()
-@click.version_option("1.1.0")
+@click.version_option("1.1.1")
 def cli() -> None:
     """TA Trader - ADX/MACD/RSI/Bollinger Bands 기반 트레이딩 분석 도구"""
 
@@ -41,7 +41,7 @@ def cli() -> None:
 @click.option("--llm",        is_flag=True,   help="Anthropic Claude LLM 해석 추가 (ANTHROPIC_API_KEY 필요)")
 @click.option("--llm-stream", is_flag=True,   help="LLM 응답을 스트리밍으로 출력")
 @click.option("--llm-provider", default=None,
-              type=click.Choice(["anthropic", "gemini"], case_sensitive=False),
+              type=click.Choice(["anthropic", "google"], case_sensitive=False),
               help="LLM Provider (기본값: 환경변수 자동 감지)")
 @click.option("--llm-model",  default=None,   help="LLM 모델명 (기본값: claude-sonnet-4-20250514)")
 def analyze(ticker: str, period: str, interval: str, save_chart: bool, no_chart: bool, save_report: bool,
