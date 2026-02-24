@@ -126,3 +126,10 @@ class TradingDecision:
             d["LLM_Confidence"] = self.llm_analysis.confidence
             d["LLM_Assessment"] = self.llm_analysis.overall_assessment[:80] + "..."
         return d
+
+    def get_indicator(self, name: str) -> Optional["IndicatorResult"]:
+        """이름으로 개별 지표 결과 조회"""
+        for ind in self.indicators:
+            if ind.name == name:
+                return ind
+        return None

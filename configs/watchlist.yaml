@@ -46,4 +46,11 @@ watchlist:
   - "RA"          # Brookfield Real Assets Income Fund Inc
   - "QYLD"        # Global X NASDAQ 100 Covered Call ETF
   # ── 종목 검토 ─────────────────────
+  - "ASML"        # ASML Holding N.V. - New York Re
+  - "AVGO"        # Broadcom Inc.
+  - "GOOG"        # Alphabet Inc.
+  - "GOOGL"       # Alphabet Inc.
+  - "KO"          # Coca-Cola Company (The)
+  - "MRVL"        # Marvell Technology, Inc.
+  - "TSM"         # Taiwan Semiconductor Manufactur
   - "PLTR"        # Palantir Technologies Inc

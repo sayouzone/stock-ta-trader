@@ -56,10 +56,13 @@ stock-ta-trader/
 │   └── analyzer.py              ← 메인 MonthlyTradingAnalyzer (파사드)
 ├── tests/
 │   ├── conftest.py
+│   ├── test_backtest.py
+│   ├── test_gemini.py
 │   ├── test_indicators.py
+│   ├── test_llm.py              ← LLM 모듈 모킹 테스트 ★
 │   ├── test_signals.py
 │   ├── test_risk.py
-│   └── test_llm.py              ← LLM 모듈 모킹 테스트 ★
+│   └── test_strategy.py
 ├── configs/
 │   └── watchlist.yaml           ← 관심 종목 목록
 ├── docs/
@@ -168,3 +171,5 @@ black src/ tests/ && isort src/ tests/
 - 2026-02-21: Claude LLM 분석 기능 추가
 - 2026-02-22: Gemini LLM 분석 기능 추가
 - 2026-02-23: Regime-adaptive strategy 자동 전환 시스템 추가
+- 2026-02-24: Backtest 결과 리포트 추가
+- 2026-02-24: 기술적 분석 후 추천 종목 선정 추가
