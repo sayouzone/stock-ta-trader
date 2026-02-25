@@ -38,6 +38,19 @@ class MarketRegime(Enum):
     VOLATILE     = "변동성확대"
 
 
+class TradingStyle(Enum):
+    """매매 스타일 (보유 기간 기반)"""
+    SWING    = "스윙"       # 2일~2주: 단기 파동 포착
+    POSITION = "포지션"     # 수주~수개월: 중장기 추세 추종
+
+    @property
+    def description(self) -> str:
+        return {
+            TradingStyle.SWING:    "스윙 트레이딩 (2일~2주, 단기 파동 포착)",
+            TradingStyle.POSITION: "포지션 트레이딩 (수주~수개월, 중장기 추세 추종)",
+        }[self]
+
+
 class StrategyType(Enum):
     """체제별 적용 전략"""
     TREND_FOLLOWING    = "추세추종"
@@ -89,6 +102,7 @@ class TradingDecision:
     strategy_type:     StrategyType
     composite_score:   float           # -100 ~ +100
     final_signal:      Signal
+    trading_style:     TradingStyle                     = TradingStyle.SWING
     indicators:        list[IndicatorResult]           = field(default_factory=list)
     risk:              Optional[RiskLevels]            = None
     summary:           str                             = ""
@@ -114,6 +128,7 @@ class TradingDecision:
             "Name":        self.name,
             "Date":        self.date,
             "Price":       self.current_price,
+            "Style":       self.trading_style.value,
             "Regime":      self.market_regime.value,
             "Strategy":    self.strategy_type.value,
             "Score":       self.composite_score,

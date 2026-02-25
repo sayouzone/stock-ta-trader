@@ -13,9 +13,10 @@ from ta_trader.indicators.bollinger import BollingerAnalyzer
 from ta_trader.indicators.calculator import IndicatorCalculator
 from ta_trader.indicators.macd import MACDAnalyzer
 from ta_trader.indicators.rsi import RSIAnalyzer
-from ta_trader.models import TradingDecision
+from ta_trader.models import TradingDecision, TradingStyle
 from ta_trader.risk.manager import RiskManager
 from ta_trader.signals.composer import SignalComposer
+from ta_trader.style_config import StyleConfig, get_style_config
 from ta_trader.utils.logger import get_logger
 
 if TYPE_CHECKING:
@@ -39,6 +40,9 @@ class MonthlyTradingAnalyzer:
     사용 예:
         analyzer = MonthlyTradingAnalyzer("005930.KS")
         decision = analyzer.analyze()
+
+        analyzer = MonthlyTradingAnalyzer("AAPL", trading_style=TradingStyle.POSITION)
+        decision = analyzer.analyze()  # 포지션 트레이딩
     """
 
     def __init__(
@@ -46,13 +50,18 @@ class MonthlyTradingAnalyzer:
         ticker: str,
         period: str = "6mo",
         interval: str = "1d",
+        trading_style: TradingStyle = TradingStyle.SWING,
     ) -> None:
         self.ticker   = ticker
+        self.trading_style = trading_style
+        self._style_config = get_style_config(trading_style)
         self._fetcher = DataFetcher(period=period, interval=interval)
         self._calc    = None   # IndicatorCalculator (analyze() 호출 후 사용 가능)
 
     def analyze(self) -> TradingDecision:
         """전체 분석 파이프라인 실행 후 TradingDecision 반환"""
+        sc = self._style_config
+
         # 1. 데이터 수집
         name, raw_df = self._fetcher.fetch(self.ticker)
 
@@ -68,13 +77,14 @@ class MonthlyTradingAnalyzer:
         macd_result = MACDAnalyzer().analyze(latest, prev)
         bb_result   = BollingerAnalyzer().analyze(latest)
 
-        # 4. 복합 신호 합산
+        # 4. 복합 신호 합산 (스타일 설정 전파)
         composer = SignalComposer()
         score, signal, regime_ctx = composer.compose_with_strategy(
             adx_result, rsi_result, macd_result, bb_result,
             row=latest,
             prev_row=prev,
             prev_rows=df,
+            style_config=sc,
         )
 
         # 5. 리스크 관리
@@ -82,6 +92,7 @@ class MonthlyTradingAnalyzer:
         risk    = RiskManager().calculate(price, latest, signal)
         date    = str(df.index[-1].date())
         summary = (
+            f"매매 스타일: {self.trading_style.value} | "
             f"시장 국면: {regime_ctx.regime.value} | "
             f"적용 전략: {regime_ctx.strategy.value} | "
             f"복합 점수: {score:+.1f} | "
@@ -95,6 +106,7 @@ class MonthlyTradingAnalyzer:
             name=name,
             signal=signal.value,
             score=score,
+            style=self.trading_style.value,
             regime=regime_ctx.regime.value,
             strategy=regime_ctx.strategy.value,
         )
@@ -108,6 +120,7 @@ class MonthlyTradingAnalyzer:
             strategy_type   = regime_ctx.strategy,
             composite_score = score,
             final_signal    = signal,
+            trading_style   = self.trading_style,
             indicators      = [adx_result, rsi_result, macd_result, bb_result],
             risk            = risk,
             summary         = summary,

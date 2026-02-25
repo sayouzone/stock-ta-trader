@@ -20,12 +20,22 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from ta_trader.analyzer import MonthlyTradingAnalyzer
+from ta_trader.models import TradingStyle
 from ta_trader.utils.formatter import make_decision
 from ta_trader.visualization.chart import ChartVisualizer
 
 
+def _parse_style(style_str: str | None) -> TradingStyle:
+    """CLI 문자열을 TradingStyle로 변환"""
+    if style_str is None or style_str.lower() in ("swing", "스윙"):
+        return TradingStyle.SWING
+    if style_str.lower() in ("position", "포지션"):
+        return TradingStyle.POSITION
+    return TradingStyle.SWING
+
+
 @click.group()
-@click.version_option("1.1.1")
+@click.version_option("1.2.0")
 def cli() -> None:
     """TA Trader - ADX/MACD/RSI/Bollinger Bands 기반 트레이딩 분석 도구"""
 
@@ -35,6 +45,9 @@ def cli() -> None:
 @click.argument("ticker")
 @click.option("--period",     default="6mo",  show_default=True, help="데이터 기간 (예: 3mo, 6mo, 1y)")
 @click.option("--interval",   default="1d",   show_default=True, help="봉 간격 (예: 1d, 1wk)")
+@click.option("--style",      default="swing", show_default=True,
+              type=click.Choice(["swing", "position"], case_sensitive=False),
+              help="매매 스타일: swing(스윙, 단기) / position(포지션, 중장기)")
 @click.option("--save-chart", is_flag=True,   help="차트를 reports/ 폴더에 저장")
 @click.option("--no-chart",   is_flag=True,   help="차트 표시 안 함")
 @click.option("--save-report",is_flag=True,   help="분석결과를 reports/ 폴더에 저장")
@@ -44,7 +57,8 @@ def cli() -> None:
               type=click.Choice(["anthropic", "google"], case_sensitive=False),
               help="LLM Provider (기본값: 환경변수 자동 감지)")
 @click.option("--llm-model",  default=None,   help="LLM 모델명 (기본값: claude-sonnet-4-20250514)")
-def analyze(ticker: str, period: str, interval: str, save_chart: bool, no_chart: bool, save_report: bool,
+def analyze(ticker: str, period: str, interval: str, style: str,
+            save_chart: bool, no_chart: bool, save_report: bool,
             llm: bool, llm_stream: bool, llm_provider: str | None, llm_model: str | None) -> None:
     """단일 종목 기술적 분석
 
@@ -52,10 +66,12 @@ def analyze(ticker: str, period: str, interval: str, save_chart: bool, no_chart:
 
     예시:
         python main.py analyze 005930.KS
-        python main.py analyze AAPL --llm
+        python main.py analyze AAPL --style position
         python main.py analyze NVDA --llm --llm-stream --save-chart
     """
-    analyzer = MonthlyTradingAnalyzer(ticker, period=period, interval=interval)
+    trading_style = _parse_style(style)
+    analyzer = MonthlyTradingAnalyzer(ticker, period=period, interval=interval,
+                                      trading_style=trading_style)
     
     if llm or llm_stream:
         try:
@@ -201,9 +217,12 @@ def _save_equity_chart(result, save_path: Path) -> None:
 @click.option("--config",  default="configs/watchlist.yaml", show_default=True, help="종목 목록 YAML")
 @click.option("--output",  default="reports",                 show_default=True, help="결과 저장 디렉토리")
 @click.option("--period",  default="6mo",                    show_default=True)
+@click.option("--style",   default="swing", show_default=True,
+              type=click.Choice(["swing", "position"], case_sensitive=False),
+              help="매매 스타일: swing(스윙) / position(포지션)")
 @click.option("--save-report", is_flag=True,                 help="보고서를 reports/ 폴더에 저장")
 @click.option("--top-n",   default=0, type=int,              help="상위 N개만 상세 출력 (0=전체)")
-def recommend(config: str, output: str, period: str, save_report: bool, top_n: int) -> None:
+def recommend(config: str, output: str, period: str, style: str, save_report: bool, top_n: int) -> None:
     """관심 종목 일괄 분석 후 매수 추천 및 근거 제시
 
     watchlist.yaml의 종목을 분석하고, 각 종목에 대해
@@ -213,10 +232,12 @@ def recommend(config: str, output: str, period: str, save_report: bool, top_n: i
     예시:
         python main.py recommend
         python main.py recommend --config my_stocks.yaml --top-n 5
-        python main.py recommend --save-report
+        python main.py recommend --style position --save-report
     """
     import yaml
     from ta_trader.recommend import RecommendationEngine, format_recommendation_report
+
+    trading_style = _parse_style(style)
 
     config_path = Path(config)
     if not config_path.exists():
@@ -235,7 +256,9 @@ def recommend(config: str, output: str, period: str, save_report: bool, top_n: i
     with click.progressbar(tickers, label="분석 중") as bar:
         for ticker in bar:
             try:
-                decision = MonthlyTradingAnalyzer(ticker, period=period).analyze()
+                decision = MonthlyTradingAnalyzer(
+                    ticker, period=period, trading_style=trading_style,
+                ).analyze()
                 decisions.append(decision)
             except Exception as e:
                 click.echo(f"\n[{ticker}] 오류: {e}", err=True)
@@ -261,7 +284,7 @@ def recommend(config: str, output: str, period: str, save_report: bool, top_n: i
         out_dir = Path(output)
         out_dir.mkdir(parents=True, exist_ok=True)
         from datetime import date
-        report_path = out_dir / f"recommend_{date.today().strftime('%Y%m%d')}.txt"
+        report_path = out_dir / f"recommend_{style}_{date.today().strftime('%Y%m%d')}.txt"
         report_path.write_text(report_str, encoding="utf-8")
         click.echo(f"보고서 저장됨: {report_path}")
 
@@ -271,9 +294,14 @@ def recommend(config: str, output: str, period: str, save_report: bool, top_n: i
 @click.option("--config",  default="configs/watchlist.yaml", show_default=True, help="종목 목록 YAML")
 @click.option("--output",  default="reports",                 show_default=True, help="결과 저장 디렉토리")
 @click.option("--period",  default="6mo",                    show_default=True)
-def screen(config: str, output: str, period: str) -> None:
+@click.option("--style",   default="swing", show_default=True,
+              type=click.Choice(["swing", "position"], case_sensitive=False),
+              help="매매 스타일: swing(스윙) / position(포지션)")
+def screen(config: str, output: str, period: str, style: str) -> None:
     """관심 종목 일괄 스크리닝"""
     import yaml
+
+    trading_style = _parse_style(style)
 
     config_path = Path(config)
     if not config_path.exists():
@@ -292,7 +320,9 @@ def screen(config: str, output: str, period: str) -> None:
     with click.progressbar(tickers, label="스크리닝 중") as bar:
         for ticker in bar:
             try:
-                decision = MonthlyTradingAnalyzer(ticker, period=period).analyze()
+                decision = MonthlyTradingAnalyzer(
+                    ticker, period=period, trading_style=trading_style,
+                ).analyze()
                 rows.append(decision.to_dict())
             except Exception as e:
                 click.echo(f"\n[{ticker}] 오류: {e}", err=True)

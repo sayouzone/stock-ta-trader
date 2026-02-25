@@ -13,7 +13,8 @@ def make_decision(decision: TradingDecision) -> str:
     decision_str = (
         f"\n{bar}\n"
         f"  📊  {decision.ticker} ({decision.name}) |  {decision.date}\n"
-        f"  |  현재가: {decision.current_price:,.2f}\n"
+        f"  |  현재가: {decision.current_price:,.2f}  "
+        f"|  매매 스타일: {decision.trading_style.value}\n"
         f"{bar}\n"
         f"  시장 국면    : {decision.market_regime.value}\n"
         f"  적용 전략    : {decision.strategy_type.value}\n"

@@ -4,6 +4,10 @@ ta_trader/signals/composer.py
 
 기존 가중치 방식에 더해, 각 시장 체제에 맞는 전략을 자동으로
 선택하고 전략별 보정 점수를 산출합니다.
+
+트레이딩 스타일에 따라:
+  - 스윙: 기존 ADX 25/20 임계값, 오실레이터 보너스 적극 적용
+  - 포지션: ADX 30/22 임계값, 추세 지표 가중치 상향
 """
 
 from __future__ import annotations
@@ -18,6 +22,7 @@ from ta_trader.constants import (
 from ta_trader.models import IndicatorResult, MarketRegime, Signal, StrategyType, WeightSet
 from ta_trader.signals.regime import RegimeContext, classify_regime, detect_regime, get_weights
 from ta_trader.signals.strategy import BaseStrategy, create_strategy
+from ta_trader.style_config import StyleConfig
 
 
 class SignalComposer:
@@ -61,27 +66,31 @@ class SignalComposer:
         row: pd.Series,
         prev_row: Optional[pd.Series] = None,
         prev_rows: Optional[pd.DataFrame] = None,
+        style_config: Optional[StyleConfig] = None,
     ) -> tuple[float, Signal, RegimeContext]:
         """
         체제 자동 판별 + 전략 자동 선택 + 보정 점수 산출.
 
         Args:
-            adx_result:  ADX 분석 결과
-            rsi_result:  RSI 분석 결과
-            macd_result: MACD 분석 결과
-            bb_result:   Bollinger Bands 분석 결과
-            row:         최신 DataFrame 행 (체제 판별에 필요)
-            prev_row:    직전 DataFrame 행 (크로스/반전 감지에 필요)
-            prev_rows:   최근 N일 DataFrame (스퀴즈 지속 확인)
+            adx_result:   ADX 분석 결과
+            rsi_result:   RSI 분석 결과
+            macd_result:  MACD 분석 결과
+            bb_result:    Bollinger Bands 분석 결과
+            row:          최신 DataFrame 행 (체제 판별에 필요)
+            prev_row:     직전 DataFrame 행 (크로스/반전 감지에 필요)
+            prev_rows:    최근 N일 DataFrame (스퀴즈 지속 확인)
+            style_config: 트레이딩 스타일 설정 (None이면 기본값)
 
         Returns:
             (composite_score, final_signal, regime_context)
         """
-        # 1. 체제 판별
-        regime_ctx = detect_regime(row, prev_rows)
+        # 1. 체제 판별 (스타일별 ADX 임계값 적용)
+        adx_strong = style_config.adx_strong_trend if style_config else None
+        adx_weak   = style_config.adx_weak_trend if style_config else None
+        regime_ctx = detect_regime(row, prev_rows, adx_strong=adx_strong, adx_weak=adx_weak)
 
-        # 2. 전략 자동 선택
-        strategy = create_strategy(regime_ctx)
+        # 2. 전략 자동 선택 (스타일 설정 전파)
+        strategy = create_strategy(regime_ctx, style_config)
 
         # 3. 전략별 보정 점수 산출
         score = strategy.score(
@@ -89,7 +98,7 @@ class SignalComposer:
             regime_ctx, row, prev_row,
         )
 
-        # 4. 점수 → 신호 변환
+        # 4. 점수 → 신호 변환 (스타일별 임계값 적용)
         signal = strategy.score_to_signal(score)
 
         return round(score, 2), signal, regime_ctx

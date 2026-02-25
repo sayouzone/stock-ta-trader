@@ -24,7 +24,7 @@ def format_recommendation_report(report: RecommendationReport) -> str:
 
     # ── 요약 테이블 ───────────────────────────────────────
     lines.append("")
-    lines.append(f"  {'순위':>4s}  {'등급':7s}  {'종목':8s}  {'현재가':>10s}  {'점수':>7s}  {'전략':8s}  {'신뢰도':>6s}")
+    lines.append(f"  {'순위':>4s}  {'등급':7s}  {'종목':8s}  {'현재가':>10s}  {'점수':>7s}  {'전략':8s}  {'신뢰도':8s}  {'종목명':>10s}")
     lines.append(f"  {thin[2:]}")
 
     for rec in report.recommendations:
@@ -33,7 +33,7 @@ def format_recommendation_report(report: RecommendationReport) -> str:
         lines.append(
             f"  {rec.rank:>4d}  {rec.grade.emoji} {rec.grade.value:5s}  "
             f"{dec.ticker:8s}  {dec.current_price:>10,.2f}  {dec.composite_score:>+7.2f}  "
-            f"{dec.strategy_type.value:8s}  {conf_bar}"
+            f"{dec.strategy_type.value:8s}  {conf_bar:8s} {dec.name:>10s}"
         )
 
     # ── 매수 추천 종목 상세 ───────────────────────────────
