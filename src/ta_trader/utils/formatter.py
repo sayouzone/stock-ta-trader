@@ -42,6 +42,9 @@ def make_decision(decision: TradingDecision) -> str:
     if decision.regime_detail:
         decision_str += f"\n  🔄 체제 판별: {decision.regime_detail}\n"
 
+    # ── 한줄 요약 ──────────────────────────────────────
+    decision_str += f"\n📌 요약:\n{make_summary(decision)}\n"
+
     # ── LLM 분석 섹션 ──────────────────────────────────
     if decision.llm_analysis:
         decision_str += make_llm_analysis(decision)
@@ -49,6 +52,29 @@ def make_decision(decision: TradingDecision) -> str:
     decision_str += f"{bar}\n"
 
     return decision_str
+
+def make_summary(decision: TradingDecision) -> str:
+    """TradingDecision을 파이프(|) 구분 한줄 요약으로 변환
+
+    형식:
+      티커 | 현재가 | 시장국면 | 전략 | 점수 | 신호 | 지표1 | 지표2 | ... | 날짜
+    """
+    parts = [
+        decision.ticker,
+        f"{decision.current_price:,.2f}",
+        decision.market_regime.value,
+        decision.strategy_type.value,
+        f"{decision.composite_score:+.2f}",
+        decision.final_signal.value,
+    ]
+
+    # 개별 지표 description 추가
+    for ind in decision.indicators:
+        parts.append(ind.description)
+
+    parts.append(decision.date)
+
+    return " | ".join(parts)
 
 def make_llm_analysis(decision: TradingDecision) -> str:
     """LLMAnalysis 섹션만 출력"""

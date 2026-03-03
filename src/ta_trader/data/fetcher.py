@@ -78,3 +78,21 @@ class DataFetcher:
 
         logger.info("데이터 수집 완료", ticker=ticker, rows=len(df))
         return name, df
+
+    def info(self, ticker: str) -> tuple[str, dict]:
+        # yfinance info (펀더멘털)
+        name = ticker
+        info = {}
+        try:
+            tk = yf.Ticker(ticker)
+            info = tk.info or {}
+            name = (
+                info.get("shortName")
+                or info.get("longName")
+                or info.get("displayName")
+                or ticker
+            )
+        except Exception:
+            pass
+
+        return name, info

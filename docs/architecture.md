@@ -11,6 +11,9 @@
 │  Data    │Indicators│ Signals  │  Risk   │  ← 도메인 레이어
 │  Layer   │  Layer   │  Layer   │  Layer  │
 ├──────────┴──────────┴──────────┴─────────┤
+│  Growth Module (growth/)                 │  ← 100% 상승 후보 6단계 분석
+│  Value Module  (value/)                  │  ← 가치 투자 5단계 분석
+├──────────────────────────────────────────┤
 │  Models (models.py)                      │  ← 순수 데이터 구조
 │  Constants (constants.py)                │
 │  Exceptions (exceptions.py)              │
@@ -36,6 +39,22 @@ SignalComposer.compose() → (composite_score, Signal, MarketRegime)
 RiskManager.calculate()  → RiskLevels (stop_loss, take_profit, rr)
   ↓
 TradingDecision (최종 결과 데이터클래스)
+```
+
+## 데이터 흐름 (가치 투자)
+
+```
+yfinance (OHLCV + info 펀더멘털)
+  ↓
+ValueInvestingAnalyzer.analyze()
+  ↓
+[1단계] 밸류에이션 필터  → PER, PBR, PSR, EV/EBITDA
+[2단계] 수익성 분석      → ROE, 영업이익률, FCF Yield, Cash Conversion
+[3단계] 재무 건전성      → 부채비율, 유동비율, 이자보상배율, 이익 안정성
+[4단계] 안전마진 산출    → Graham Number, 비교 밸류에이션, 배당, PEG
+[5단계] 기술적 진입      → 이평선 지지, RSI 과매도, 52주 위치, R:R
+  ↓
+ValueScreenResult (종합 등급 + 5단계 상세 + 리스크 관리)
 ```
 
 ## 핵심 설계 결정

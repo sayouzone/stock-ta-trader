@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from ta_trader.analyzer import MonthlyTradingAnalyzer
 from ta_trader.models import TradingStyle
-from ta_trader.utils.formatter import make_decision
+from ta_trader.utils.formatter import make_decision, make_summary
 from ta_trader.visualization.chart import ChartVisualizer
 
 
@@ -34,8 +34,15 @@ def _parse_style(style_str: str | None) -> TradingStyle:
     return TradingStyle.SWING
 
 
+def _resolve_styles(style_str: str | None) -> list[TradingStyle]:
+    """CLI 문자열을 TradingStyle 리스트로 변환. 'all'이면 양쪽 모두."""
+    if style_str and style_str.lower() in ("all", "전체"):
+        return [TradingStyle.SWING, TradingStyle.POSITION]
+    return [_parse_style(style_str)]
+
+
 @click.group()
-@click.version_option("1.2.0")
+@click.version_option("1.5.0")
 def cli() -> None:
     """TA Trader - ADX/MACD/RSI/Bollinger Bands 기반 트레이딩 분석 도구"""
 
@@ -46,8 +53,8 @@ def cli() -> None:
 @click.option("--period",     default="6mo",  show_default=True, help="데이터 기간 (예: 3mo, 6mo, 1y)")
 @click.option("--interval",   default="1d",   show_default=True, help="봉 간격 (예: 1d, 1wk)")
 @click.option("--style",      default="swing", show_default=True,
-              type=click.Choice(["swing", "position"], case_sensitive=False),
-              help="매매 스타일: swing(스윙, 단기) / position(포지션, 중장기)")
+              type=click.Choice(["swing", "position", "all"], case_sensitive=False),
+              help="매매 스타일: swing / position / all(양쪽 모두)")
 @click.option("--save-chart", is_flag=True,   help="차트를 reports/ 폴더에 저장")
 @click.option("--no-chart",   is_flag=True,   help="차트 표시 안 함")
 @click.option("--save-report",is_flag=True,   help="분석결과를 reports/ 폴더에 저장")
@@ -67,40 +74,60 @@ def analyze(ticker: str, period: str, interval: str, style: str,
     예시:
         python main.py analyze 005930.KS
         python main.py analyze AAPL --style position
+        python main.py analyze NVDA --style all
         python main.py analyze NVDA --llm --llm-stream --save-chart
     """
-    trading_style = _parse_style(style)
-    analyzer = MonthlyTradingAnalyzer(ticker, period=period, interval=interval,
-                                      trading_style=trading_style)
-    
-    if llm or llm_stream:
-        try:
-            decision = analyzer.analyze_with_llm(
-                provider=llm_provider,
-                model=llm_model, 
-                stream=llm_stream)
-        except Exception as e:
-            click.echo(f"⚠ LLM 분석 실패: {e}", err=True)
-            click.echo("  기술적 분석만 출력합니다.\n", err=True)
+    styles = _resolve_styles(style)
+    is_multi = len(styles) > 1
+
+    for idx, trading_style in enumerate(styles):
+        if is_multi:
+            click.echo(f"\n{'━'*68}")
+            click.echo(f"  ▶ [{idx+1}/{len(styles)}] {trading_style.description}")
+            click.echo(f"{'━'*68}")
+
+        analyzer = MonthlyTradingAnalyzer(ticker, period=period, interval=interval,
+                                          trading_style=trading_style)
+
+        if llm or llm_stream:
+            try:
+                decision = analyzer.analyze_with_llm(
+                    provider=llm_provider,
+                    model=llm_model,
+                    stream=llm_stream)
+            except Exception as e:
+                click.echo(f"⚠ LLM 분석 실패: {e}", err=True)
+                click.echo("  기술적 분석만 출력합니다.\n", err=True)
+                decision = analyzer.analyze()
+        else:
             decision = analyzer.analyze()
-    else:
-        decision = analyzer.analyze()
-    
-    decision_str = make_decision(decision)
-    print(decision_str)
 
-    if save_report:
-        save_path = Path("reports") / f"{ticker.replace('.', '_')}_report_{decision.date.replace('-','')}.txt" if save_chart else None
-        with open(save_path, "wt") as file:
-            file.write(decision_str)
+        decision_str = make_decision(decision)
+        print(decision_str)
 
-    if not no_chart:
-        save_path = Path("reports") / f"{ticker.replace('.', '_')}_chart_{decision.date.replace('-','')}.png" if save_chart else None
-        df = analyzer.calculator.dataframe if analyzer.calculator else None
-        if df is not None:
-            ChartVisualizer().plot(decision, df, save_path=save_path, show=not save_chart)
-            if save_chart and save_path:
-                click.echo(f"차트 저장됨: {save_path}")
+        style_tag = trading_style.name.lower()
+
+        if save_report:
+            out_dir = Path("reports")
+            out_dir.mkdir(parents=True, exist_ok=True)
+            report_path = out_dir / f"{ticker.replace('.', '_')}_report_{style_tag}_{decision.date.replace('-','')}.txt"
+            report_path.write_text(decision_str, encoding="utf-8")
+            click.echo(f"보고서 저장됨: {report_path}")
+
+            summary_path = out_dir / f"summary_{style_tag}_{decision.date.replace('-','')}.txt"
+            with summary_path.open("a", encoding="utf-8") as file:
+                file.write(make_summary(decision) + "\n")
+
+        if not no_chart:
+            chart_path = (
+                Path("reports") / f"{ticker.replace('.', '_')}_chart_{style_tag}_{decision.date.replace('-','')}.png"
+                if save_chart else None
+            )
+            df = analyzer.calculator.dataframe if analyzer.calculator else None
+            if df is not None:
+                ChartVisualizer().plot(decision, df, save_path=chart_path, show=not save_chart)
+                if save_chart and chart_path:
+                    click.echo(f"차트 저장됨: {chart_path}")
 
 
 # ── backtest 명령 ──────────────────────────────────────────
@@ -218,8 +245,8 @@ def _save_equity_chart(result, save_path: Path) -> None:
 @click.option("--output",  default="reports",                 show_default=True, help="결과 저장 디렉토리")
 @click.option("--period",  default="6mo",                    show_default=True)
 @click.option("--style",   default="swing", show_default=True,
-              type=click.Choice(["swing", "position"], case_sensitive=False),
-              help="매매 스타일: swing(스윙) / position(포지션)")
+              type=click.Choice(["swing", "position", "all"], case_sensitive=False),
+              help="매매 스타일: swing / position / all(양쪽 모두)")
 @click.option("--save-report", is_flag=True,                 help="보고서를 reports/ 폴더에 저장")
 @click.option("--top-n",   default=0, type=int,              help="상위 N개만 상세 출력 (0=전체)")
 def recommend(config: str, output: str, period: str, style: str, save_report: bool, top_n: int) -> None:
@@ -237,7 +264,8 @@ def recommend(config: str, output: str, period: str, style: str, save_report: bo
     import yaml
     from ta_trader.recommend import RecommendationEngine, format_recommendation_report
 
-    trading_style = _parse_style(style)
+    styles = _resolve_styles(style)
+    is_multi = len(styles) > 1
 
     config_path = Path(config)
     if not config_path.exists():
@@ -252,41 +280,49 @@ def recommend(config: str, output: str, period: str, style: str, save_report: bo
         click.echo("watchlist 항목이 없습니다.", err=True)
         sys.exit(1)
 
-    decisions = []
-    with click.progressbar(tickers, label="분석 중") as bar:
-        for ticker in bar:
-            try:
-                decision = MonthlyTradingAnalyzer(
-                    ticker, period=period, trading_style=trading_style,
-                ).analyze()
-                decisions.append(decision)
-            except Exception as e:
-                click.echo(f"\n[{ticker}] 오류: {e}", err=True)
+    for idx, trading_style in enumerate(styles):
+        if is_multi:
+            click.echo(f"\n{'━'*68}")
+            click.echo(f"  ▶ [{idx+1}/{len(styles)}] {trading_style.description}")
+            click.echo(f"{'━'*68}")
 
-    if not decisions:
-        click.echo("분석 가능한 종목이 없습니다.")
-        return
+        decisions = []
+        label = f"분석 중 ({trading_style.value})" if is_multi else "분석 중"
+        with click.progressbar(tickers, label=label) as bar:
+            for ticker in bar:
+                try:
+                    decision = MonthlyTradingAnalyzer(
+                        ticker, period=period, trading_style=trading_style,
+                    ).analyze()
+                    decisions.append(decision)
+                except Exception as e:
+                    click.echo(f"\n[{ticker}] 오류: {e}", err=True)
 
-    engine = RecommendationEngine()
-    report = engine.analyze(decisions)
+        if not decisions:
+            click.echo("분석 가능한 종목이 없습니다.")
+            continue
 
-    # top-n 필터링
-    if top_n > 0:
-        report.recommendations = report.recommendations[:top_n]
-        report.buy_picks = [r for r in report.buy_picks if r.rank <= top_n]
-        report.watch_list = [r for r in report.watch_list if r.rank <= top_n]
-        report.avoid_list = [r for r in report.avoid_list if r.rank <= top_n]
+        engine = RecommendationEngine()
+        report = engine.analyze(decisions)
 
-    report_str = format_recommendation_report(report)
-    click.echo(report_str)
+        # top-n 필터링
+        if top_n > 0:
+            report.recommendations = report.recommendations[:top_n]
+            report.buy_picks = [r for r in report.buy_picks if r.rank <= top_n]
+            report.watch_list = [r for r in report.watch_list if r.rank <= top_n]
+            report.avoid_list = [r for r in report.avoid_list if r.rank <= top_n]
 
-    if save_report:
-        out_dir = Path(output)
-        out_dir.mkdir(parents=True, exist_ok=True)
-        from datetime import date
-        report_path = out_dir / f"recommend_{style}_{date.today().strftime('%Y%m%d')}.txt"
-        report_path.write_text(report_str, encoding="utf-8")
-        click.echo(f"보고서 저장됨: {report_path}")
+        report_str = format_recommendation_report(trading_style, report)
+        click.echo(report_str)
+
+        if save_report:
+            out_dir = Path(output)
+            out_dir.mkdir(parents=True, exist_ok=True)
+            from datetime import date
+            style_tag = trading_style.name.lower()
+            report_path = out_dir / f"recommend_{style_tag}_{date.today().strftime('%Y%m%d')}.txt"
+            report_path.write_text(report_str, encoding="utf-8")
+            click.echo(f"보고서 저장됨: {report_path}")
 
 
 # ── screen 명령 ───────────────────────────────────────────
@@ -295,13 +331,18 @@ def recommend(config: str, output: str, period: str, style: str, save_report: bo
 @click.option("--output",  default="reports",                 show_default=True, help="결과 저장 디렉토리")
 @click.option("--period",  default="6mo",                    show_default=True)
 @click.option("--style",   default="swing", show_default=True,
-              type=click.Choice(["swing", "position"], case_sensitive=False),
-              help="매매 스타일: swing(스윙) / position(포지션)")
+              type=click.Choice(["swing", "position", "all"], case_sensitive=False),
+              help="매매 스타일: swing / position / all(양쪽 모두)")
 def screen(config: str, output: str, period: str, style: str) -> None:
-    """관심 종목 일괄 스크리닝"""
+    """관심 종목 일괄 스크리닝
+
+    예시:
+        python main.py screen
+        python main.py screen --style all
+    """
     import yaml
 
-    trading_style = _parse_style(style)
+    styles = _resolve_styles(style)
 
     config_path = Path(config)
     if not config_path.exists():
@@ -317,29 +358,260 @@ def screen(config: str, output: str, period: str, style: str) -> None:
         sys.exit(1)
 
     rows = []
-    with click.progressbar(tickers, label="스크리닝 중") as bar:
-        for ticker in bar:
-            try:
-                decision = MonthlyTradingAnalyzer(
-                    ticker, period=period, trading_style=trading_style,
-                ).analyze()
-                rows.append(decision.to_dict())
-            except Exception as e:
-                click.echo(f"\n[{ticker}] 오류: {e}", err=True)
+    for trading_style in styles:
+        label = f"스크리닝 중 ({trading_style.value})" if len(styles) > 1 else "스크리닝 중"
+        with click.progressbar(tickers, label=label) as bar:
+            for ticker in bar:
+                try:
+                    decision = MonthlyTradingAnalyzer(
+                        ticker, period=period, trading_style=trading_style,
+                    ).analyze()
+                    rows.append(decision.to_dict())
+                except Exception as e:
+                    click.echo(f"\n[{ticker}] 오류: {e}", err=True)
 
     if not rows:
         click.echo("분석 가능한 종목이 없습니다.")
         return
 
-    df = pd.DataFrame(rows).sort_values("Score", ascending=False).reset_index(drop=True)
+    df = pd.DataFrame(rows).sort_values(["Style", "Score"], ascending=[True, False]).reset_index(drop=True)
     click.echo("\n" + df.to_string(index=False))
 
     out_dir = Path(output)
     out_dir.mkdir(parents=True, exist_ok=True)
     from datetime import date
-    csv_path = out_dir / f"screening_{date.today().strftime('%Y%m%d')}.csv"
+    style_tag = style.lower()
+    csv_path = out_dir / f"screening_{style_tag}_{date.today().strftime('%Y%m%d')}.csv"
     df.to_csv(csv_path, index=False, encoding="utf-8-sig")
     click.echo(f"\n결과 저장됨: {csv_path}")
+
+
+# ── growth 명령 ───────────────────────────────────────────
+@cli.command()
+@click.argument("ticker")
+@click.option("--period", default="1y", show_default=True, help="데이터 기간 (예: 1y, 2y)")
+@click.option("--save-report", is_flag=True, help="보고서를 reports/ 폴더에 저장")
+def growth(ticker: str, period: str, save_report: bool) -> None:
+    """100% 상승 후보 6단계 분석 (단일 종목)
+
+    이익가속·스테이지·기술적진입·리스크·건강도를 종합 평가하여
+    GrowthScore (0~100)와 등급(적극매수~부적합)을 산출합니다.
+
+    TICKER: 종목 코드 (예: AAPL, NVDA, 005930.KS)
+
+    예시:
+        python main.py growth NVDA
+        python main.py growth AAPL --period 2y --save-report
+    """
+    from ta_trader.growth import GrowthMomentumAnalyzer, format_growth_result
+
+    try:
+        analyzer = GrowthMomentumAnalyzer(ticker, period=period)
+        result = analyzer.analyze()
+    except Exception as e:
+        click.echo(f"❌ 분석 실패 [{ticker}]: {e}", err=True)
+        raise SystemExit(1) from e
+
+    report_str = format_growth_result(result)
+    click.echo(report_str)
+
+    if save_report:
+        out_dir = Path("reports")
+        out_dir.mkdir(parents=True, exist_ok=True)
+        report_path = out_dir / f"{ticker.replace('.', '_')}_growth_{result.date.replace('-','')}.txt"
+        report_path.write_text(report_str, encoding="utf-8")
+        click.echo(f"보고서 저장됨: {report_path}")
+
+
+# ── growth-screen 명령 ────────────────────────────────────
+@cli.command("growth-screen")
+@click.option("--config", default="configs/watchlist.yaml", show_default=True, help="종목 목록 YAML")
+@click.option("--output", default="reports", show_default=True, help="결과 저장 디렉토리")
+@click.option("--period", default="1y", show_default=True)
+@click.option("--top-n", default=0, type=int, help="상위 N개만 출력 (0=전체)")
+@click.option("--min-score", default=0.0, type=float, help="최소 점수 필터")
+@click.option("--save-report", is_flag=True, help="보고서를 reports/ 폴더에 저장")
+def growth_screen(config: str, output: str, period: str, top_n: int, min_score: float, save_report: bool) -> None:
+    """관심 종목 일괄 Growth 스크리닝
+
+    watchlist.yaml의 종목을 6단계 프로세스로 분석하여
+    GrowthScore 기준으로 정렬합니다.
+
+    예시:
+        python main.py growth-screen
+        python main.py growth-screen --config my_stocks.yaml --top-n 10
+        python main.py growth-screen --min-score 50
+    """
+    import yaml
+    from ta_trader.growth import GrowthMomentumAnalyzer, format_growth_report
+
+    config_path = Path(config)
+    if not config_path.exists():
+        click.echo(f"설정 파일을 찾을 수 없습니다: {config}", err=True)
+        sys.exit(1)
+
+    with config_path.open(encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+
+    tickers = cfg.get("watchlist", [])
+    if not tickers:
+        click.echo("watchlist 항목이 없습니다.", err=True)
+        sys.exit(1)
+
+    results = []
+    with click.progressbar(tickers, label="Growth 스크리닝 중") as bar:
+        for ticker in bar:
+            try:
+                result = GrowthMomentumAnalyzer(ticker, period=period).analyze()
+                results.append(result)
+            except Exception as e:
+                click.echo(f"\n[{ticker}] 오류: {e}", err=True)
+
+    if not results:
+        click.echo("분석 가능한 종목이 없습니다.")
+        return
+
+    # 점수 필터링 및 정렬
+    results.sort(key=lambda r: r.total_score, reverse=True)
+    if min_score > 0:
+        results = [r for r in results if r.total_score >= min_score]
+    if top_n > 0:
+        results = results[:top_n]
+
+    # recommend 형식 보고서 출력
+    report_str = format_growth_report(results)
+    click.echo(report_str)
+
+    # 보고서/CSV 저장
+    out_dir = Path(output)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    if save_report:
+        from datetime import date
+        rpt_path = out_dir / f"recommend_growth_{date.today().strftime('%Y%m%d')}.txt"
+        rpt_path.write_text(report_str, encoding="utf-8")
+        click.echo(f"보고서 저장됨: {rpt_path}")
+
+    rows = [r.to_dict() for r in results]
+    df = pd.DataFrame(rows)
+    from datetime import date
+    csv_path = out_dir / f"recommend_growth_{date.today().strftime('%Y%m%d')}.csv"
+    df.to_csv(csv_path, index=False, encoding="utf-8-sig")
+    click.echo(f"결과 저장됨: {csv_path}")
+
+
+# ── value 명령 ────────────────────────────────────────────
+@cli.command()
+@click.argument("ticker")
+@click.option("--period", default="2y", show_default=True, help="데이터 기간 (예: 2y, 3y)")
+@click.option("--save-report", is_flag=True, help="보고서를 reports/ 폴더에 저장")
+def value(ticker: str, period: str, save_report: bool) -> None:
+    """가치 투자 5단계 분석 (단일 종목)
+
+    밸류에이션·수익성·재무건전성·안전마진·진입타이밍을 종합 평가하여
+    ValueScore (0~100)와 등급(적극매수~부적합)을 산출합니다.
+
+    TICKER: 종목 코드 (예: AAPL, JNJ, 005930.KS)
+
+    예시:
+        python main.py value AAPL
+        python main.py value 005930.KS --period 3y --save-report
+    """
+    from ta_trader.value import ValueInvestingAnalyzer, format_value_result
+
+    try:
+        analyzer = ValueInvestingAnalyzer(ticker, period=period)
+        result = analyzer.analyze()
+    except Exception as e:
+        click.echo(f"❌ 분석 실패 [{ticker}]: {e}", err=True)
+        raise SystemExit(1) from e
+
+    report_str = format_value_result(result)
+    click.echo(report_str)
+
+    if save_report:
+        out_dir = Path("reports")
+        out_dir.mkdir(parents=True, exist_ok=True)
+        report_path = out_dir / f"{ticker.replace('.', '_')}_value_{result.date.replace('-','')}.txt"
+        report_path.write_text(report_str, encoding="utf-8")
+        click.echo(f"보고서 저장됨: {report_path}")
+
+
+# ── value-screen 명령 ─────────────────────────────────────
+@cli.command("value-screen")
+@click.option("--config", default="configs/watchlist.yaml", show_default=True, help="종목 목록 YAML")
+@click.option("--output", default="reports", show_default=True, help="결과 저장 디렉토리")
+@click.option("--period", default="2y", show_default=True)
+@click.option("--top-n", default=0, type=int, help="상위 N개만 출력 (0=전체)")
+@click.option("--min-score", default=0.0, type=float, help="최소 점수 필터")
+@click.option("--save-report", is_flag=True, help="보고서를 reports/ 폴더에 저장")
+def value_screen(config: str, output: str, period: str, top_n: int, min_score: float, save_report: bool) -> None:
+    """관심 종목 일괄 Value 스크리닝
+
+    watchlist.yaml의 종목을 5단계 가치 투자 프로세스로 분석하여
+    ValueScore 기준으로 정렬합니다.
+
+    예시:
+        python main.py value-screen
+        python main.py value-screen --config my_stocks.yaml --top-n 10
+        python main.py value-screen --min-score 50
+    """
+    import yaml
+    from ta_trader.value import ValueInvestingAnalyzer, format_value_report
+
+    config_path = Path(config)
+    if not config_path.exists():
+        click.echo(f"설정 파일을 찾을 수 없습니다: {config}", err=True)
+        sys.exit(1)
+
+    with config_path.open(encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+
+    tickers = cfg.get("watchlist", [])
+    if not tickers:
+        click.echo("watchlist 항목이 없습니다.", err=True)
+        sys.exit(1)
+
+    results = []
+    with click.progressbar(tickers, label="Value 스크리닝 중") as bar:
+        for ticker in bar:
+            try:
+                result = ValueInvestingAnalyzer(ticker, period=period).analyze()
+                results.append(result)
+            except Exception as e:
+                click.echo(f"\n[{ticker}] 오류: {e}", err=True)
+
+    if not results:
+        click.echo("분석 가능한 종목이 없습니다.")
+        return
+
+    # 점수 필터링 및 정렬
+    results.sort(key=lambda r: r.total_score, reverse=True)
+    if min_score > 0:
+        results = [r for r in results if r.total_score >= min_score]
+    if top_n > 0:
+        results = results[:top_n]
+
+    # recommend 형식 보고서 출력
+    report_str = format_value_report(results)
+    click.echo(report_str)
+
+    # 보고서/CSV 저장
+    out_dir = Path(output)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    if save_report:
+        from datetime import date
+        rpt_path = out_dir / f"recommend_value_{date.today().strftime('%Y%m%d')}.txt"
+        rpt_path.write_text(report_str, encoding="utf-8")
+        click.echo(f"보고서 저장됨: {rpt_path}")
+
+    rows = [r.to_dict() for r in results]
+    df = pd.DataFrame(rows)
+    from datetime import date
+    csv_path = out_dir / f"recommend_value_{date.today().strftime('%Y%m%d')}.csv"
+    df.to_csv(csv_path, index=False, encoding="utf-8-sig")
+    click.echo(f"결과 저장됨: {csv_path}")
 
 
 if __name__ == "__main__":

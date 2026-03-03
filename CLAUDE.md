@@ -31,6 +31,12 @@ stock-ta-trader/
 │   ├── data/
 │   │   ├── fetcher.py           ← yfinance 데이터 수집
 │   │   └── validator.py         ← 데이터 검증
+│   ├── growth/
+│   │   ├── __init__.py
+│   │   ├── analyzer.py          ← 100% 상승 후보 발굴 6단계 분석 엔진
+│   │   ├── constants.py         ← 후보 발굴 6단계 프로세스 전용 상수
+│   │   ├── formatter.py         ← 출력 포매터
+│   │   └── models.py            ← 100% 상승 후보 발굴 6단계 분석 결과 모델
 │   ├── indicators/
 │   │   ├── calculator.py        ← 모든 지표 계산 (ta 라이브러리)
 │   │   ├── adx.py               ← ADX 신호 분석
@@ -173,3 +179,5 @@ black src/ tests/ && isort src/ tests/
 - 2026-02-23: Regime-adaptive strategy 자동 전환 시스템 추가
 - 2026-02-24: Backtest 결과 리포트 추가
 - 2026-02-24: 기술적 분석 후 추천 종목 선정 추가
+- 2026-02-25: 스윙 / 포지션 트레이딩 분리
+- 2026-02-26: growth 추가 

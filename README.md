@@ -388,6 +388,30 @@ ADX가 25이상이면 추세가 존재한다고 판단하고, MACD 시그널 크
 | ADX 추세 기준 | ≥25 | ≥30 (보수적) |
 | 점수 임계값 | 높음 (빈번 매매) | 낮음 (보수적 진입) |
 
+### 1년 100% 성장 가능성 종목 판단
+
+#### GrowthMomentumAnalyzer
+
+| 구분 | MonthlyTradingAnalyzer | GrowthMomentumAnalyzer |
+| --- | ---------------------- | ---------------------- |
+| 목적 | 현재 시점 매매 신호 | 향후 1년 2배 상승 잠재력 평가 |
+| 출력 | TradingDecision (점수 -100~+100) | GrowthScreenResult (점수 0~100) |
+| 등급 | 강력매수/매수/중립/매도/강력매도 | ★★★★★ 적극매수 ~ ★ 부적합 |
+| 지표 | ADX/MACD/RSI/BB 4개 | 4개 + 150/200일 SMA, 52주 고/저, 거래량, 펀더멘털 |
+| 기본 기간 | 6개월 | 1년 (200일 SMA 계산 필요) |
+| 
+
+#### 6단계 점수 체계 (총 100점)
+
+| 단계 | 배점 | 핵심 체크 항목 |
+| --- | --- | ---------- |
+| 1. 이익 가속 | 25점 | EPS 성장률(8), 매출(7), 이익률(5), 목표가(5) |
+| 2. 촉매 확인 | 0점 | 수동 — 섹터/시총/사업요약 제공 |
+| 3. 스테이지 판별 | 25점 | 이평선 정배열(8), 200일선 상승(5), 52주 위치(7), 상대강도(5) |
+| 4. 기술적 진입 | 30점 | ADX 게이트(8), MACD 방향(8), BB 돌파(6), RSI 구간(3), 거래량(5) |
+| 5. 리스크 관리 | 10점 | R:R ≥1:2(5), R:R ≥1:3(+5) |
+| 6. 추세 건강도 | 10점 | ADX(3), MACD(3), DI(2), RSI(2) |
+
 ## 
 
 ```
@@ -405,6 +429,12 @@ stock-ta-trader/
 │   ├── models.py                ← Signal·MarketRegime·TradingDecision
 │   ├── analyzer.py              ← 파사드 (외부 유일 진입점)
 │   ├── data/fetcher.py          ← yfinance 데이터 수집
+│   ├── growth/                  ← 
+│   │   ├── __init__.py
+│   │   ├── constants.py         ← 6단계 전용 상수 (임계값, 점수 배분)
+│   │   ├── models.py            ← GrowthScreenResult, StageResult, CheckItem 등
+│   │   ├── analyzer.py          ← ★ GrowthMomentumAnalyzer 핵심 엔진
+│   │   └── formatter.py         ← 터미널 출력 포매터
 │   ├── indicators/              ← ADX·RSI·MACD·Bollinger 개별 모듈
 │   ├── llm/                     ← 
 │   │   ├── __init__.py
@@ -669,6 +699,27 @@ python main.py recommend
     🎯 행동 제안
        적극 매수 추천. 현재가(13.42) 부근에서 진입 가능.
     💰 손절: 12.80  |  익절: 14.50  |  RR=1:2.1
+```
+
+### 종목 추천
+
+```bash
+# 단일 종목 6단계 분석
+python main.py growth NVDA
+python main.py growth AAPL --period 2y --save-report
+
+# 관심 종목 일괄 Growth 스크리닝
+python main.py growth-screen
+python main.py growth-screen --top-n 10 --min-score 50
+python main.py growth-screen --save-report
+```
+
+### 가치 투자
+
+```bash
+python main.py value AAPL
+python main.py value-screen --min-score 50 --save-report
+python main.py value-screen --save-report
 ```
 
 ###

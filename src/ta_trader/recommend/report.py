@@ -11,14 +11,14 @@ from ta_trader.recommend.models import (
 from ta_trader.utils.formatter import _wrap
 
 
-def format_recommendation_report(report: RecommendationReport) -> str:
+def format_recommendation_report(trading_style: TradingStyle, report: RecommendationReport) -> str:
     """RecommendationReport를 구조화된 터미널 보고서로 변환"""
     bar  = "═" * 72
     thin = "─" * 72
 
     lines = [
         f"\n{bar}",
-        f"  📋 종목 추천 보고서  |  {report.date}",
+        f"  📋 종목 추천 보고서 ({trading_style.value}) |  {report.date}",
         f"{bar}",
     ]
 

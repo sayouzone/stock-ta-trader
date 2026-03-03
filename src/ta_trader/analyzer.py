@@ -87,9 +87,9 @@ class MonthlyTradingAnalyzer:
             style_config=sc,
         )
 
-        # 5. 리스크 관리
+        # 5. 리스크 관리 (스타일별 ATR 배수 적용)
         price   = float(latest["Close"])
-        risk    = RiskManager().calculate(price, latest, signal)
+        risk    = RiskManager(sc).calculate(price, latest, signal)
         date    = str(df.index[-1].date())
         summary = (
             f"매매 스타일: {self.trading_style.value} | "
