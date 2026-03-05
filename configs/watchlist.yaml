@@ -149,29 +149,29 @@ watchlist:
   - "BAC"         # Bank of America Corporation
   - "KO"          # The Coca-Cola Company
   - "CAT"         # Caterpillar Inc.
-  - "BABA"        # 
+  - "BABA"        # Alibaba Group Holding Limited
   - "PLTR"        # Palantir Technologies Inc.
-  - "AMD"         # 
-  - "NVS"         # 
-  - "HSBC"        # 
-  - "TM"          # 
-  - "CSCO"        # 
-  - "MRK"         # 
-  - "AMAT"        # 
-  - "LRCX"        # 
-  - "PM"          # 
-  - "RTX"         # 
-  - "UNH"         # 
-  - "MS"          # 
-  - "GS"          # 
-  - "WFC"         # 
-  - "SAP"         # 
-  - "SHEL"        # 
-  - "MCD"         # 
+  - "AMD"         # Advanced Micro Devices, Inc.
+  - "NVS"         # Novartis AG
+  - "HSBC"        # HSBC Holdings plc
+  - "TM"          # Toyota Motor Corporation
+  - "CSCO"        # Cisco Systems, Inc.
+  - "MRK"         # Merck & Co., Inc.
+  - "AMAT"        # Applied Materials, Inc.
+  - "LRCX"        # Lam Research Corporation
+  - "PM"          # Philip Morris International Inc.
+  - "RTX"         # RTX Corporation
+  - "UNH"         # UnitedHealth Group Incorporated
+  - "MS"          # Morgan Stanley
+  - "GS"          # The Goldman Sachs Group, Inc.
+  - "WFC"         # Wells Fargo & Company
+  - "SAP"         # SAP SE
+  - "SHEL"        # Shell plc
+  - "MCD"         # McDonald's Corporation
   # ── 보유종목 ─────────────────────
   - "DOW"         # Dow Inc
   - "NNDM"        # Nano Dimension Ltd
-  - "INVU"        # Investview Inc. Common Stock
+  - "INUV"        # Inuvo, Inc.
   - "IONQ"        # IONQ Inc
   - "MVIS"        # Microvision Inc
   - "ARKG"        # ARK Genomic Revolution ETF

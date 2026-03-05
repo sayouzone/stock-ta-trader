@@ -44,7 +44,16 @@ def _resolve_styles(style_str: str | None) -> list[TradingStyle]:
 @click.group()
 @click.version_option("1.5.0")
 def cli() -> None:
-    """TA Trader - ADX/MACD/RSI/Bollinger Bands 기반 트레이딩 분석 도구"""
+    """TA Trader - 4-에이전트 기반 트레이딩 분석 시스템
+
+    에이전트 명령어:
+        agent-analyze  : 4-에이전트 파이프라인 단일 종목 분석
+        agent-screen   : 4-에이전트 파이프라인 복수 종목 스크리닝
+        agent-trade    : 전체 파이프라인 (체결 시뮬레이션 포함)
+
+    레거시 명령어 (하위 호환):
+        analyze, screen, recommend, backtest, growth, value 등
+    """
 
 
 # ── analyze 명령 ──────────────────────────────────────────
@@ -297,6 +306,8 @@ def recommend(config: str, output: str, period: str, style: str, save_report: bo
                     decisions.append(decision)
                 except Exception as e:
                     click.echo(f"\n[{ticker}] 오류: {e}", err=True)
+                #finally:
+                #    pass
 
         if not decisions:
             click.echo("분석 가능한 종목이 없습니다.")
@@ -612,6 +623,312 @@ def value_screen(config: str, output: str, period: str, top_n: int, min_score: f
     csv_path = out_dir / f"recommend_value_{date.today().strftime('%Y%m%d')}.csv"
     df.to_csv(csv_path, index=False, encoding="utf-8-sig")
     click.echo(f"결과 저장됨: {csv_path}")
+
+
+# ── agent-analyze 명령 ─────────────────────────────────────
+@cli.command("agent-analyze")
+@click.argument("ticker")
+@click.option("--period",     default="6mo",  show_default=True, help="데이터 기간")
+@click.option("--interval",   default="1d",   show_default=True, help="봉 간격")
+@click.option("--style",      default="swing", show_default=True,
+              type=click.Choice(["swing", "position", "all"], case_sensitive=False),
+              help="매매 스타일")
+@click.option("--capital",    default=10_000_000, show_default=True, type=float,
+              help="총 투자 자본금 (원)")
+@click.option("--risk-pct",   default=2.0, show_default=True, type=float,
+              help="1회 거래 최대 리스크 (%)")
+@click.option("--sizing",     default="fixed_ratio", show_default=True,
+              type=click.Choice(["fixed_ratio", "kelly", "equal_weight"]),
+              help="포지션 사이징 방법")
+@click.option("--llm",        is_flag=True,   help="LLM 해석 추가")
+@click.option("--llm-stream", is_flag=True,   help="LLM 스트리밍 출력")
+@click.option("--llm-provider", default=None,
+              type=click.Choice(["anthropic", "google"], case_sensitive=False))
+@click.option("--llm-model",  default=None,   help="LLM 모델명")
+@click.option("--save-report", is_flag=True,  help="보고서 저장")
+@click.option("--save-chart", is_flag=True,   help="차트 저장")
+@click.option("--no-chart",   is_flag=True,   help="차트 표시 안 함")
+def agent_analyze(ticker: str, period: str, interval: str, style: str,
+                  capital: float, risk_pct: float, sizing: str,
+                  llm: bool, llm_stream: bool, llm_provider: str | None,
+                  llm_model: str | None, save_report: bool,
+                  save_chart: bool, no_chart: bool) -> None:
+    """4-에이전트 파이프라인으로 단일 종목 분석
+
+    Data Agent → Strategy Agent → Risk Agent 파이프라인을 순차 실행하여
+    매매 시그널 + 리스크 검증 결과를 출력합니다.
+
+    TICKER: 종목 코드 (예: 005930.KS, AAPL)
+
+    예시:
+        python main.py agent-analyze AAPL
+        python main.py agent-analyze 005930.KS --capital 50000000 --sizing kelly
+        python main.py agent-analyze NVDA --llm --llm-stream --style all
+    """
+    from ta_trader.agents import AgentOrchestrator, OrchestratorConfig
+    from ta_trader.agents.risk_agent import RiskConfig
+    from ta_trader.agents.formatter import format_pipeline_result
+
+    styles = _resolve_styles(style)
+
+    for idx, trading_style in enumerate(styles):
+        if len(styles) > 1:
+            click.echo(f"\n{'━'*68}")
+            click.echo(f"  ▶ [{idx+1}/{len(styles)}] {trading_style.description}")
+            click.echo(f"{'━'*68}")
+
+        risk_cfg = RiskConfig(
+            total_capital=capital,
+            max_risk_per_trade_pct=risk_pct / 100,
+            sizing_method=sizing,
+        )
+
+        config = OrchestratorConfig(
+            trading_style=trading_style,
+            period=period,
+            interval=interval,
+            use_llm=(llm or llm_stream),
+            llm_provider=llm_provider,
+            llm_model=llm_model,
+            llm_stream=llm_stream,
+            risk_config=risk_cfg,
+        )
+
+        orchestrator = AgentOrchestrator(config=config)
+
+        try:
+            result = orchestrator.run(ticker)
+        except Exception as e:
+            click.echo(f"❌ 분석 실패: {e}", err=True)
+            raise SystemExit(1) from e
+
+        output = format_pipeline_result(result)
+        click.echo(output)
+
+        style_tag = trading_style.name.lower()
+
+        if save_report:
+            out_dir = Path("reports")
+            out_dir.mkdir(parents=True, exist_ok=True)
+            report_path = out_dir / f"{ticker.replace('.', '_')}_agent_{style_tag}_{result.date.replace('-','')}.txt"
+            report_path.write_text(output, encoding="utf-8")
+            click.echo(f"보고서 저장됨: {report_path}")
+
+        if not no_chart:
+            decision = result.to_trading_decision()
+            if decision and result.market_data:
+                chart_path = (
+                    Path("reports") / f"{ticker.replace('.', '_')}_chart_{style_tag}_{result.date.replace('-','')}.png"
+                    if save_chart else None
+                )
+                ChartVisualizer().plot(
+                    decision, result.market_data.ohlcv_df,
+                    save_path=chart_path, show=not save_chart,
+                )
+                if save_chart and chart_path:
+                    click.echo(f"차트 저장됨: {chart_path}")
+
+
+# ── agent-screen 명령 ──────────────────────────────────────
+@cli.command("agent-screen")
+@click.option("--config",  default="configs/watchlist.yaml", show_default=True, help="종목 목록 YAML")
+@click.option("--output",  default="reports",                 show_default=True, help="결과 저장 디렉토리")
+@click.option("--period",  default="6mo",                    show_default=True)
+@click.option("--style",   default="swing", show_default=True,
+              type=click.Choice(["swing", "position", "all"], case_sensitive=False))
+@click.option("--capital",    default=10_000_000, show_default=True, type=float,
+              help="총 투자 자본금 (원)")
+@click.option("--risk-pct",   default=2.0, show_default=True, type=float,
+              help="1회 거래 최대 리스크 (%)")
+@click.option("--sizing",     default="fixed_ratio", show_default=True,
+              type=click.Choice(["fixed_ratio", "kelly", "equal_weight"]))
+@click.option("--top-n",   default=0, type=int,              help="상위 N개만 출력")
+@click.option("--save-report", is_flag=True,                 help="보고서 저장")
+def agent_screen(config: str, output: str, period: str, style: str,
+                 capital: float, risk_pct: float, sizing: str,
+                 top_n: int, save_report: bool) -> None:
+    """4-에이전트 파이프라인으로 복수 종목 스크리닝
+
+    watchlist.yaml의 종목을 4-에이전트 파이프라인으로 분석하고,
+    리스크 검증 결과를 포함한 종합 리포트를 출력합니다.
+
+    예시:
+        python main.py agent-screen
+        python main.py agent-screen --capital 50000000 --sizing kelly --top-n 5
+        python main.py agent-screen --style all --save-report
+    """
+    import yaml
+    from ta_trader.agents import AgentOrchestrator, OrchestratorConfig
+    from ta_trader.agents.risk_agent import RiskConfig
+    from ta_trader.agents.formatter import format_screening_results
+
+    styles = _resolve_styles(style)
+
+    config_path = Path(config)
+    if not config_path.exists():
+        click.echo(f"설정 파일을 찾을 수 없습니다: {config}", err=True)
+        sys.exit(1)
+
+    with config_path.open(encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+
+    tickers = cfg.get("watchlist", [])
+    if not tickers:
+        click.echo("watchlist 항목이 없습니다.", err=True)
+        sys.exit(1)
+
+    for idx, trading_style in enumerate(styles):
+        if len(styles) > 1:
+            click.echo(f"\n{'━'*68}")
+            click.echo(f"  ▶ [{idx+1}/{len(styles)}] {trading_style.description}")
+            click.echo(f"{'━'*68}")
+
+        risk_cfg = RiskConfig(
+            total_capital=capital,
+            max_risk_per_trade_pct=risk_pct / 100,
+            sizing_method=sizing,
+        )
+
+        orch_config = OrchestratorConfig(
+            trading_style=trading_style,
+            period=period,
+            risk_config=risk_cfg,
+        )
+
+        orchestrator = AgentOrchestrator(config=orch_config)
+
+        results = []
+        label = f"에이전트 분석 중 ({trading_style.value})" if len(styles) > 1 else "에이전트 분석 중"
+        with click.progressbar(tickers, label=label) as bar:
+            for ticker in bar:
+                try:
+                    result = orchestrator.run(ticker)
+                    results.append(result)
+                except Exception as e:
+                    click.echo(f"\n[{ticker}] 오류: {e}", err=True)
+
+        if not results:
+            click.echo("분석 가능한 종목이 없습니다.")
+            continue
+
+        # 점수 기준 정렬
+        results.sort(
+            key=lambda r: r.trade_signal.composite_score if r.trade_signal else -999,
+            reverse=True,
+        )
+        if top_n > 0:
+            results = results[:top_n]
+
+        report_str = format_screening_results(results)
+        click.echo(report_str)
+
+        if save_report:
+            out_dir = Path(output)
+            out_dir.mkdir(parents=True, exist_ok=True)
+            from datetime import date
+            style_tag = trading_style.name.lower()
+            report_path = out_dir / f"agent_screen_{style_tag}_{date.today().strftime('%Y%m%d')}.txt"
+            report_path.write_text(report_str, encoding="utf-8")
+            click.echo(f"보고서 저장됨: {report_path}")
+
+        # CSV 저장
+        rows = []
+        for r in results:
+            ts = r.trade_signal
+            ra = r.risk_approval
+            if ts:
+                row = {
+                    "Ticker": ts.ticker,
+                    "Name": ts.name,
+                    "Price": ts.current_price,
+                    "Score": ts.composite_score,
+                    "Signal": ts.signal.value,
+                    "Side": ts.side.value,
+                    "Regime": ts.market_regime.value,
+                    "Strategy": ts.strategy_type.value,
+                    "RR_Ratio": ts.suggested_rr_ratio,
+                    "Approved": ra.approved if ra else False,
+                    "Shares": ra.position_size.shares if ra and ra.position_size else 0,
+                    "RiskPct": ra.position_size.risk_pct if ra and ra.position_size else 0,
+                }
+                rows.append(row)
+
+        if rows:
+            df = pd.DataFrame(rows)
+            out_dir = Path(output)
+            out_dir.mkdir(parents=True, exist_ok=True)
+            from datetime import date
+            style_tag = trading_style.name.lower()
+            csv_path = out_dir / f"agent_screen_{style_tag}_{date.today().strftime('%Y%m%d')}.csv"
+            df.to_csv(csv_path, index=False, encoding="utf-8-sig")
+            click.echo(f"CSV 저장됨: {csv_path}")
+
+
+# ── agent-trade 명령 (시뮬레이션) ──────────────────────────
+@cli.command("agent-trade")
+@click.argument("ticker")
+@click.option("--period",     default="6mo",  show_default=True, help="데이터 기간")
+@click.option("--style",      default="swing", show_default=True,
+              type=click.Choice(["swing", "position"], case_sensitive=False))
+@click.option("--capital",    default=10_000_000, show_default=True, type=float,
+              help="총 투자 자본금 (원)")
+@click.option("--risk-pct",   default=2.0, show_default=True, type=float,
+              help="1회 거래 최대 리스크 (%)")
+@click.option("--sizing",     default="fixed_ratio", show_default=True,
+              type=click.Choice(["fixed_ratio", "kelly", "equal_weight"]))
+@click.option("--slippage",   default=0.05, show_default=True, type=float,
+              help="시뮬레이션 슬리피지 (%)")
+@click.option("--commission", default=0.015, show_default=True, type=float,
+              help="편도 수수료 (%)")
+def agent_trade(ticker: str, period: str, style: str,
+                capital: float, risk_pct: float, sizing: str,
+                slippage: float, commission: float) -> None:
+    """4-에이전트 전체 파이프라인 (체결 시뮬레이션 포함)
+
+    Data → Strategy → Risk → Execution 전체 파이프라인을 실행하여
+    시뮬레이션 체결 결과까지 출력합니다.
+
+    TICKER: 종목 코드 (예: AAPL, 005930.KS)
+
+    예시:
+        python main.py agent-trade AAPL
+        python main.py agent-trade NVDA --capital 50000000 --sizing kelly
+    """
+    from ta_trader.agents import AgentOrchestrator, OrchestratorConfig
+    from ta_trader.agents.risk_agent import RiskConfig
+    from ta_trader.agents.execution_agent import DryRunBackend, ExecutionConfig
+    from ta_trader.agents.formatter import format_pipeline_result
+
+    trading_style = _parse_style(style)
+
+    risk_cfg = RiskConfig(
+        total_capital=capital,
+        max_risk_per_trade_pct=risk_pct / 100,
+        sizing_method=sizing,
+    )
+
+    exec_cfg = ExecutionConfig(dry_run=True)
+    backend = DryRunBackend(slippage_pct=slippage, commission_pct=commission)
+
+    config = OrchestratorConfig(
+        trading_style=trading_style,
+        period=period,
+        risk_config=risk_cfg,
+        execution_config=exec_cfg,
+        execution_backend=backend,
+        execute_trades=True,
+    )
+
+    orchestrator = AgentOrchestrator(config=config)
+
+    try:
+        result = orchestrator.run(ticker)
+    except Exception as e:
+        click.echo(f"❌ 실행 실패: {e}", err=True)
+        raise SystemExit(1) from e
+
+    output = format_pipeline_result(result)
+    click.echo(output)
 
 
 if __name__ == "__main__":

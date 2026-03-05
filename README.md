@@ -412,7 +412,124 @@ ADX가 25이상이면 추세가 존재한다고 판단하고, MACD 시그널 크
 | 5. 리스크 관리 | 10점 | R:R ≥1:2(5), R:R ≥1:3(+5) |
 | 6. 추세 건강도 | 10점 | ADX(3), MACD(3), DI(2), RSI(2) |
 
-## 
+
+### 가치 투자
+
+
+### 트레이딩 프로세스
+
+#### 스윙 트레이딩 프로세스
+
+- 1단계: 시장 환경 판별 (Market Regime)
+  - ADX(14일)
+  - Bollinger BandWidth
+- 2단계: 방향 결정 (Direction)
+  - MACD (12/26/9)
+  - +DI / -DI (ADX 구성요소)
+- 3단계: 타이밍 포착 (Entry Timing)
+  - A. 추세추종 진입 타이밍
+  - B. 평균회귀 진입 타이밍
+  - C. 돌파 모멘텀 진입 타이밍
+- 4단계: 리스크 관리 (Stop Loss / Take Profit)
+  - ATR 근사값 (= BB 상단-하단 / 4)
+  - Bollinger Bands 상/하단
+- 5단계: 청산 판단 (Exit)
+  - 손절가 도달
+  - 목표가 도달
+  - 신호 반전
+  - 과매수/과매도 도달
+  - 체제 전환
+  - 시간
+
+#### 포지션 트레이딩 프로세스
+
+- 1단계: 시장 환경 판별 (Market Regime)
+  - ADX(14일)
+  - Bollinger BandWidth
+- 2단계: 방향 결정 (Direction)
+  - MACD (12/26/9)
+  - +DI / -DI (ADX 구성요소)
+  - RSI (14일)
+- 3단계: 타이밍 포착 (Entry Timing)
+  - A. 추세추종 진입 (ADX ≥ 30) — 포지션의 핵심 전략
+  - B. 돌파 모멘텀 진입 (ADX < 30, BW 수축) — 대추세 시작 포착
+  - C. 평균회귀 — 포지션에서는 비중 낮음
+- 4단계: 리스크 관리 (Stop Loss / Take Profit)
+  - ATR 근사값 (= BB 상단-하단 / 4) — 변동성 기반 손절폭 산출
+  - Bollinger Bands 상/하단 — 지지/저항 참조선
+- 5단계: 청산 판단 (Exit)
+  - 손절가 도달
+  - ADX 하락 전환
+  - DI 역전
+  - MACD 제로라인 하회
+  - 목표가 도달
+  - RSI 50 하회
+
+#### 성장  트레이딩 프로세스
+
+- 1단계: 이익 가속 필터 (Earnings Acceleration)
+  - EPS 성장률: yfinance (earningsQuarterlyGrowth, earningsGrowth)
+  - 매출 성장률: yfinance (revenueGrowth)
+  - 영업이익률: yfinance (operatingMargins, profitMargins)
+  - 어닝 서프라이즈 (추정): yfinance (targetMeanPrice, currentPrice, regularMarketPrice)
+- 2단계: 촉매 확인 (수동)
+  - 섹터, 산업, 사업 요약: yfinance (sector, industry, longBusinessSummary)
+  - 시가총액 규모: yfinance (marketCap)
+- 3단계: 스테이지 판별
+  - (A) 이평선 정배열: 현재가 > SMA150 > SMA200
+  - (B) 200일선 상승 지속 (최근 22거래일)
+  - (C) 52주 고/저 위치
+  - (D) 상대강도 (RS) — 6개월 수익률 기준 단순 평가
+  - 스테이지 판별
+- 4단계: 기술적 진입 조건
+  - (A) ADX 게이트 — 상승 전환 중 25~40 구간
+  - (B) MACD 방향 + 제로라인 위치
+  - (C) BB 돌파/스퀴즈
+  - (D) RSI 강세 구간
+  - (E) 거래량 확인
+- 5단계: 리스크 관리
+  - ATR 근사 (BB 기반)
+  - 손절가
+  - 익절가
+  - R:R 비율
+- 6단계: 보유 관리 (추세 건강도)
+  - ADX 건강도
+  - MACD 건강도
+  - DI 건강도
+  - RSI 건강도
+
+#### 가치 투자 프로세스
+
+- 데이터 수집
+- 1단계: 밸류에이션 필터
+  - PER: yfinance (trailingPE, forwardPE)
+  - PBR: yfinance (priceToBook)
+  - PSR: yfinance (priceToSalesTrailing12Months)
+  - EV/EBITDA: yfinance (enterpriseToEbitda)
+- 2단계: 수익성 분석
+  - ROE: yfinance (returnOnEquity)
+  - 영업이익률: yfinance (operatingMargins)
+  - FCF Yield: yfinance (freeCashflow, marketCap)
+  - Cash Conversion Ratio: yfinance (netIncomeToCommon)
+- 3단계: 재무 건전성
+  - 부채비율 (D/E Ratio): yfinance (debtToEquity)
+  - 유동비율: yfinance (currentRatio)
+  - 이자보상배율 (EBIT / Interest Expense): yfinance (ebitda, totalDebt)
+  - 이익 안정성: yfinance (revenueGrowth, earningsGrowth)
+- 4단계: 안전마진 산출
+  - 내재가치 대비 할인율 (안전마진)
+  - 배당 매력도: yfinance (dividendYield, payoutRatio)
+  - PEG Ratio: yfinance (pegRatio)
+  - 주주환원 (자사주 매입 여부 — shares outstanding 감소로 추정): yfinance (sharesOutstanding, floatShares)
+  - 단순히 배당과 FCF 존재 여부로 주주환원 점수 부여: yfinance (freeCashflow)
+- 5단계: 기술적 진입 타이밍
+  - 이동평균선 지지
+  - RSI 과매도 여부
+  - 52주 위치
+  - 손절/익절/R:R 계산
+  - 손절/목표가 (보고서용)
+
+## 디렉토리 구조
 
 ```
 stock-ta-trader/
@@ -451,6 +568,10 @@ stock-ta-trader/
 ├── tests/                       ← 25개 단위 테스트 (커버리지 64%)
 ├── configs/watchlist.yaml       ← 관심 종목 목록
 └── main.py                      ← CLI (python main.py analyze 005930.KS)
+```
+
+```bash
+source /Users/seongjungkim/Development/sayouzone/.venv/bin/activate
 ```
 
 ```bash
@@ -720,6 +841,207 @@ python main.py growth-screen --save-report
 python main.py value AAPL
 python main.py value-screen --min-score 50 --save-report
 python main.py value-screen --save-report
+```
+
+### Agents
+
+```bash
+python main.py agent-analyze AAPL                       # 단일 종목 분석 (3-Stage)
+python main.py agent-analyze 005930.KS --sizing kelly   # Kelly 포지션 사이징
+python main.py agent-screen --capital 50000000          # 복수 종목 스크리닝
+python main.py agent-trade NVDA                         # 체결 시뮬레이션 포함
+```
+
+#### Agents 출력 예시
+
+```
+에이전트 분석 중  [####################################]  100%          
+
+══════════════════════════════════════════════════════════════════════════════════════════
+  📋 에이전트 스크리닝 결과  |  총 171종목
+══════════════════════════════════════════════════════════════════════════════════════════
+
+    순위  종목               현재가       점수  신호      승인        수량         리스크      R/R           종목명
+  ────────────────────────────────────────────────────────────────────────────────────────
+     1  035420.KS  220,000.00   +50.74  매수      ✅         45      96,111  1:19.11         NAVER
+     2  INUV            2.97   +33.78  매수      🚫          -           -  1: 0.07   Inuvo, Inc.
+     3  035720.KS   51,200.00   +32.57  매수      ✅        195      21,725  1:85.27         Kakao
+     4  TM            232.81   +30.29  매수      ✅     42,953      20,618  1:23.93  Toyota Motor Corporation
+     5  AGNC           10.97   +29.39  매수      ✅     911,577      27,347  1: 8.65  AGNC Investment Corp.
+     6  041510.KQ   98,600.00   +28.03  매수      ✅        101      33,784  1:59.35           SME
+     7  039030.KQ  446,000.00   +22.76  매수      🚫          -           -  1: 0.26   EO Technics
+     8  035900.KQ   61,600.00   +21.81  매수      ✅        162     100,377  1:16.96      JYP Ent.
+     9  009150.KS  401,500.00   +18.51  중립      ✅          -           -  1: 1.67  SamsungElecMech
+    10  036930.KQ   66,800.00   +16.80  중립      ✅          -           -  1: 1.67           JEL
+    11  058470.KQ  121,400.00   +16.56  중립      ✅          -           -  1: 1.67         LEENO
+    12  SHEL           82.70   +14.50  중립      ✅          -           -  1: 1.67     Shell PLC
+    13  277810.KQ  837,000.00   +12.51  중립      ✅          -           -  1: 1.67  Rainbow Robotics
+    14  310210.KQ  316,500.00   +12.39  중립      ✅          -           -  1: 1.67          VRNI
+    15  012450.KS  1,381,000.00   +12.00  중립      ✅          -           -  1: 1.67  HANWHA AEROSPACE
+    16  108490.KQ  235,000.00   +10.78  중립      ✅          -           -  1: 1.67       ROBOTIS
+    17  BABA          133.27   +10.69  중립      ✅          -           -  1: 1.67  Alibaba Group Holding Limited
+    18  IONQ           37.13   +10.61  중립      ✅          -           -  1: 1.67    IonQ, Inc.
+    19  META          667.73   +10.15  중립      ✅          -           -  1: 1.67  Meta Platforms, Inc.
+    20  RTX           208.82   +10.03  중립      ✅          -           -  1: 1.67  RTX Corporation
+    21  006800.KS   65,200.00    +8.31  중립      ✅          -           -  1: 1.67  MIRAE ASSET SEC
+    22  207940.KS  1,647,000.00    +7.61  중립      ✅          -           -  1: 1.67  SAMSUNG BIOLOGICS
+    23  267250.KS  275,000.00    +7.17  중립      ✅          -           -  1: 1.67    HD HYUNDAI
+    24  032830.KS  214,000.00    +6.77  중립      ✅          -           -  1: 1.67  SAMSUNG LIFE
+    25  064350.KS  225,500.00    +6.38  중립      ✅          -           -  1: 1.67  HYUNDAI ROTEM
+    26  032820.KQ   16,580.00    +5.98  중립      ✅          -           -  1: 1.67  WooriTG, Inc.
+    27  160190.KQ   57,900.00    +5.88  중립      ✅          -           -  1: 1.67     HIGEN RNM
+    28  005930.KS  191,600.00    +5.87  중립      ✅          -           -  1: 1.67   SamsungElec
+    29  096770.KS  126,500.00    +5.75  중립      ✅          -           -  1: 1.67  SK Innovation
+    30  UNH           291.96    +5.23  중립      ✅          -           -  1: 1.67  UnitedHealth Group Incorporated
+    31  NFLX           98.66    +5.19  중립      ✅          -           -  1: 1.67  Netflix, Inc.
+    32  000150.KS  1,073,000.00    +5.04  중립      ✅          -           -  1: 1.67        DOOSAN
+    33  GE            339.81    +5.01  중립      ✅          -           -  1: 1.67  GE Aerospace
+    34  XOM           149.82    +4.98  중립      ✅          -           -  1: 1.67  Exxon Mobil Corporation
+    35  010120.KS  701,000.00    +4.69  중립      ✅          -           -  1: 1.67   LS ELECTRIC
+    36  263750.KQ   54,900.00    +4.67  중립      ✅          -           -  1: 1.67    PearlAbyss
+    37  MVIS            0.78    +4.61  중립      ✅          -           -  1: 1.67  Microvision, Inc.
+    38  000270.KS  166,400.00    +4.23  중립      ✅          -           -  1: 1.67     KIA CORP.
+    39  ARKG           29.51    +4.08  중립      ✅          -           -  1: 1.67  ARK Genomic Revolution ETF
+    40  CVX           186.03    +3.70  중립      ✅          -           -  1: 1.67  Chevron Corporation
+    41  950160.KQ  102,300.00    +3.67  중립      ✅          -           -  1: 1.67  Kolon TissueGene
+    42  000660.KS  941,000.00    +3.66  중립      ✅          -           -  1: 1.67      SK hynix
+    43  066570.KS  115,400.00    +3.49  중립      ✅          -           -  1: 1.67  LGELECTRONICS
+    44  COST        1,006.74    +3.25  중립      ✅          -           -  1: 1.67  Costco Wholesale Corporation
+    45  AMAT          357.76    +3.12  중립      ✅          -           -  1: 1.67  Applied Materials, Inc.
+    46  000250.KQ  796,000.00    +3.04  중립      ✅          -           -  1: 1.67           SCD
+    47  RA             13.41    +2.88  중립      ✅          -           -  1: 1.67  Brookfield Real Assets Income F
+    48  KO             78.10    +2.38  중립      ✅          -           -  1: 1.67  Coca-Cola Company (The)
+    49  084370.KQ  144,900.00    +2.30  중립      ✅          -           -  1: 1.67    Eugenetech
+    50  GS            867.25    +2.29  중립      ✅          -           -  1: 1.67  Goldman Sachs Group, Inc. (The)
+    51  NVS           165.15    +2.20  중립      ✅          -           -  1: 1.67   Novartis AG
+    52  AZN           201.53    +2.12  중립      ✅          -           -  1: 1.67  AstraZeneca PLC
+    53  010130.KS  1,759,000.00    +2.04  중립      ✅          -           -  1: 1.67    KOREA ZINC
+    54  010140.KS   27,200.00    +1.91  중립      ✅          -           -  1: 1.67  SamsungHvyInd
+    55  AMZN          216.82    +1.91  중립      ✅          -           -  1: 1.67  Amazon.com, Inc.
+    56  PG            158.30    +1.90  중립      ✅          -           -  1: 1.67  Procter & Gamble Company (The)
+    57  007070.KS   18,960.00    +1.75  중립      ✅          -           -  1: 1.67     GS Retail
+    58  MRK           120.28    +1.53  중립      ✅          -           -  1: 1.67  Merck & Company, Inc.
+    59  MRVL           78.09    +1.42  중립      ✅          -           -  1: 1.67  Marvell Technology, Inc.
+    60  HD            369.11    +1.29  중립      ✅          -           -  1: 1.67  Home Depot, Inc. (The)
+    61  WMT           127.81    +1.00  중립      ✅          -           -  1: 1.67  Walmart Inc.
+    62  440110.KQ   66,100.00    +0.85  중립      ✅          -           -  1: 1.67          FADU
+    63  323280.KQ   74,500.00    +0.61  중립      ✅          -           -  1: 1.67       TAESUNG
+    64  LLY         1,003.57    +0.48  중립      ✅          -           -  1: 1.67  Eli Lilly and Company
+    65  086520.KQ  160,800.00    +0.46  중립      ✅          -           -  1: 1.67        ECOPRO
+    66  QYLD           17.66    +0.40  중립      ✅          -           -  1: 1.67  Global X NASDAQ 100 Covered Cal
+    67  MSFT          405.20    +0.13  중립      ✅          -           -  1: 1.67  Microsoft Corporation
+    68  178320.KQ   46,450.00    -0.06  중립      ✅          -           -  1: 1.67  SEOJIN SYSTEM
+    69  JNJ           245.30    -0.40  중립      ✅          -           -  1: 1.67  Johnson & Johnson
+    70  AMD           202.07    -0.49  중립      ✅          -           -  1: 1.67  Advanced Micro Devices, Inc.
+    71  ORCL          152.37    -0.51  중립      ✅          -           -  1: 1.67  Oracle Corporation
+    72  141080.KQ  190,000.00    -0.54  중립      ✅          -           -  1: 1.67           LCB
+    73  SAP           195.58    -0.57  중립      ✅          -           -  1: 1.67       SAP  SE
+    74  196170.KQ  372,000.00    -0.72  중립      ✅          -           -  1: 1.67      Alteogen
+    75  347850.KQ   82,200.00    -0.80  중립      ✅          -           -  1: 1.67  D&D Pharmatech
+    76  V             320.47    -1.16  중립      ✅          -           -  1: 1.67     Visa Inc.
+    77  040420.KQ    5,790.00    -1.44  중립      ✅          -           -  1: 1.67           jls
+    78  JPM           299.39    -1.48  중립      ✅          -           -  1: 1.67  JP Morgan Chase & Co.
+    79  CAT           731.97    -1.86  중립      ✅          -           -  1: 1.67  Caterpillar, Inc.
+    80  MA            522.92    -2.04  중립      ✅          -           -  1: 1.67  Mastercard Incorporated
+    81  TSM           357.44    -2.63  중립      ✅          -           -  1: 1.67  Taiwan Semiconductor Manufactur
+    82  240810.KQ  132,800.00    -2.70  중립      ✅          -           -  1: 1.67     WONIK IPS
+    83  298380.KQ  177,100.00    -2.81  중립      ✅          -           -  1: 1.67       ABL Bio
+    84  257720.KQ   38,750.00    -2.87  중립      ✅          -           -  1: 1.67      Silicon2
+    85  005290.KQ   51,700.00    -2.96  중립      ✅          -           -  1: 1.67       DONGJIN
+    86  475830.KQ  115,000.00    -3.05  중립      ✅          -           -  1: 1.67          ORUM
+    87  SPY           685.13    -3.64  중립      ✅          -           -  1: 1.67  State Street SPDR S&P 500 ETF T
+    88  042700.KS  315,000.00    -3.74  중립      ✅          -           -  1: 1.67     HANMISemi
+    89  028300.KQ   50,600.00    -3.80  중립      ✅          -           -  1: 1.67           HLB
+    90  051910.KS  324,500.00    -3.99  중립      ✅          -           -  1: 1.67        LGCHEM
+    91  272210.KS  150,800.00    -4.02  중립      ✅          -           -  1: 1.67  HANWHA SYSTEMS
+    92  067310.KQ   35,000.00    -4.45  중립      ✅          -           -  1: 1.67   Hana Micron
+    93  095340.KQ  202,000.00    -4.51  중립      ✅          -           -  1: 1.67           ISC
+    94  KBWY           16.52    -4.86  중립      ✅          -           -  1: 1.67  Invesco KBW Premium Yield Equit
+    95  079550.KS  763,000.00    -5.09  중립      ✅          -           -  1: 1.67      LIG Nex1
+    96  403870.KQ   44,950.00    -5.17  중립      ✅          -           -  1: 1.67          HPSP
+    97  237690.KQ  148,800.00    -5.72  중립      ✅          -           -  1: 1.67      ST Pharm
+    98  JEPI           59.08    -6.00  중립      ✅          -           -  1: 1.67  JPMorgan Equity Premium Income 
+    99  452430.KQ   31,000.00    -6.19  중립      ✅          -           -  1: 1.67        SAPIEN
+   100  MS            167.58    -6.47  중립      ✅          -           -  1: 1.67  Morgan Stanley
+   101  MU            400.77    -6.91  중립      ✅          -           -  1: 1.67  Micron Technology, Inc.
+   102  CSCO           80.87    -7.14  중립      ✅          -           -  1: 1.67  Cisco Systems, Inc.
+   103  WFC            83.93    -7.69  중립      ✅          -           -  1: 1.67  Wells Fargo & Company
+   104  BAC            50.30    -7.78  중립      ✅          -           -  1: 1.67  Bank of America Corporation
+   105  AVGO          317.53    -7.80  중립      ✅          -           -  1: 1.67  Broadcom Inc.
+   106  267260.KS  984,000.00    -7.92  중립      ✅          -           -  1: 1.67  HD HYUNDAI ELECTRIC
+   107  298040.KS  2,484,000.00    -8.09  중립      ✅          -           -  1: 1.67  HYOSUNG HEAVY
+   108  DOW            32.34    -8.54  중립      ✅          -           -  1: 1.67      Dow Inc.
+   109  0009K0.KQ   62,800.00    -8.73  중립      ✅          -           -  1: 1.67     Aimed Bio
+   110  087010.KQ  260,500.00    -9.78  중립      ✅          -           -  1: 1.67       PEPTRON
+   111  PLTR          153.19    -9.78  중립      ✅          -           -  1: 1.67  Palantir Technologies Inc.
+   112  NVDA          183.04   -10.05  중립      ✅          -           -  1: 1.67  NVIDIA Corporation
+   113  329180.KS  559,000.00   -11.34  중립      ✅          -           -  1: 1.67  HD HYUNDAI HEAVY INDUSTRIES
+   114  NNDM            1.88   -12.13  중립      ✅          -           -  1: 1.67  Nano Dimension Ltd.
+   115  064760.KQ  245,000.00   -13.71  중립      ✅          -           -  1: 1.67           TCK
+   116  357780.KQ  475,500.00   -14.52  중립      ✅          -           -  1: 1.67     Soulbrain
+   117  068760.KQ   62,800.00   -14.72  중립      ✅          -           -  1: 1.67   Celltrionph
+   118  214450.KQ  317,000.00   -14.77  중립      ✅          -           -  1: 1.67  PharmaResearch
+   119  008490.KS   21,650.00   -15.00  중립      ✅          -           -  1: 1.67       SUHEUNG
+   120  AAPL          262.52   -15.00  중립      ✅          -           -  1: 1.67    Apple Inc.
+   121  373220.KS  371,500.00   -15.22  중립      ✅          -           -  1: 1.67  LG Energy Solution
+   122  TSLA          405.94   -15.49  중립      ✅          -           -  1: 1.67   Tesla, Inc.
+   123  BRK-B         487.48   -15.68  중립      ✅          -           -  1: 1.67  Berkshire Hathaway Inc. New
+   124  042660.KS  122,100.00   -16.17  중립      ✅          -           -  1: 1.67  Hanwha Ocean
+   125  009540.KS  407,000.00   -17.09  중립      ✅          -           -  1: 1.67        HDKSOE
+   126  GOOGL         303.13   -17.16  중립      ✅          -           -  1: 1.67  Alphabet Inc.
+   127  005380.KS  548,000.00   -19.10  중립      ✅          -           -  1: 1.67    HyundaiMtr
+   128  030530.KQ   31,000.00   -19.52  중립      ✅          -           -  1: 1.67  WONIK HOLDINGS
+   129  MCD           331.74   -20.33  매도      ✅     30,144     170,917  1: 2.27  McDonald's Corporation
+   130  ABBV          236.19   -20.76  매도      ✅     42,338      54,616  1:12.11   AbbVie Inc.
+   131  015760.KS   48,200.00   -20.78  매도      ✅        131     993,150  1: 0.14         KEPCO
+   132  034730.KS  359,500.00   -21.00  매도      ✅         20     994,730  1: 1.42            SK
+   133  083650.KQ   80,800.00   -21.31  매도      ✅         90     989,393  1: 1.35           BHI
+   134  011200.KS   21,250.00   -21.38  매도      ✅        470     964,830  1: 1.42           HMM
+   135  PM            179.04   -22.04  매도      ✅     55,853     266,978  1: 0.24  Philip Morris International Inc
+   136  005935.KS  128,600.00   -22.40  매도      ✅         57     997,939  1: 1.47  SamsungElec(1P)
+   137  069500.KS   83,570.00   -22.55  매도      ✅        107     995,744  1: 1.43     KODEX 200
+   138  006400.KS  392,500.00   -23.09  매도      ✅         23     986,990  1: 1.28  SAMSUNG SDI CO.,LTD.
+   139  226950.KQ  196,300.00   -23.42  매도      ✅         50     328,024  1:10.13          OliX
+   140  HSBC           87.19   -23.78  매도      ✅     114,692     445,005  1: 0.91  HSBC Holdings, plc.
+   141  402340.KS  566,000.00   -24.77  매도      ✅         14     957,354  1: 1.27      SKSQUARE
+   142  214370.KQ  122,400.00   -25.47  매도      ✅         53     983,467  1: 1.12       Caregen
+   143  005680.KS   11,770.00   -26.44  매도      ✅        849     605,031  1: 0.93  SamyoungElec
+   144  012330.KS  432,000.00   -27.24  매도      ✅         23     983,756  1: 0.93         Mobis
+   145  319400.KQ   30,950.00   -27.55  매도      ✅        225     995,760  1: 1.29  HYUNDAI MOVEX
+   146  055550.KS   92,900.00   -28.27  매도      ✅        107     956,653  1: 1.00  ShinhanGroup
+   147  024110.KS   23,800.00   -28.66  매도      ✅        355     999,169  1: 0.97           IBK
+   148  214150.KQ   54,900.00   -28.69  매도      ✅         99     991,958  1: 0.31       CLASSYS
+   149  016580.KS   10,410.00   -28.83  매도      ✅        960     532,925  1: 0.81   WhaninPharm
+   150  140410.KQ  128,600.00   -28.83  매도      ✅         63     995,816  1: 0.51  Mezzion Pharma
+   151  086280.KS  246,500.00   -28.91  매도      ✅         40     962,790  1: 0.87  HYUNDAIGLOVIS
+   152  ASML        1,399.37   -29.39  매도      ✅      7,146     510,367  1: 0.90  ASML Holding N.V. - New York Re
+   153  316140.KS   33,750.00   -30.43  매도      ✅        204     996,038  1: 1.01  WooriFinancialGroup
+   154  033780.KS  156,600.00   -31.66  매도      ✅         63     676,336  1: 0.66          KT&G
+   155  105560.KS  149,000.00   -31.76  매도      ✅         56     991,551  1: 1.02  KBFinancialGroup
+   156  086790.KS  111,200.00   -32.46  매도      ✅         83     992,814  1: 0.67  HANAFINANCIALGR
+   157  290650.KQ   82,800.00   -34.49  매도      ✅         67     994,486  1: 0.60       L&C BIO
+   158  145020.KQ  258,000.00   -34.55  매도      ✅         38     610,825  1: 1.22         Hugel
+   159  298050.KS  209,000.00   -35.25  매도      ✅         37     998,500  1: 0.14  HS HYOSUNG ADVANCED
+   160  058610.KQ  126,900.00   -37.32  매도      ✅         61     996,491  1: 0.62           SPG
+   161  LRCX          222.99   -37.51  매도      ✅     44,845     685,231  1: 0.73  Lam Research Corporation
+   162  028260.KS  293,000.00   -38.21  매도      ✅         31     994,258  1: 0.53   SAMSUNG C&T
+   163  034020.KS   90,500.00   -40.89  매도      ✅        104     995,928  1: 0.77  Doosan Enerbility
+   164  001680.KS   20,850.00   -41.54  매도      ✅        479     677,747  1: 0.11       Daesang
+   165  005490.KS  346,500.00   -43.61  매도      ✅         28     966,714  1: 0.52  POSCO Holdings
+   166  247540.KQ  195,400.00   -50.36  매도      ✅         51     971,932  1: 0.71      ECOPROBM
+   167  138040.KS  115,800.00   -51.35  매도      ✅         73     996,811  1: 0.49  Meritz Financial
+   168  068270.KS  211,500.00   -51.72  매도      ✅         43     983,471  1: 0.58     Celltrion
+   169  003670.KS  208,000.00   -53.72  매도      ✅         48     986,924  1: 0.45  POSCO FUTURE M
+   170  098460.KQ   30,600.00   -57.40  매도      ✅        326     879,336  1: 0.87     Koh Young
+   171  000810.KS  491,500.00   -57.87  매도      ✅         18     964,634  1: 0.54  SamsungF&MIns
+
+  ────────────────────────────────────────────────────────────────────────────────────────
+  승인: 169/171  |  매수 추천: 6종목
+
+  ⚠ 본 분석은 기술적 지표 기반 참고용이며 투자 조언이 아닙니다.
+══════════════════════════════════════════════════════════════════════════════════════════
+
+CSV 저장됨: reports/agent_screen_swing_20260305.csv
 ```
 
 ###
