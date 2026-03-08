@@ -27,10 +27,10 @@ from ta_trader.constants import (
     BB_UPPER_THRESHOLD, BB_LOWER_THRESHOLD,
     BB_BANDWIDTH_SQUEEZE, BB_BANDWIDTH_EXPAND,
 )
-from ta_trader.models import (
+from ta_trader.models.short_models import (
     IndicatorResult, MarketRegime, Signal, StrategyType, TradingDecision,
 )
-from ta_trader.recommend.models import (
+from ta_trader.models.recommend_models import (
     Grade, Rationale, Recommendation, RecommendationReport,
 )
 
@@ -46,7 +46,7 @@ class RecommendationEngine:
         TradingDecision 리스트를 받아 추천 보고서를 반환합니다.
 
         Args:
-            decisions: MonthlyTradingAnalyzer.analyze() 결과 리스트
+            decisions: ShortTermAnalyzer.analyze() 결과 리스트
 
         Returns:
             RecommendationReport

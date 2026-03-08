@@ -20,7 +20,7 @@ import anthropic
 import pandas as pd
 
 from ta_trader.exceptions import TATraderError
-from ta_trader.llm.base import BaseLLMAnalyzer
+from ta_trader.base.base_llm import BaseLLMAnalyzer
 from ta_trader.utils.logger import get_logger
 
 logger = get_logger(__name__)

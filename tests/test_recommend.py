@@ -19,11 +19,13 @@ from __future__ import annotations
 
 import pytest
 
-from ta_trader.models import (
+from ta_trader.models.short_models import (
     IndicatorResult, MarketRegime, RiskLevels, Signal, StrategyType, TradingDecision,
 )
+from ta_trader.models.recommend_models import (
+    Grade, Rationale, Recommendation, RecommendationReport
+)
 from ta_trader.recommend.engine import RecommendationEngine
-from ta_trader.recommend.models import Grade, Rationale, Recommendation, RecommendationReport
 from ta_trader.recommend.report import format_recommendation_report
 
 

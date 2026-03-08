@@ -5,7 +5,7 @@ ta_trader/backtest/report.py
 
 from __future__ import annotations
 
-from ta_trader.backtest.models import BacktestResult, ExitReason
+from ta_trader.models.backtest_models import BacktestResult, ExitReason
 
 
 def format_backtest_report(result: BacktestResult) -> str:

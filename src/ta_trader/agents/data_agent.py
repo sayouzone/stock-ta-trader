@@ -24,7 +24,7 @@ from typing import Optional
 import pandas as pd
 
 from ta_trader.agents.base import BaseAgent
-from ta_trader.agents.models import MarketDataReport
+from ta_trader.models.agent_models import MarketDataReport
 from ta_trader.data.fetcher import DataFetcher
 from ta_trader.indicators.adx import ADXAnalyzer
 from ta_trader.indicators.bollinger import BollingerAnalyzer

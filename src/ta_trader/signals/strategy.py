@@ -31,7 +31,7 @@ from ta_trader.constants import (
     BB_UPPER_THRESHOLD, BB_LOWER_THRESHOLD,
     RSI_OVERBOUGHT, RSI_OVERSOLD,
 )
-from ta_trader.models import IndicatorResult, Signal, WeightSet
+from ta_trader.models.short_models import IndicatorResult, Signal, WeightSet
 from ta_trader.signals.regime import RegimeContext
 from ta_trader.style_config import StyleConfig
 

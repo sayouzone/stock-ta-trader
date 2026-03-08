@@ -16,7 +16,7 @@ from typing import Iterator
 
 import pandas as pd
 
-from ta_trader.llm.models import LLMAnalysis
+from ta_trader.models.llm_models import LLMAnalysis
 from ta_trader.llm.prompt_builder import PromptBuilder
 from ta_trader.models import TradingDecision
 from ta_trader.utils.logger import get_logger

@@ -33,7 +33,7 @@ from ta_trader.agents.data_agent import DataAgent, DataAgentInput
 from ta_trader.agents.execution_agent import (
     DryRunBackend, ExecutionAgent, ExecutionBackend, ExecutionConfig,
 )
-from ta_trader.agents.models import (
+from ta_trader.models.agent_models import (
     ExecutionResult, MarketDataReport, PipelineResult,
     RiskApproval, StrategyReport, TradeSignal,
 )
@@ -163,7 +163,7 @@ class AgentOrchestrator:
         """
         분석만 실행 (Data + Strategy 에이전트만)
 
-        기존 MonthlyTradingAnalyzer.analyze()와 동등한 기능.
+        기존 ShortTermAnalyzer.analyze()와 동등한 기능.
         리스크 검증과 체결은 수행하지 않습니다.
 
         Args:

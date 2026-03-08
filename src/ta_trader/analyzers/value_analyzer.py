@@ -22,6 +22,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
+from ta_trader.base.base_analyzer import BaseAnalyzer
 from ta_trader.data.fetcher import DataFetcher
 from ta_trader.indicators.calculator import IndicatorCalculator
 from ta_trader.indicators.rsi import RSIAnalyzer
@@ -66,15 +67,15 @@ from ta_trader.value.constants import (
     GRADE_STRONG_BUY, GRADE_BUY, GRADE_CONDITIONAL, GRADE_WATCH,
     VALUE_DEFAULT_PERIOD, VALUE_MIN_DATA_ROWS,
 )
-from ta_trader.value.models import (
-    CheckItem, ValueFundamentals, ValueGrade, ValueScreenResult,
-    StageResult, StageStatus,
+from ta_trader.models.base_models import CheckItem, StageResult, StageStatus
+from ta_trader.models.value_models import (
+    ValueFundamentals, ValueGrade, ValueScreenResult,
 )
 
 logger = get_logger(__name__)
 
 
-class ValueInvestingAnalyzer:
+class ValueInvestingAnalyzer(BaseAnalyzer[ValueScreenResult]):
     """
     가치 투자 5단계 분석 엔진.
 
@@ -89,19 +90,13 @@ class ValueInvestingAnalyzer:
         result = analyzer.analyze()
     """
 
-    def __init__(
-        self,
-        ticker: str,
-        period: str = VALUE_DEFAULT_PERIOD,
-        interval: str = "1d",
-    ) -> None:
-        self.ticker   = ticker
-        self.period   = period
-        self.interval = interval
-        self._calc: Optional[IndicatorCalculator] = None
-        self._df: Optional[pd.DataFrame] = None
-        self._info: dict = {}
-        self._name: str = ticker
+    @property
+    def name(self) -> str:
+        return "데이터 분석 에이전트"
+
+    @property
+    def role(self) -> str:
+        return "시장 데이터 수집 및 기술적 지표 연산"
 
     # ── 공개 API ──────────────────────────────────────────
 
@@ -110,6 +105,14 @@ class ValueInvestingAnalyzer:
         logger.info("가치 투자 분석 시작", ticker=self.ticker)
 
         self._fetch_data()
+
+        if len(self._df) < VALUE_MIN_DATA_ROWS:
+            logger.warning(
+                "데이터 부족",
+                ticker=self.ticker,
+                rows=len(self._df),
+                required=VALUE_MIN_DATA_ROWS,
+            )
 
         stages = [
             self._stage1_valuation(),
@@ -169,23 +172,52 @@ class ValueInvestingAnalyzer:
         )
         return result
 
-    # ── 데이터 수집 ───────────────────────────────────────
+    def analyze_with_llm(
+        self,
+        provider:    str | None = None,
+        api_key:     str | None = None,
+        model:       str | None = None,
+        recent_days: int = 10,
+        stream:      bool = False,
+    ) -> ValueScreenResult:
+        """
+        기술적 분석 실행 후 LLM 해석을 추가하여 반환합니다.
+        analyze() 를 내부적으로 먼저 호출하므로 별도 호출 불필요.
 
-    def _fetch_data(self) -> None:
-        """OHLCV + yfinance info 수집"""
-        fetcher = DataFetcher(period=self.period, interval=self.interval)
-        self._name, self._df = fetcher.fetch(self.ticker)
+        Args:
+            provider:    'anthropic' | 'google' | None (None이면 환경변수/자동감지)
+            api_key:     Anthropic API 키 (None이면 환경변수 ANTHROPIC_API_KEY 사용)
+            model:       LLM 모델명 (None이면 환경변수 TA_LLM_MODEL 또는 기본값 사용)
+            recent_days: 가격 추이 요약에 사용할 최근 일수
+            stream:      True 이면 스트리밍으로 LLM 응답을 출력하고 결과 반환
 
-        if len(self._df) < VALUE_MIN_DATA_ROWS:
-            logger.warning(
-                "데이터 부족",
-                ticker=self.ticker,
-                rows=len(self._df),
-                required=VALUE_MIN_DATA_ROWS,
-            )
+        Returns:
+            llm_analysis 필드가 채워진 GrowthScreenResult
+        """
+        from ta_trader.llm.factory import create_llm_analyzer
 
-        self._calc = IndicatorCalculator(self._df)
-        self._name, self._info = fetcher.info(self.ticker)
+        # 기술적 분석이 아직 실행되지 않았으면 실행
+        result = self.analyze()
+        df = self._calc.dataframe
+
+        llm = create_llm_analyzer(provider=provider, api_key=api_key, model=model)
+        
+        if stream:
+            print(f"\n{'─'*60}")
+            print(f"  🤖 LLM 분석 중 [{self.ticker}] ...")
+            print(f"{'─'*60}\n")
+            full_text = ""
+            for chunk in llm.analyze_stream(decision, df, recent_days):
+                print(chunk, end="", flush=True)
+                full_text += chunk
+            print()
+            llm_result = llm._parse_response(full_text, llm._model)
+        else:
+            llm_result = llm.analyze(decision, df, recent_days)
+
+        result.llm_analysis = llm_result
+
+        return result
 
     def _current_price(self) -> float:
         """최신 종가"""

@@ -1,5 +1,5 @@
 """
-ta_trader/models.py
+ta_trader/models/short_models.py
 도메인 데이터 모델 (dataclass 기반)
 """
 
@@ -10,7 +10,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from ta_trader.llm.models import LLMAnalysis
+    from ta_trader.models.llm_models import LLMAnalysis
 
 
 class Signal(Enum):
@@ -42,12 +42,16 @@ class TradingStyle(Enum):
     """매매 스타일 (보유 기간 기반)"""
     SWING    = "스윙"       # 2일~2주: 단기 파동 포착
     POSITION = "포지션"     # 수주~수개월: 중장기 추세 추종
+    GROWTH   = "성장"       # 
+    VALUE    = "가치"       # 
 
     @property
     def description(self) -> str:
         return {
             TradingStyle.SWING:    "스윙 트레이딩 (2일~2주, 단기 파동 포착)",
             TradingStyle.POSITION: "포지션 트레이딩 (수주~수개월, 중장기 추세 추종)",
+            TradingStyle.GROWTH: "",
+            TradingStyle.VALUE: "",
         }[self]
 
 

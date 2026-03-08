@@ -12,8 +12,9 @@ growth/formatter.py와 동일한 레이아웃:
 
 from __future__ import annotations
 
-from ta_trader.value.models import (
-    ValueGrade, ValueScreenResult, StageResult, StageStatus,
+from ta_trader.models.base_models import StageResult, StageStatus
+from ta_trader.models.value_models import (
+    ValueGrade, ValueScreenResult,
 )
 from ta_trader.utils.formatter import _wrap
 

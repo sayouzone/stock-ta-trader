@@ -392,7 +392,7 @@ ADX가 25이상이면 추세가 존재한다고 판단하고, MACD 시그널 크
 
 #### GrowthMomentumAnalyzer
 
-| 구분 | MonthlyTradingAnalyzer | GrowthMomentumAnalyzer |
+| 구분 | ShortTermAnalyzer | GrowthMomentumAnalyzer |
 | --- | ---------------------- | ---------------------- |
 | 목적 | 현재 시점 매매 신호 | 향후 1년 2배 상승 잠재력 평가 |
 | 출력 | TradingDecision (점수 -100~+100) | GrowthScreenResult (점수 0~100) |

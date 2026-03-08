@@ -12,9 +12,9 @@ import pandas as pd
 import pytest
 
 from ta_trader.llm.analyzer import LLMAnalyzer
-from ta_trader.llm.models import LLMAnalysis
+from ta_trader.models.llm_models import LLMAnalysis
 from ta_trader.llm.prompt_builder import PromptBuilder
-from ta_trader.models import (
+from ta_trader.models.short_models import (
     IndicatorResult, MarketRegime, RiskLevels, Signal, TradingDecision,
 )
 

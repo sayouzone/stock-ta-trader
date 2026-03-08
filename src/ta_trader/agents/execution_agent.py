@@ -29,7 +29,7 @@ from datetime import datetime
 from typing import Optional
 
 from ta_trader.agents.base import BaseAgent
-from ta_trader.agents.models import (
+from ta_trader.models.agent_models import (
     ExecutionAlgorithm, ExecutionResult, OrderRequest,
     OrderSide, OrderStatus, OrderType, RiskApproval,
 )

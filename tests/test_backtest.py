@@ -16,7 +16,7 @@ from datetime import date
 
 import pytest
 
-from ta_trader.backtest.models import (
+from ta_trader.models.backtest_models import (
     BacktestConfig,
     BacktestResult,
     ExitReason,
@@ -31,7 +31,7 @@ from ta_trader.backtest.metrics import (
     compute_metrics,
 )
 from ta_trader.backtest.report import format_backtest_report
-from ta_trader.models import MarketRegime, StrategyType
+from ta_trader.models.short_models import MarketRegime, StrategyType
 
 
 # ── 헬퍼 ─────────────────────────────────────────────────

@@ -20,7 +20,7 @@ from __future__ import annotations
 from typing import Optional
 
 from ta_trader.agents.base import BaseAgent
-from ta_trader.agents.models import (
+from ta_trader.models.agent_models import (
     MarketDataReport, OrderSide, StrategyReport, TradeSignal,
 )
 from ta_trader.models import Signal, TradingStyle

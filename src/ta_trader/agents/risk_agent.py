@@ -22,7 +22,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from ta_trader.agents.base import BaseAgent
-from ta_trader.agents.models import (
+from ta_trader.models.agent_models import (
     OrderSide, PositionSize, RiskApproval,
     TradeSignal, VetoReason,
 )

@@ -8,7 +8,9 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-from ta_trader.models import IndicatorResult, MarketRegime, Signal, StrategyType
+from ta_trader.models.short_models import (
+    IndicatorResult, MarketRegime, Signal, StrategyType
+)
 from ta_trader.signals.regime import RegimeContext, classify_regime, detect_regime
 from ta_trader.signals.strategy import (
     AdaptiveDefaultStrategy,

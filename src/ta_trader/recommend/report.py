@@ -5,7 +5,7 @@ ta_trader/recommend/report.py
 
 from __future__ import annotations
 
-from ta_trader.recommend.models import (
+from ta_trader.models.recommend_models import (
     Grade, Rationale, Recommendation, RecommendationReport,
 )
 from ta_trader.utils.formatter import _wrap

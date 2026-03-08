@@ -1,13 +1,13 @@
 """
-ta_trader/analyzer.py
-MonthlyTradingAnalyzer - 전체 분석 파사드(Facade)
+ta_trader/analyzers/short_analyzer.py
+ShortTermAnalyzer - 전체 분석 파사드(Facade)
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ta_trader.data.fetcher import DataFetcher
+from ta_trader.base.base_analyzer import BaseAnalyzer
 from ta_trader.indicators.adx import ADXAnalyzer
 from ta_trader.indicators.bollinger import BollingerAnalyzer
 from ta_trader.indicators.calculator import IndicatorCalculator
@@ -20,7 +20,7 @@ from ta_trader.style_config import StyleConfig, get_style_config
 from ta_trader.utils.logger import get_logger
 
 if TYPE_CHECKING:
-    from ta_trader.llm.models import LLMAnalysis
+    from ta_trader.models.llm_models import LLMAnalysis
 
 logger = get_logger(__name__)
 
@@ -33,40 +33,36 @@ _SIGNAL_SUMMARY = {
 }
 
 
-class MonthlyTradingAnalyzer:
+class ShortTermAnalyzer(BaseAnalyzer[TradingDecision]):
     """
     1개월 단위 기술적 분석 트레이딩 시스템 파사드.
 
     사용 예:
-        analyzer = MonthlyTradingAnalyzer("005930.KS")
+        analyzer = ShortTermAnalyzer("005930.KS")
         decision = analyzer.analyze()
 
-        analyzer = MonthlyTradingAnalyzer("AAPL", trading_style=TradingStyle.POSITION)
+        analyzer = ShortTermAnalyzer("AAPL", trading_style=TradingStyle.POSITION)
         decision = analyzer.analyze()  # 포지션 트레이딩
     """
 
-    def __init__(
-        self,
-        ticker: str,
-        period: str = "6mo",
-        interval: str = "1d",
-        trading_style: TradingStyle = TradingStyle.SWING,
-    ) -> None:
-        self.ticker   = ticker
-        self.trading_style = trading_style
-        self._style_config = get_style_config(trading_style)
-        self._fetcher = DataFetcher(period=period, interval=interval)
-        self._calc    = None   # IndicatorCalculator (analyze() 호출 후 사용 가능)
+    @property
+    def name(self) -> str:
+        return "데이터 분석 에이전트"
+
+    @property
+    def role(self) -> str:
+        return "시장 데이터 수집 및 기술적 지표 연산"
 
     def analyze(self) -> TradingDecision:
         """전체 분석 파이프라인 실행 후 TradingDecision 반환"""
         sc = self._style_config
 
         # 1. 데이터 수집
-        name, raw_df = self._fetcher.fetch(self.ticker)
+        #name, raw_df = self._fetcher.fetch(self.ticker)
+        self._fetch_data()
 
         # 2. 지표 계산
-        self._calc = IndicatorCalculator(raw_df)
+        #self._calc = IndicatorCalculator(raw_df)
         df         = self._calc.dataframe
         latest     = self._calc.latest()
         prev       = self._calc.previous()
@@ -103,7 +99,7 @@ class MonthlyTradingAnalyzer:
         logger.info(
             "분석 완료",
             ticker=self.ticker,
-            name=name,
+            name=self.name,
             signal=signal.value,
             score=score,
             style=self.trading_style.value,
@@ -113,7 +109,7 @@ class MonthlyTradingAnalyzer:
 
         return TradingDecision(
             ticker          = self.ticker,
-            name            = name,
+            name            = self.name,
             date            = date,
             current_price   = price,
             market_regime   = regime_ctx.regime,
@@ -127,10 +123,12 @@ class MonthlyTradingAnalyzer:
             regime_detail   = regime_ctx.detail,
         )
 
+    """
     @property
     def calculator(self) -> IndicatorCalculator | None:
-        """analyze() 호출 후 사용 가능한 IndicatorCalculator"""
+        "analyze() 호출 후 사용 가능한 IndicatorCalculator"
         return self._calc
+    """
 
     def analyze_with_llm(
         self,
@@ -178,7 +176,7 @@ class MonthlyTradingAnalyzer:
         decision.llm_analysis = llm_result
         logger.info("LLM 분석 결과 첨부 완료",
                     ticker=self.ticker,
-                    name=name,
+                    name=self.name,
                     provider=llm_result.provider,
                     confidence=llm_result.confidence)
         return decision

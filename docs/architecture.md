@@ -6,7 +6,7 @@
 ┌──────────────────────────────────────────┐
 │  CLI (main.py)                           │  ← Click 기반 진입점
 ├──────────────────────────────────────────┤
-│  Facade (analyzer.py)                    │  ← MonthlyTradingAnalyzer
+│  Facade (analyzer.py)                    │  ← ShortTermAnalyzer
 ├──────────┬──────────┬────────────────────┤
 │  Data    │Indicators│ Signals  │  Risk   │  ← 도메인 레이어
 │  Layer   │  Layer   │  Layer   │  Layer  │
@@ -60,7 +60,7 @@ ValueScreenResult (종합 등급 + 5단계 상세 + 리스크 관리)
 ## 핵심 설계 결정
 
 ### 1. 파사드 패턴 (Facade)
-`MonthlyTradingAnalyzer`는 외부에서 보이는 유일한 인터페이스.
+`ShortTermAnalyzer`는 외부에서 보이는 유일한 인터페이스.
 내부 모듈 교체 시 main.py·tests 수정 불필요.
 
 ### 2. 점수 기반 신호 (Score-based Signal)

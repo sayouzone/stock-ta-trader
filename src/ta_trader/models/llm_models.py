@@ -1,5 +1,5 @@
 """
-ta_trader/llm/models.py
+ta_trader/models/llm_models.py
 LLM 분석 결과 데이터 모델
 """
 

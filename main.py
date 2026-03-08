@@ -15,15 +15,19 @@ from pathlib import Path
 
 import click
 import pandas as pd
+import yaml
 
 # PYTHONPATH=src 설정 없이도 동작하도록 보험용 경로 추가
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from ta_trader.analyzer import MonthlyTradingAnalyzer
+from ta_trader.analyzers.growth_analyzer import GrowthMomentumAnalyzer
+from ta_trader.analyzers.short_analyzer import ShortTermAnalyzer
+from ta_trader.analyzers.value_analyzer import ValueInvestingAnalyzer
 from ta_trader.models import TradingStyle
 from ta_trader.utils.formatter import make_decision, make_summary
 from ta_trader.visualization.chart import ChartVisualizer
-
+from ta_trader.growth import format_growth_report, format_growth_result
+from ta_trader.value import format_value_report, format_value_result
 
 def _parse_style(style_str: str | None) -> TradingStyle:
     """CLI 문자열을 TradingStyle로 변환"""
@@ -95,8 +99,9 @@ def analyze(ticker: str, period: str, interval: str, style: str,
             click.echo(f"  ▶ [{idx+1}/{len(styles)}] {trading_style.description}")
             click.echo(f"{'━'*68}")
 
-        analyzer = MonthlyTradingAnalyzer(ticker, period=period, interval=interval,
+        analyzer = ShortTermAnalyzer(ticker, period=period, interval=interval,
                                           trading_style=trading_style)
+
 
         if llm or llm_stream:
             try:
@@ -119,7 +124,7 @@ def analyze(ticker: str, period: str, interval: str, style: str,
         if save_report:
             out_dir = Path("reports")
             out_dir.mkdir(parents=True, exist_ok=True)
-            report_path = out_dir / f"{ticker.replace('.', '_')}_report_{style_tag}_{decision.date.replace('-','')}.txt"
+            report_path = out_dir / f"{ticker.replace('.', '_')}_{style_tag}_{decision.date.replace('-','')}.txt"
             report_path.write_text(decision_str, encoding="utf-8")
             click.echo(f"보고서 저장됨: {report_path}")
 
@@ -300,7 +305,7 @@ def recommend(config: str, output: str, period: str, style: str, save_report: bo
         with click.progressbar(tickers, label=label) as bar:
             for ticker in bar:
                 try:
-                    decision = MonthlyTradingAnalyzer(
+                    decision = ShortTermAnalyzer(
                         ticker, period=period, trading_style=trading_style,
                     ).analyze()
                     decisions.append(decision)
@@ -374,7 +379,7 @@ def screen(config: str, output: str, period: str, style: str) -> None:
         with click.progressbar(tickers, label=label) as bar:
             for ticker in bar:
                 try:
-                    decision = MonthlyTradingAnalyzer(
+                    decision = ShortTermAnalyzer(
                         ticker, period=period, trading_style=trading_style,
                     ).analyze()
                     rows.append(decision.to_dict())
@@ -414,8 +419,6 @@ def growth(ticker: str, period: str, save_report: bool) -> None:
         python main.py growth NVDA
         python main.py growth AAPL --period 2y --save-report
     """
-    from ta_trader.growth import GrowthMomentumAnalyzer, format_growth_result
-
     try:
         analyzer = GrowthMomentumAnalyzer(ticker, period=period)
         result = analyzer.analyze()
@@ -453,9 +456,6 @@ def growth_screen(config: str, output: str, period: str, top_n: int, min_score: 
         python main.py growth-screen --config my_stocks.yaml --top-n 10
         python main.py growth-screen --min-score 50
     """
-    import yaml
-    from ta_trader.growth import GrowthMomentumAnalyzer, format_growth_report
-
     config_path = Path(config)
     if not config_path.exists():
         click.echo(f"설정 파일을 찾을 수 없습니다: {config}", err=True)
@@ -528,8 +528,6 @@ def value(ticker: str, period: str, save_report: bool) -> None:
         python main.py value AAPL
         python main.py value 005930.KS --period 3y --save-report
     """
-    from ta_trader.value import ValueInvestingAnalyzer, format_value_result
-
     try:
         analyzer = ValueInvestingAnalyzer(ticker, period=period)
         result = analyzer.analyze()
@@ -567,9 +565,6 @@ def value_screen(config: str, output: str, period: str, top_n: int, min_score: f
         python main.py value-screen --config my_stocks.yaml --top-n 10
         python main.py value-screen --min-score 50
     """
-    import yaml
-    from ta_trader.value import ValueInvestingAnalyzer, format_value_report
-
     config_path = Path(config)
     if not config_path.exists():
         click.echo(f"설정 파일을 찾을 수 없습니다: {config}", err=True)

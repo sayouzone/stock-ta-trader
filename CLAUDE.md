@@ -28,6 +28,11 @@ stock-ta-trader/
 │   ├── constants.py             ← 모든 상수 (임계값, 가중치)
 │   ├── exceptions.py            ← 커스텀 예외 계층
 │   ├── models.py                ← 데이터클래스 (Signal, TradingDecision 등)
+│   ├── growth/
+│   │   ├── __init__.py
+│   │   ├── growth_analyzer.py   ← 100% 상승 후보 발굴 6단계 분석 엔진
+│   │   ├── short_analyzer.py    ← 
+│   │   └── value_analyzer.py    ← 
 │   ├── data/
 │   │   ├── fetcher.py           ← yfinance 데이터 수집
 │   │   └── validator.py         ← 데이터 검증
@@ -55,11 +60,10 @@ stock-ta-trader/
 │   │   └── analyzer.py          ← Anthropic API 호출 (동기/스트리밍)
 │   ├── visualization/
 │   │   └── chart.py             ← 5패널 차트 (가격·MACD·RSI·ADX·점수)
-│   ├── utils/
-│   │   ├── logger.py            ← 로깅 설정 (structlog)
-│   │   ├── formatter.py         ← 결과 출력 포매터 (LLM 섹션 포함)
-│   │   └── font.py              ← matplotlib 한글 폰트 자동 설정
-│   └── analyzer.py              ← 메인 MonthlyTradingAnalyzer (파사드)
+│   └── utils/
+│       ├── logger.py            ← 로깅 설정 (structlog)
+│       ├── formatter.py         ← 결과 출력 포매터 (LLM 섹션 포함)
+│       └── font.py              ← matplotlib 한글 폰트 자동 설정
 ├── tests/
 │   ├── conftest.py
 │   ├── test_backtest.py
@@ -83,7 +87,7 @@ stock-ta-trader/
 
 ## 주요 클래스
 
-- MonthlyTradingAnalyzer  ← 메인 진입점 (ticker 입력 → TradingDecision 반환)
+- ShortTermAnalyzer  ← 메인 진입점 (ticker 입력 → TradingDecision 반환)
 - IndicatorCalculator     ← ta 라이브러리 기반 지표 계산
 - SignalAnalyzer          ← 지표별 신호 및 점수 산출
 - RiskManager             ← BB 기반 손절/익절가 자동 산출
@@ -93,7 +97,7 @@ stock-ta-trader/
 ## 핵심 모듈 관계
 ```
 main.py
-  └─► MonthlyTradingAnalyzer (analyzer.py)
+  └─► ShortTermAnalyzer (analyzers/analyzer.py)
         ├─► DataFetcher (data/fetcher.py)
         ├─► IndicatorCalculator (indicators/calculator.py)
         │     ├─► ADXAnalyzer

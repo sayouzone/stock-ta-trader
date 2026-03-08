@@ -23,6 +23,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
+from ta_trader.base.base_analyzer import BaseAnalyzer
 from ta_trader.data.fetcher import DataFetcher
 from ta_trader.indicators.adx import ADXAnalyzer
 from ta_trader.indicators.bollinger import BollingerAnalyzer
@@ -62,19 +63,19 @@ from ta_trader.growth.constants import (
     GRADE_STRONG_BUY, GRADE_BUY, GRADE_CONDITIONAL, GRADE_WATCH,
     GROWTH_DEFAULT_PERIOD, GROWTH_MIN_DATA_ROWS,
 )
-from ta_trader.growth.models import (
-    CheckItem, FundamentalData, GrowthGrade, GrowthScreenResult,
-    StageResult, StageStatus,
+from ta_trader.models.base_models import CheckItem, StageResult, StageStatus
+from ta_trader.models.growth_models import (
+    FundamentalData, GrowthGrade, GrowthScreenResult,
 )
 
 logger = get_logger(__name__)
 
 
-class GrowthMomentumAnalyzer:
+class GrowthMomentumAnalyzer(BaseAnalyzer[GrowthScreenResult]):
     """
     100% 상승 후보 발굴을 위한 6단계 분석 엔진.
 
-    MonthlyTradingAnalyzer가 '현재 시점의 매매 신호'를 분석한다면,
+    ShortTermAnalyzer가 '현재 시점의 매매 신호'를 분석한다면,
     GrowthMomentumAnalyzer는 '향후 1년 내 대폭 상승할 잠재력'을 평가합니다.
 
     사용 예:
@@ -85,24 +86,31 @@ class GrowthMomentumAnalyzer:
         result = analyzer.analyze()
     """
 
-    def __init__(
-        self,
-        ticker: str,
-        period: str = GROWTH_DEFAULT_PERIOD,
-        interval: str = "1d",
-    ) -> None:
-        self.ticker   = ticker
-        self.period   = period
-        self.interval = interval
-        self._calc: Optional[IndicatorCalculator] = None
-        self._df: Optional[pd.DataFrame] = None
-        self._info: dict = {}
-        self._name: str = ticker
+    @property
+    def name(self) -> str:
+        return "데이터 분석 에이전트"
+
+    @property
+    def role(self) -> str:
+        return "시장 데이터 수집 및 기술적 지표 연산"
 
     def analyze(self) -> GrowthScreenResult:
         """6단계 전체 분석 파이프라인 실행"""
         # 0. 데이터 수집
         self._fetch_data()
+
+        # 추가 컬럼: SMA 150/200/50, 거래량 평균
+        close = self._df["Close"]
+        self._df["sma_50"]  = close.rolling(window=min(SMA_50_WINDOW, len(close))).mean()
+        self._df["sma_150"] = close.rolling(window=min(SMA_150_WINDOW, len(close))).mean()
+        self._df["sma_200"] = close.rolling(window=min(SMA_200_WINDOW, len(close))).mean()
+
+        if "Volume" in self._df.columns:
+            self._df["vol_avg_50"] = (
+                self._df["Volume"]
+                .rolling(window=min(VOLUME_AVG_WINDOW, len(self._df)))
+                .mean()
+            )
 
         # 6단계 순차 실행
         s1 = self._stage1_earnings()
@@ -151,40 +159,52 @@ class GrowthMomentumAnalyzer:
         )
         return result
 
-    @property
-    def calculator(self) -> Optional[IndicatorCalculator]:
-        return self._calc
+    def analyze_with_llm(
+        self,
+        provider:    str | None = None,
+        api_key:     str | None = None,
+        model:       str | None = None,
+        recent_days: int = 10,
+        stream:      bool = False,
+    ) -> GrowthScreenResult:
+        """
+        기술적 분석 실행 후 LLM 해석을 추가하여 반환합니다.
+        analyze() 를 내부적으로 먼저 호출하므로 별도 호출 불필요.
 
-    # ── 데이터 수집 ──────────────────────────────────────
+        Args:
+            provider:    'anthropic' | 'google' | None (None이면 환경변수/자동감지)
+            api_key:     Anthropic API 키 (None이면 환경변수 ANTHROPIC_API_KEY 사용)
+            model:       LLM 모델명 (None이면 환경변수 TA_LLM_MODEL 또는 기본값 사용)
+            recent_days: 가격 추이 요약에 사용할 최근 일수
+            stream:      True 이면 스트리밍으로 LLM 응답을 출력하고 결과 반환
 
-    def _fetch_data(self) -> None:
-        """가격 데이터 + yfinance info 수집"""
-        fetcher = DataFetcher(period=self.period, interval=self.interval)
+        Returns:
+            llm_analysis 필드가 채워진 GrowthScreenResult
+        """
+        from ta_trader.llm.factory import create_llm_analyzer
 
-        # yfinance info (펀더멘털)
-        self._name, self._info = fetcher.info(self.ticker)
+        # 기술적 분석이 아직 실행되지 않았으면 실행
+        result = self.analyze()
+        df = self._calc.dataframe
 
-        # 가격 데이터 (충분한 기간)
-        name, raw_df = fetcher.fetch(self.ticker)
-        if not self._name or self._name == self.ticker:
-            self._name = name
+        llm = create_llm_analyzer(provider=provider, api_key=api_key, model=model)
+        
+        if stream:
+            print(f"\n{'─'*60}")
+            print(f"  🤖 LLM 분석 중 [{self.ticker}] ...")
+            print(f"{'─'*60}\n")
+            full_text = ""
+            for chunk in llm.analyze_stream(decision, df, recent_days):
+                print(chunk, end="", flush=True)
+                full_text += chunk
+            print()
+            llm_result = llm._parse_response(full_text, llm._model)
+        else:
+            llm_result = llm.analyze(decision, df, recent_days)
 
-        # 지표 계산
-        self._calc = IndicatorCalculator(raw_df)
-        self._df = self._calc.dataframe
+        result.llm_analysis = llm_result
 
-        # 추가 컬럼: SMA 150/200/50, 거래량 평균
-        close = self._df["Close"]
-        self._df["sma_50"]  = close.rolling(window=min(SMA_50_WINDOW, len(close))).mean()
-        self._df["sma_150"] = close.rolling(window=min(SMA_150_WINDOW, len(close))).mean()
-        self._df["sma_200"] = close.rolling(window=min(SMA_200_WINDOW, len(close))).mean()
-
-        if "Volume" in self._df.columns:
-            self._df["vol_avg_50"] = (
-                self._df["Volume"]
-                .rolling(window=min(VOLUME_AVG_WINDOW, len(self._df)))
-                .mean()
-            )
+        return result
 
     # ── 1단계: 이익 가속 필터 ────────────────────────────
 

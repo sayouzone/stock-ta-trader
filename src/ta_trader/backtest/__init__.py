@@ -1,7 +1,7 @@
 # ta_trader/backtest/__init__.py
 from ta_trader.backtest.engine import BacktestEngine
 from ta_trader.backtest.metrics import compute_metrics
-from ta_trader.backtest.models import (
+from ta_trader.models.backtest_models import (
     BacktestConfig,
     BacktestResult,
     ExitReason,

@@ -45,7 +45,7 @@ from ta_trader.constants import (
     POSITION_SQUEEZE_BONUS, POSITION_VOLUME_BONUS,
     POSITION_ADX_STRONG_TREND, POSITION_ADX_WEAK_TREND,
 )
-from ta_trader.models import TradingStyle, WeightSet
+from ta_trader.models.short_models import TradingStyle, WeightSet
 
 
 @dataclass(frozen=True)
