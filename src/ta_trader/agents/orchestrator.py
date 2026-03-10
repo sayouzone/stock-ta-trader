@@ -33,7 +33,7 @@ from ta_trader.agents.data_agent import DataAgent, DataAgentInput
 from ta_trader.agents.execution_agent import (
     DryRunBackend, ExecutionAgent, ExecutionBackend, ExecutionConfig,
 )
-from ta_trader.models.agent_models import (
+from ta_trader.models.agent import (
     ExecutionResult, MarketDataReport, PipelineResult,
     RiskApproval, StrategyReport, TradeSignal,
 )

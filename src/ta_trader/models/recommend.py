@@ -1,5 +1,5 @@
 """
-ta_trader/recommend/models.py
+ta_trader/models/recommend.py
 종목 추천 도메인 모델
 
 추천 등급:

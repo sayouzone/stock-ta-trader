@@ -27,10 +27,10 @@ from ta_trader.constants import (
     BB_UPPER_THRESHOLD, BB_LOWER_THRESHOLD,
     BB_BANDWIDTH_SQUEEZE, BB_BANDWIDTH_EXPAND,
 )
-from ta_trader.models.short_models import (
+from ta_trader.models.short import (
     IndicatorResult, MarketRegime, Signal, StrategyType, TradingDecision,
 )
-from ta_trader.models.recommend_models import (
+from ta_trader.models.recommend import (
     Grade, Rationale, Recommendation, RecommendationReport,
 )
 

@@ -21,7 +21,7 @@ from datetime import date
 import pandas as pd
 
 from ta_trader.backtest.metrics import compute_metrics
-from ta_trader.backtest.models import (
+from ta_trader.models.backtest import (
     BacktestConfig,
     BacktestResult,
     ExitReason,

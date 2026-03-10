@@ -1,5 +1,5 @@
 """
-ta_trader/growth/models.py
+ta_trader/models/growth.py
 100% 상승 후보 발굴 6단계 분석 결과 모델
 """
 
@@ -10,7 +10,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from ta_trader.models.llm_models import LLMAnalysis
+    from ta_trader.models.llm import LLMAnalysis
 
 class GrowthGrade(Enum):
     """종합 등급"""

@@ -13,7 +13,7 @@ from ta_trader.indicators.bollinger import BollingerAnalyzer
 from ta_trader.indicators.calculator import IndicatorCalculator
 from ta_trader.indicators.macd import MACDAnalyzer
 from ta_trader.indicators.rsi import RSIAnalyzer
-from ta_trader.models.short_models import Signal
+from ta_trader.models.short import Signal
 
 
 class TestIndicatorCalculator:

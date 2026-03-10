@@ -20,9 +20,9 @@ import yaml
 # PYTHONPATH=src 설정 없이도 동작하도록 보험용 경로 추가
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from ta_trader.analyzers.growth_analyzer import GrowthMomentumAnalyzer
-from ta_trader.analyzers.short_analyzer import ShortTermAnalyzer
-from ta_trader.analyzers.value_analyzer import ValueInvestingAnalyzer
+from ta_trader.analyzers.growth import GrowthMomentumAnalyzer
+from ta_trader.analyzers.short import ShortTermAnalyzer
+from ta_trader.analyzers.value import ValueInvestingAnalyzer
 from ta_trader.models import TradingStyle
 from ta_trader.utils.formatter import make_decision, make_summary
 from ta_trader.visualization.chart import ChartVisualizer
@@ -662,7 +662,7 @@ def agent_analyze(ticker: str, period: str, interval: str, style: str,
     """
     from ta_trader.agents import AgentOrchestrator, OrchestratorConfig
     from ta_trader.agents.risk_agent import RiskConfig
-    from ta_trader.agents.formatter import format_pipeline_result
+    from ta_trader.formatters.agent import format_pipeline_result
 
     styles = _resolve_styles(style)
 
@@ -693,9 +693,11 @@ def agent_analyze(ticker: str, period: str, interval: str, style: str,
 
         try:
             result = orchestrator.run(ticker)
-        except Exception as e:
-            click.echo(f"❌ 분석 실패: {e}", err=True)
-            raise SystemExit(1) from e
+        #except Exception as e:
+        #    click.echo(f"❌ 분석 실패: {e}", err=True)
+        #    raise SystemExit(1) from e
+        finally:
+            pass
 
         output = format_pipeline_result(result)
         click.echo(output)
@@ -755,7 +757,7 @@ def agent_screen(config: str, output: str, period: str, style: str,
     import yaml
     from ta_trader.agents import AgentOrchestrator, OrchestratorConfig
     from ta_trader.agents.risk_agent import RiskConfig
-    from ta_trader.agents.formatter import format_screening_results
+    from ta_trader.formatters.agent import format_screening_results
 
     styles = _resolve_styles(style)
 
@@ -892,7 +894,7 @@ def agent_trade(ticker: str, period: str, style: str,
     from ta_trader.agents import AgentOrchestrator, OrchestratorConfig
     from ta_trader.agents.risk_agent import RiskConfig
     from ta_trader.agents.execution_agent import DryRunBackend, ExecutionConfig
-    from ta_trader.agents.formatter import format_pipeline_result
+    from ta_trader.formatters.agent import format_pipeline_result
 
     trading_style = _parse_style(style)
 

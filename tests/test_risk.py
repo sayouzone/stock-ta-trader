@@ -8,7 +8,7 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-from ta_trader.models.short_models import Signal
+from ta_trader.models.short import Signal
 from ta_trader.risk.manager import RiskManager
 
 

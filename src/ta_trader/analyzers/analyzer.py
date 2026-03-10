@@ -6,11 +6,11 @@ ta_trader/analyzers/analyzer.py
 신규 코드에서는 아래를 사용하세요:
 
     from ta_trader.llm.factory import create_llm_analyzer          # 권장
-    from ta_trader.analyzers.anthropic_analyzer import AnthropicAnalyzer # 직접 지정
-    from ta_trader.analyzers.google_analyzer import GoogleAnalyzer       # 직접 지정
+    from ta_trader.analyzers.anthropic import AnthropicAnalyzer # 직접 지정
+    from ta_trader.analyzers.google import GoogleAnalyzer       # 직접 지정
 """
 
-from ta_trader.analyzers.anthropic_analyzer import AnthropicAnalyzer
+from ta_trader.analyzers.anthropic import AnthropicAnalyzer
 
 # 기존 코드 호환: LLMAnalyzer → AnthropicAnalyzer
 LLMAnalyzer = AnthropicAnalyzer

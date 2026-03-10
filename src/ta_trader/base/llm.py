@@ -1,5 +1,5 @@
 """
-ta_trader/llm/base.py
+ta_trader/base/llm.py
 LLM 분석기 공통 인터페이스 (추상 기반 클래스)
 
 모든 Provider(Anthropic, Gemini, …)는 이 클래스를 상속합니다.
@@ -16,7 +16,7 @@ from typing import Iterator
 
 import pandas as pd
 
-from ta_trader.models.llm_models import LLMAnalysis
+from ta_trader.models.llm import LLMAnalysis
 from ta_trader.llm.prompt_builder import PromptBuilder
 from ta_trader.models import TradingDecision
 from ta_trader.utils.logger import get_logger

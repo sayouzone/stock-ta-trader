@@ -1,5 +1,5 @@
 """
-ta_trader/value/analyzer.py
+ta_trader/analyzers/value.py
 ValueInvestingAnalyzer — 가치 투자 5단계 분석 엔진
 
 프로세스:
@@ -22,7 +22,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-from ta_trader.base.base_analyzer import BaseAnalyzer
+from ta_trader.base.analyzer import BaseAnalyzer
 from ta_trader.data.fetcher import DataFetcher
 from ta_trader.indicators.calculator import IndicatorCalculator
 from ta_trader.indicators.rsi import RSIAnalyzer
@@ -67,8 +67,8 @@ from ta_trader.value.constants import (
     GRADE_STRONG_BUY, GRADE_BUY, GRADE_CONDITIONAL, GRADE_WATCH,
     VALUE_DEFAULT_PERIOD, VALUE_MIN_DATA_ROWS,
 )
-from ta_trader.models.base_models import CheckItem, StageResult, StageStatus
-from ta_trader.models.value_models import (
+from ta_trader.models.base import CheckItem, StageResult, StageStatus
+from ta_trader.models.value import (
     ValueFundamentals, ValueGrade, ValueScreenResult,
 )
 
@@ -92,7 +92,7 @@ class ValueInvestingAnalyzer(BaseAnalyzer[ValueScreenResult]):
 
     @property
     def name(self) -> str:
-        return "데이터 분석 에이전트"
+        return "가치 투자 분석"
 
     @property
     def role(self) -> str:

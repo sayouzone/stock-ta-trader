@@ -11,8 +11,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from ta_trader.models.base_models import CheckItem, StageResult, StageStatus
-from ta_trader.models.value_models import (
+from ta_trader.models.base import CheckItem, StageResult, StageStatus
+from ta_trader.models.value import (
     ValueFundamentals, ValueGrade, ValueScreenResult,
 )
 from ta_trader.value.constants import (
@@ -23,7 +23,7 @@ from ta_trader.value.constants import (
     SCORE_VALUATION_MAX, SCORE_PROFITABILITY_MAX,
     SCORE_FINANCIAL_MAX, SCORE_MARGIN_MAX, SCORE_ENTRY_MAX,
 )
-from ta_trader.value.formatter import format_value_result, format_value_report
+from ta_trader.formatters.value import format_value_result, format_value_report
 
 
 # ── 모델 테스트 ───────────────────────────────────────────

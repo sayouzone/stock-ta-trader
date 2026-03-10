@@ -1,5 +1,5 @@
 """
-ta_trader/analyzers/google_analyzer.py
+ta_trader/analyzers/google.py
 Google Gemini API Provider (google-genai SDK)
 
 환경변수:
@@ -22,7 +22,7 @@ from google import genai
 from google.genai import types
 
 from ta_trader.exceptions import TATraderError
-from ta_trader.base.base_llm import BaseLLMAnalyzer
+from ta_trader.base.llm import BaseLLMAnalyzer
 from ta_trader.utils.logger import get_logger
 
 logger = get_logger(__name__)

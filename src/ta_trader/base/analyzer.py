@@ -1,5 +1,5 @@
 """
-ta_trader/agents/base_agent.py
+ta_trader/base/analyzer.py
 에이전트 기반 추상 클래스
 
 모든 에이전트는 이 클래스를 상속합니다.

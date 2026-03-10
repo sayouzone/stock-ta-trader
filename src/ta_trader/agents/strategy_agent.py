@@ -19,8 +19,8 @@ from __future__ import annotations
 
 from typing import Optional
 
-from ta_trader.agents.base import BaseAgent
-from ta_trader.models.agent_models import (
+from ta_trader.base.agent import BaseAgent
+from ta_trader.models.agent import (
     MarketDataReport, OrderSide, StrategyReport, TradeSignal,
 )
 from ta_trader.models import Signal, TradingStyle

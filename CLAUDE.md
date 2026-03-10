@@ -28,11 +28,11 @@ stock-ta-trader/
 │   ├── constants.py             ← 모든 상수 (임계값, 가중치)
 │   ├── exceptions.py            ← 커스텀 예외 계층
 │   ├── models.py                ← 데이터클래스 (Signal, TradingDecision 등)
-│   ├── growth/
+│   ├── analyzers/
 │   │   ├── __init__.py
-│   │   ├── growth_analyzer.py   ← 100% 상승 후보 발굴 6단계 분석 엔진
-│   │   ├── short_analyzer.py    ← 
-│   │   └── value_analyzer.py    ← 
+│   │   ├── growth.py            ← 100% 상승 후보 발굴 6단계 분석 엔진
+│   │   ├── short.py             ← 
+│   │   └── value.py             ← 
 │   ├── data/
 │   │   ├── fetcher.py           ← yfinance 데이터 수집
 │   │   └── validator.py         ← 데이터 검증

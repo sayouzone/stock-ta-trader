@@ -1,5 +1,5 @@
 """
-ta_trader/agents/models.py
+ta_trader/models/agent.py
 에이전트 간 통신 데이터 모델
 
 에이전트 파이프라인:
@@ -17,7 +17,7 @@ from typing import Optional
 
 import pandas as pd
 
-from ta_trader.models.short_models import (
+from ta_trader.models.short import (
     IndicatorResult, MarketRegime, RiskLevels, Signal,
     StrategyType, TradingDecision, TradingStyle,
 )

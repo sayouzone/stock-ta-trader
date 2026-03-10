@@ -5,15 +5,18 @@ yfinance 기반 OHLCV 데이터 수집
 
 from __future__ import annotations
 
+import os
 import pandas as pd
 import yfinance as yf
+
+from sayou.stock.opendart import OpenDartCrawler
 
 from ta_trader.constants import DEFAULT_INTERVAL, DEFAULT_PERIOD, MIN_DATA_ROWS
 from ta_trader.exceptions import DataFetchError, InsufficientDataError, InvalidTickerError
 from ta_trader.utils.logger import get_logger
 
-logger = get_logger(__name__)
 
+logger = get_logger(__name__)
 
 class DataFetcher:
     """yfinance를 통한 주가 데이터 수집기"""
@@ -94,5 +97,13 @@ class DataFetcher:
             )
         except Exception:
             pass
+
+        if ticker.endswith((".KS", ".KQ")):
+            dart_api_key = os.getenv("DART_API_KEY", "")
+            crawler = OpenDartCrawler(api_key=dart_api_key)
+
+            corp_code = ticker.split(".")[0]
+            corp_name = crawler.fetch_corp_name(corp_code)
+            name = corp_name or name
 
         return name, info

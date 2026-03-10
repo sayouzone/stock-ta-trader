@@ -19,7 +19,7 @@ import pandas as pd
 from ta_trader.constants import (
     SCORE_BUY, SCORE_SELL, SCORE_STRONG_BUY, SCORE_STRONG_SELL,
 )
-from ta_trader.models.short_models import IndicatorResult, MarketRegime, Signal, StrategyType, WeightSet
+from ta_trader.models.short import IndicatorResult, MarketRegime, Signal, StrategyType, WeightSet
 from ta_trader.signals.regime import RegimeContext, classify_regime, detect_regime, get_weights
 from ta_trader.signals.strategy import BaseStrategy, create_strategy
 from ta_trader.style_config import StyleConfig

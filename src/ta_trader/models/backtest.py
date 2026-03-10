@@ -1,5 +1,5 @@
 """
-ta_trader/models/backtest_models.py
+ta_trader/models/backtest.py
 백테스팅 도메인 모델
 """
 
@@ -10,7 +10,7 @@ from datetime import date
 from enum import Enum
 from typing import Optional
 
-from ta_trader.models.short_models import MarketRegime, Signal, StrategyType
+from ta_trader.models.short import MarketRegime, Signal, StrategyType
 
 
 class PositionSide(Enum):

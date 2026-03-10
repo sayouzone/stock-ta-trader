@@ -16,7 +16,7 @@ from __future__ import annotations
 import math
 from collections import defaultdict
 
-from ta_trader.models.backtest_models import BacktestResult, Trade
+from ta_trader.models.backtest import BacktestResult, Trade
 
 # 연간 거래일 수 (한국 시장 기준)
 TRADING_DAYS_PER_YEAR: int = 252

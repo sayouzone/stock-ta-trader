@@ -23,8 +23,8 @@ from typing import Optional
 
 import pandas as pd
 
-from ta_trader.agents.base import BaseAgent
-from ta_trader.models.agent_models import MarketDataReport
+from ta_trader.base.agent import BaseAgent
+from ta_trader.models.agent import MarketDataReport
 from ta_trader.data.fetcher import DataFetcher
 from ta_trader.indicators.adx import ADXAnalyzer
 from ta_trader.indicators.bollinger import BollingerAnalyzer
@@ -85,17 +85,16 @@ class DataAgent(BaseAgent[DataAgentInput, MarketDataReport]):
         style_config = get_style_config(input_data.trading_style)
 
         # 1. 데이터 수집 ─────────────────────────────────
-        fetcher = DataFetcher(
+        self._fetch_data(
+            ticker=input_data.ticker,
             period=input_data.period,
             interval=input_data.interval,
         )
-        name, raw_df = fetcher.fetch(input_data.ticker)
 
-        # 2. 기술적 지표 계산 ─────────────────────────────
-        calculator = IndicatorCalculator(raw_df)
-        df = calculator.dataframe
-        latest = calculator.latest()
-        prev = calculator.previous()
+        # 2. 기술적 지표 계산 ─────────────────────────────        
+        df = self._calc.dataframe
+        latest = self._calc.latest()
+        prev = self._calc.previous()
 
         # 3. 개별 지표 분석 ───────────────────────────────
         indicator_results = self._analyze_indicators(latest, prev)
@@ -106,9 +105,7 @@ class DataAgent(BaseAgent[DataAgentInput, MarketDataReport]):
         # 5. 펀더멘털 수집 (선택적) ───────────────────────
         fundamentals = {}
         if input_data.include_fundamentals:
-            fundamentals = self._fetch_fundamentals(
-                input_data.ticker, fetcher,
-            )
+            fundamentals = self._info
 
         # 6. 센티먼트 분석 (선택적) ───────────────────────
         sentiment = ""
@@ -118,6 +115,7 @@ class DataAgent(BaseAgent[DataAgentInput, MarketDataReport]):
         self._logger.info(
             "데이터 분석 완료",
             ticker=input_data.ticker,
+            name=self._name,
             regime=regime_ctx.regime.value if regime_ctx else "미판별",
             indicators=len(indicator_results),
             rows=len(df),
@@ -125,7 +123,7 @@ class DataAgent(BaseAgent[DataAgentInput, MarketDataReport]):
 
         return MarketDataReport(
             ticker=input_data.ticker,
-            name=name,
+            name=self._name,
             date=str(df.index[-1].date()),
             current_price=float(latest["Close"]),
             ohlcv_df=df,

@@ -1,5 +1,5 @@
 """
-ta_trader/value/models.py
+ta_trader/models/value.py
 가치 투자 5단계 분석 결과 모델
 
 growth/models.py와 동일한 패턴:
@@ -16,7 +16,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from ta_trader.models.llm_models import LLMAnalysis
+    from ta_trader.models.llm import LLMAnalysis
 
 
 class ValueGrade(Enum):

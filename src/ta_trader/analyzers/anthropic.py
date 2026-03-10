@@ -1,5 +1,5 @@
 """
-ta_trader/llm/anthropic_analyzer.py
+ta_trader/analyzers/anthropic.py
 Anthropic Claude API 기반 기술적 분석 해석기
 
 환경변수:
@@ -20,7 +20,7 @@ import anthropic
 import pandas as pd
 
 from ta_trader.exceptions import TATraderError
-from ta_trader.base.base_llm import BaseLLMAnalyzer
+from ta_trader.base.llm import BaseLLMAnalyzer
 from ta_trader.utils.logger import get_logger
 
 logger = get_logger(__name__)

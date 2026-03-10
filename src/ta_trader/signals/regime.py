@@ -29,7 +29,7 @@ from ta_trader.constants import (
     WEIGHT_ADX_TREND,   WEIGHT_RSI_TREND,   WEIGHT_MACD_TREND,   WEIGHT_BB_TREND,
     WEIGHT_ADX_SIDEWAYS, WEIGHT_RSI_SIDEWAYS, WEIGHT_MACD_SIDEWAYS, WEIGHT_BB_SIDEWAYS,
 )
-from ta_trader.models.short_models import MarketRegime, StrategyType, WeightSet
+from ta_trader.models.short import MarketRegime, StrategyType, WeightSet
 
 
 @dataclass

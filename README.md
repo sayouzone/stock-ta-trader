@@ -555,15 +555,15 @@ stock-ta-trader/
 │   ├── indicators/              ← ADX·RSI·MACD·Bollinger 개별 모듈
 │   ├── llm/                     ← 
 │   │   ├── __init__.py
-│   │   ├── analyzer.py           ← 하위 호환성 유지용 모듈 (Deprecated)
-│   │   ├── base.py               ← BaseLLMAnalyzer 추상 기반 클래스
-│   │   ├── models.py             ← LLMAnalysis 데이터클래스
-│   │   ├── prompt_builder.py     ← TradingDecision → 구조화 프롬프트
-│   │   ├── anthropic_analyzer.py ← Anthropic Provider (동기 + 스트리밍) (기존 analyzer.py 리팩토링)
-│   │   ├── google_analyzer.py    ← Google Provider (신규)
-│   │   └── factory.py            ← Provider 팩토리 + 자동 감지
-│   ├── signals/                  ← 복합 점수 합산·시장 국면 분류
-│   ├── risk/manager.py           ← 손절·익절·RR 계산
+│   │   ├── analyzer.py          ← 하위 호환성 유지용 모듈 (Deprecated)
+│   │   ├── base.py              ← BaseLLMAnalyzer 추상 기반 클래스
+│   │   ├── models.py            ← LLMAnalysis 데이터클래스
+│   │   ├── prompt_builder.py    ← TradingDecision → 구조화 프롬프트
+│   │   ├── anthropic.py         ← Anthropic Provider (동기 + 스트리밍) (기존 analyzer.py 리팩토링)
+│   │   ├── google.py            ← Google Provider (신규)
+│   │   └── factory.py           ← Provider 팩토리 + 자동 감지
+│   ├── signals/                 ← 복합 점수 합산·시장 국면 분류
+│   ├── risk/manager.py          ← 손절·익절·RR 계산
 │   └── visualization/chart.py   ← 5패널 차트
 ├── tests/                       ← 25개 단위 테스트 (커버리지 64%)
 ├── configs/watchlist.yaml       ← 관심 종목 목록
@@ -579,6 +579,8 @@ pip install -r requirements.txt
 ```
 
 ```bash
+export DART_API_KEY="fd..."
+
 PYTHONPATH=src python main.py analyze 005930.KS --save-chart
 ```
 

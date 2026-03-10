@@ -5,7 +5,7 @@ ta_trader/agents/formatter.py
 
 from __future__ import annotations
 
-from ta_trader.models.agent_models import (
+from ta_trader.models.agent import (
     ExecutionResult, OrderSide, OrderStatus,
     PipelineResult, RiskApproval, TradeSignal, VetoReason,
 )

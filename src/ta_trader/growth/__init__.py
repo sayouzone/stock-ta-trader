@@ -8,7 +8,7 @@ ta_trader/growth — 100% 상승 후보 발굴 6단계 분석 모듈
     print(format_growth_result(result))
 """
 
-from ta_trader.growth.formatter import format_growth_report, format_growth_result
+from ta_trader.formatters.growth import format_growth_report, format_growth_result
 
 __all__ = [
     "format_growth_report",

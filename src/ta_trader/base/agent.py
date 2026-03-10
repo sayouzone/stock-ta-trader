@@ -1,5 +1,5 @@
 """
-ta_trader/agents/base.py
+ta_trader/base/agent.py
 에이전트 기반 추상 클래스
 
 모든 에이전트는 이 클래스를 상속합니다.
@@ -11,6 +11,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Generic, TypeVar
 
+from ta_trader.data.fetcher import DataFetcher
+from ta_trader.indicators.calculator import IndicatorCalculator
 from ta_trader.utils.logger import get_logger
 
 InputT = TypeVar("InputT")
@@ -30,7 +32,16 @@ class BaseAgent(ABC, Generic[InputT, OutputT]):
 
     def __init__(self) -> None:
         self._logger = get_logger(self.__class__.__name__)
+        self._calc: Optional[IndicatorCalculator] = None
+        self._df: Optional[pd.DataFrame] = None
+        self._info: dict = {}
+        self._name: str = None
 
+    @property
+    def calculator(self) -> IndicatorCalculator | None:
+        """analyze() 호출 후 사용 가능한 IndicatorCalculator"""
+        return self._calc
+    
     @property
     @abstractmethod
     def name(self) -> str:
@@ -56,6 +67,16 @@ class BaseAgent(ABC, Generic[InputT, OutputT]):
     def validate_input(self, input_data: InputT) -> bool:
         """입력 데이터 유효성 검증 (기본: 항상 True)"""
         return input_data is not None
+
+    # ── 데이터 수집 ───────────────────────────────────────
+
+    def _fetch_data(self, ticker: str, period: str, interval: str) -> None:
+        """OHLCV + yfinance info 수집"""
+        fetcher = DataFetcher(period=period, interval=interval)
+        self._name, self._df = fetcher.fetch(ticker)
+
+        self._calc = IndicatorCalculator(self._df)
+        self._name, self._info = fetcher.info(ticker)
 
     def on_error(self, error: Exception, input_data: InputT) -> None:
         """에러 발생 시 훅 (기본: 로깅)"""

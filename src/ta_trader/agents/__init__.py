@@ -16,7 +16,7 @@ from ta_trader.agents.execution_agent import (
     ExecutionBackend,
     ExecutionConfig,
 )
-from ta_trader.models.agents_models import (
+from ta_trader.models.agent import (
     ExecutionResult,
     MarketDataReport,
     OrderSide,

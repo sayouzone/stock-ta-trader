@@ -1,5 +1,5 @@
 """
-ta_trader/models/base_models.py
+ta_trader/models/base.py
 투자 단계 기본 분석 결과 모델
 
 StageStatus / CheckItem / StageResult (단계별 결과)

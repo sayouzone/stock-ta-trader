@@ -1,5 +1,5 @@
 """
-ta_trader/growth/analyzer.py
+ta_trader/analyzers/growth.py
 GrowthMomentumAnalyzer — 100% 상승 후보 발굴 6단계 분석 엔진
 
 프로세스:
@@ -23,7 +23,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-from ta_trader.base.base_analyzer import BaseAnalyzer
+from ta_trader.base.analyzer import BaseAnalyzer
 from ta_trader.data.fetcher import DataFetcher
 from ta_trader.indicators.adx import ADXAnalyzer
 from ta_trader.indicators.bollinger import BollingerAnalyzer
@@ -63,8 +63,8 @@ from ta_trader.growth.constants import (
     GRADE_STRONG_BUY, GRADE_BUY, GRADE_CONDITIONAL, GRADE_WATCH,
     GROWTH_DEFAULT_PERIOD, GROWTH_MIN_DATA_ROWS,
 )
-from ta_trader.models.base_models import CheckItem, StageResult, StageStatus
-from ta_trader.models.growth_models import (
+from ta_trader.models.base import CheckItem, StageResult, StageStatus
+from ta_trader.models.growth import (
     FundamentalData, GrowthGrade, GrowthScreenResult,
 )
 

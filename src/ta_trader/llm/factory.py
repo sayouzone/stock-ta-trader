@@ -22,12 +22,12 @@ from __future__ import annotations
 import os
 
 from ta_trader.exceptions import TATraderError
-from ta_trader.base.base_llm import BaseLLMAnalyzer
+from ta_trader.base.llm import BaseLLMAnalyzer
 
 # 지원 Provider 등록 테이블
 _PROVIDERS: dict[str, str] = {
-    "anthropic": "ta_trader.analyzers.anthropic_analyzer.AnthropicAnalyzer",
-    "google":    "ta_trader.analyzers.google_analyzer.GoogleAnalyzer",
+    "anthropic": "ta_trader.analyzers.anthropic.AnthropicAnalyzer",
+    "google":    "ta_trader.analyzers.google.GoogleAnalyzer",
 }
 
 

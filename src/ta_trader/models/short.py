@@ -1,5 +1,5 @@
 """
-ta_trader/models/short_models.py
+ta_trader/models/short.py
 도메인 데이터 모델 (dataclass 기반)
 """
 
@@ -10,7 +10,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from ta_trader.models.llm_models import LLMAnalysis
+    from ta_trader.models.llm import LLMAnalysis
 
 
 class Signal(Enum):

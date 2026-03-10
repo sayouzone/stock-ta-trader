@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from ta_trader.models.short_models import IndicatorResult, MarketRegime, Signal
+from ta_trader.models.short import IndicatorResult, MarketRegime, Signal
 from ta_trader.signals.composer import SignalComposer
 from ta_trader.signals.regime import classify_regime, get_weights
 

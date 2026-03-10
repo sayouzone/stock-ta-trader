@@ -1,5 +1,5 @@
 """
-ta_trader/analyzers/short_analyzer.py
+ta_trader/analyzers/short.py
 ShortTermAnalyzer - 전체 분석 파사드(Facade)
 """
 
@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ta_trader.base.base_analyzer import BaseAnalyzer
+from ta_trader.base.analyzer import BaseAnalyzer
 from ta_trader.indicators.adx import ADXAnalyzer
 from ta_trader.indicators.bollinger import BollingerAnalyzer
 from ta_trader.indicators.calculator import IndicatorCalculator
@@ -20,7 +20,7 @@ from ta_trader.style_config import StyleConfig, get_style_config
 from ta_trader.utils.logger import get_logger
 
 if TYPE_CHECKING:
-    from ta_trader.models.llm_models import LLMAnalysis
+    from ta_trader.models.llm import LLMAnalysis
 
 logger = get_logger(__name__)
 
@@ -47,7 +47,7 @@ class ShortTermAnalyzer(BaseAnalyzer[TradingDecision]):
 
     @property
     def name(self) -> str:
-        return "데이터 분석 에이전트"
+        return "기술적 분석 트레이딩 시스템"
 
     @property
     def role(self) -> str:
@@ -99,7 +99,7 @@ class ShortTermAnalyzer(BaseAnalyzer[TradingDecision]):
         logger.info(
             "분석 완료",
             ticker=self.ticker,
-            name=self.name,
+            name=self._name,
             signal=signal.value,
             score=score,
             style=self.trading_style.value,
@@ -109,7 +109,7 @@ class ShortTermAnalyzer(BaseAnalyzer[TradingDecision]):
 
         return TradingDecision(
             ticker          = self.ticker,
-            name            = self.name,
+            name            = self._name,
             date            = date,
             current_price   = price,
             market_regime   = regime_ctx.regime,

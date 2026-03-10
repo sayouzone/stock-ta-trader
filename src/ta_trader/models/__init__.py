@@ -2,7 +2,7 @@
 ta_trader/models/
 트레이딩 분석 시스템
 """
-from ta_trader.models.agent_models import (
+from ta_trader.models.agent import (
     ExecutionResult,
     MarketDataReport,
     OrderSide,
@@ -15,7 +15,7 @@ from ta_trader.models.agent_models import (
     TradeSignal,
     VetoReason,
 )
-from ta_trader.models.backtest_models import (
+from ta_trader.models.backtest import (
     BacktestConfig,
     BacktestResult,
     ExitReason,
@@ -23,25 +23,25 @@ from ta_trader.models.backtest_models import (
     PositionSide,
     Trade,
 )
-from ta_trader.models.base_models import CheckItem, StageResult, StageStatus
-from ta_trader.models.short_models import (
+from ta_trader.models.base import CheckItem, StageResult, StageStatus
+from ta_trader.models.short import (
     IndicatorResult,
     MarketRegime, RiskLevels, 
     Signal, StrategyType, TradingDecision, TradingStyle, WeightSet
 )
-from ta_trader.models.growth_models import (
+from ta_trader.models.growth import (
     FundamentalData, GrowthGrade, GrowthScreenResult,
 )
-from ta_trader.models.value_models import (
+from ta_trader.models.value import (
     ValueFundamentals, ValueGrade, ValueScreenResult,
 )
-from ta_trader.models.recommend_models import (
+from ta_trader.models.recommend import (
     Grade,
     Rationale,
     Recommendation,
     RecommendationReport,
 )
-from ta_trader.models.llm_models import LLMAnalysis
+from ta_trader.models.llm import LLMAnalysis
 
 __all__ = [
     # Agent
