@@ -58,11 +58,9 @@ class ShortTermAnalyzer(BaseAnalyzer[TradingDecision]):
         sc = self._style_config
 
         # 1. 데이터 수집
-        #name, raw_df = self._fetcher.fetch(self.ticker)
         self._fetch_data()
 
         # 2. 지표 계산
-        #self._calc = IndicatorCalculator(raw_df)
         df         = self._calc.dataframe
         latest     = self._calc.latest()
         prev       = self._calc.previous()
