@@ -106,7 +106,7 @@ class TradingDecision:
     strategy_type:     StrategyType
     composite_score:   float           # -100 ~ +100
     final_signal:      Signal
-    trading_style:     TradingStyle                     = TradingStyle.SWING
+    trading_style:     TradingStyle                    = TradingStyle.SWING
     indicators:        list[IndicatorResult]           = field(default_factory=list)
     risk:              Optional[RiskLevels]            = None
     summary:           str                             = ""

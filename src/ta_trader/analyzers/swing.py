@@ -108,6 +108,8 @@ class SwingTradingAnalyzer(BaseAnalyzer[SwingAnalysisResult]):
         # 0. 데이터 수집 & 지표 계산
         self._fetch_data()
         df = self._calc.dataframe
+        #print(self._df)
+        #print(df)
         latest = self._calc.latest()
         prev = self._calc.previous()
         price = float(latest["Close"])

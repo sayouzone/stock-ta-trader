@@ -16,12 +16,12 @@ from ta_trader.constants import ADX_STRONG_TREND, ADX_WEAK_TREND, RSI_OVERBOUGHT
 from ta_trader.models import TradingDecision
 from ta_trader.utils.font import setup_korean_font
 
-class ChartVisualizer:
+class SwingChartVisualizer:
     """ADX·MACD·RSI·Bollinger Bands + 복합 점수 5패널 차트"""
 
     def plot(
         self,
-        decision: TradingDecision,
+        decision: SwingAnalysisResult,
         df: pd.DataFrame,
         save_path: Optional[str | Path] = None,
         show: bool = True,
@@ -35,10 +35,14 @@ class ChartVisualizer:
         """
         setup_korean_font()   # plt 임포트 직후 1회 호출
 
+        ##print(df)
+        print(df.columns)
+
         fig = plt.figure(figsize=(16, 14))
         fig.suptitle(
             f"{decision.ticker} ({decision.name})  |  {decision.date}  |  "
-            f"{decision.final_signal.value}  (Score: {decision.composite_score:+.1f})",
+            #f"{decision.final_signal.value}  (Score: {decision.composite_score:+.1f})",
+            f"{decision.overall_signal.value}  (Score: {decision.overall_score:+.1f})",
             fontsize=14,
             fontweight="bold",
         )
@@ -47,10 +51,11 @@ class ChartVisualizer:
         gs = gridspec.GridSpec(5, 1, figure=fig, hspace=0.45, height_ratios=height_ratios)
 
         self._plot_price(fig.add_subplot(gs[0]), df, decision)
-        self._plot_macd(fig.add_subplot(gs[1]), df)
-        self._plot_rsi(fig.add_subplot(gs[2]), df)
-        self._plot_adx(fig.add_subplot(gs[3]), df)
-        self._plot_score(fig.add_subplot(gs[4]), decision)
+        self._plot_volume(fig.add_subplot(gs[1]), df)
+        self._plot_macd(fig.add_subplot(gs[2]), df)
+        self._plot_rsi(fig.add_subplot(gs[3]), df)
+        self._plot_adx(fig.add_subplot(gs[4]), df)
+        #self._plot_score(fig.add_subplot(gs[4]), decision)
 
         plt.tight_layout()
         if save_path:
@@ -63,17 +68,30 @@ class ChartVisualizer:
     # ── 개별 패널 ────────────────────────────────────────
 
     @staticmethod
-    def _plot_price(ax, df: pd.DataFrame, decision: TradingDecision) -> None:
+    def _plot_price(ax, df: pd.DataFrame, decision: SwingAnalysisResult) -> None:
         ax.plot(df.index, df["Close"],     label="Close",     color="black", linewidth=1.2)
         ax.plot(df.index, df["bb_upper"],  label="BB Upper",  color="red",   linestyle="--", alpha=0.6)
         ax.plot(df.index, df["bb_middle"], label="BB Middle",  color="blue",  linestyle="--", alpha=0.6)
         ax.plot(df.index, df["bb_lower"],  label="BB Lower",  color="green", linestyle="--", alpha=0.6)
         ax.fill_between(df.index, df["bb_lower"], df["bb_upper"], alpha=0.05, color="blue")
-        if decision.stop_loss:
-            ax.axhline(decision.stop_loss,   color="red",   linewidth=0.8, linestyle=":", label=f"SL {decision.stop_loss:,.0f}")
-        if decision.take_profit:
-            ax.axhline(decision.take_profit, color="green", linewidth=0.8, linestyle=":", label=f"TP {decision.take_profit:,.0f}")
+        
+        if decision.position.stop_loss:
+            ax.axhline(decision.position.stop_loss,   color="red",   linewidth=0.8, linestyle=":", label=f"손절 {decision.position.stop_loss:,.0f}")
+        if decision.position.take_profit:
+            ax.axhline(decision.position.take_profit, color="green", linewidth=0.8, linestyle=":", label=f"익절 {decision.position.take_profit:,.0f}")
+        
         ax.set_title("Price + Bollinger Bands")
+        ax.legend(loc="upper left", fontsize=7)
+
+    @staticmethod
+    def _plot_volume(ax, df: pd.DataFrame) -> None:
+        #ax.plot(df.index, df["vol_ma5"],        label="Vol5",   color="blue")
+        #ax.plot(df.index, df["vol_ma20"],        label="Vol20",   color="orange")
+        colors = ["red" if v > prev else "blue"
+              for v, prev in zip(df["Volume"], df["Volume"].shift(1).fillna(0))]
+        ax.bar(df.index, df["Volume"], color=colors, alpha=0.4)
+        ax.axhline(0, color="black", linewidth=0.5)
+        ax.set_title("Volume")
         ax.legend(loc="upper left", fontsize=7)
 
     @staticmethod
@@ -110,7 +128,7 @@ class ChartVisualizer:
         ax.legend(loc="upper left", fontsize=7)
 
     @staticmethod
-    def _plot_score(ax, decision: TradingDecision) -> None:
+    def _plot_score(ax, decision: SwingAnalysisResult) -> None:
         ax.axhline(0,    color="black",      linewidth=0.5)
         ax.axhline(60,   color="green",      linestyle="--", alpha=0.5, label="강력매수 60")
         ax.axhline(-60,  color="red",        linestyle="--", alpha=0.5, label="강력매도 -60")

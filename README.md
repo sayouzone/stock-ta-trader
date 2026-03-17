@@ -570,6 +570,8 @@ stock-ta-trader/
 └── main.py                      ← CLI (python main.py analyze 005930.KS)
 ```
 
+## 사용 방법
+
 ```bash
 source /Users/seongjungkim/Development/sayouzone/.venv/bin/activate
 source ~/Development/sayouzone/.venv/bin/activate
@@ -593,7 +595,20 @@ python main.py analyze 005930.KS --llm --llm-provider gemini
 # Anthropic으로 분석
 export ANTHROPIC_API_KEY="sk-ant-..."
 python main.py analyze NVDA --llm --llm-provider anthropic
+```
 
+```bash
+# 개별 종목 기술 분석
+python main.py analyze --save-chart --save-report 005930.KS
+python main.py analyze --save-chart --save-report NVDA
+
+# 마켓별 종목 기술 분석
+python main.py analyze --save-chart --save-report KOSPI
+python main.py analyze --save-chart --save-report KOSDAQ
+python main.py analyze --save-chart --save-report US
+```
+
+```bash
 # 기술적 분석 + LLM 해석
 python main.py analyze 005930.KS --llm
 
@@ -608,6 +623,7 @@ python main.py analyze TSLA --llm-stream --llm-provider gemini --llm-model gemin
 
 python main.py analyze --llm --llm-provider google --llm-model gemini-3-pro-preview --save-chart --save-report TSLA
 python main.py analyze --save-chart --save-report --llm --llm-provider google --llm-model gemini-3-pro-preview TSLA
+python main.py analyze --save-chart --save-report --llm --llm-provider google --llm-model gemini-3.1-pro-preview TSLA
 ```
 
 ### 출력 예시
@@ -650,7 +666,7 @@ python main.py backtest NVDA --min-score 40
 python main.py backtest 005930.KS --period 5y --capital 50000000 --short
 ```
 
-```
+```bash
 ════════════════════════════════════════════════════════════════════
   📈 백테스팅 결과:  005930.KS  |  기간: 5y
 ════════════════════════════════════════════════════════════════════
@@ -720,7 +736,7 @@ python main.py backtest 005930.KS --period 5y --capital 50000000 --short
 python main.py backtest 005930.KS --period 1y --capital 50000000
 ```
 
-```
+```bash
 ════════════════════════════════════════════════════════════════════
   📈 백테스팅 결과:  005930.KS  |  기간: 1y
 ════════════════════════════════════════════════════════════════════
@@ -790,6 +806,10 @@ python main.py recommend --save-report
 
 # 커스텀 종목 목록
 python main.py recommend --config my_stocks.yaml
+
+# 매매 스타일별 추천
+python main.py recommend --save-report --style swing
+python main.py recommend --save-report --style position
 ```
 
 ### 종목 추천 출력 예시

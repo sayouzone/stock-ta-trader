@@ -55,8 +55,10 @@ class SwingIndicatorCalculator(IndicatorCalculator):
             self._add_atr()
             self._add_volume()
             self._add_moving_averages()
+            #print(self._df)
 
-            self._df.dropna(inplace=True)
+            #self._df.dropna(inplace=True)
+            #print(self._df)
         except Exception as exc:
             raise IndicatorCalculationError(f"스윙 지표 계산 실패: {exc}") from exc
 

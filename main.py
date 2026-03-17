@@ -28,6 +28,7 @@ from ta_trader.models import TradingStyle
 from ta_trader.recommend import RecommendationEngine, format_recommendation_report
 from ta_trader.utils.formatter import make_decision, make_summary
 from ta_trader.visualization.chart import ChartVisualizer
+from ta_trader.visualization.swing import SwingChartVisualizer
 from ta_trader.growth import format_growth_report, format_growth_result
 from ta_trader.value import format_value_report, format_value_result
 from ta_trader.formatters.swing import format_swing_result, format_swing_report
@@ -1027,12 +1028,15 @@ def swing(ticker: str, period: str, interval: str, capital: float, risk_pct: flo
             )
             df = analyzer.calculator.dataframe if analyzer.calculator else None
             if df is not None:
-                ChartVisualizer().plot(decision, df, save_path=chart_path, show=not save_chart)
+                #ChartVisualizer().plot(decision, df, save_path=chart_path, show=not save_chart)
+                SwingChartVisualizer().plot(decision, df, save_path=chart_path, show=not save_chart)
                 if save_chart and chart_path:
                     click.echo(f"차트 저장됨: {chart_path}")
     except Exception as e:
         click.echo(f"❌ 스윙 분석 실패 [{ticker}]: {e}", err=True)
         raise SystemExit(1) from e
+    finally:
+        pass
 
 
 @cli.command("swing-screen")
