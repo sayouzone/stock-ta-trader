@@ -21,7 +21,7 @@ class SwingChartVisualizer:
 
     def plot(
         self,
-        decision: SwingAnalysisResult,
+        result: SwingAnalysisResult,
         df: pd.DataFrame,
         save_path: Optional[str | Path] = None,
         show: bool = True,
@@ -40,9 +40,9 @@ class SwingChartVisualizer:
 
         fig = plt.figure(figsize=(16, 14))
         fig.suptitle(
-            f"{decision.ticker} ({decision.name})  |  {decision.date}  |  "
+            f"{result.ticker} ({result.name})  |  {result.date}  |  "
             #f"{decision.final_signal.value}  (Score: {decision.composite_score:+.1f})",
-            f"{decision.overall_signal.value}  (Score: {decision.overall_score:+.1f})",
+            f"{result.overall_signal.value} ({result.market_env.environment.value})  (Score: {result.overall_score:+.1f})",
             fontsize=14,
             fontweight="bold",
         )
@@ -50,12 +50,12 @@ class SwingChartVisualizer:
         height_ratios = [3, 1, 1, 1, 1]
         gs = gridspec.GridSpec(5, 1, figure=fig, hspace=0.45, height_ratios=height_ratios)
 
-        self._plot_price(fig.add_subplot(gs[0]), df, decision)
+        self._plot_price(fig.add_subplot(gs[0]), df, result)
         self._plot_volume(fig.add_subplot(gs[1]), df)
         self._plot_macd(fig.add_subplot(gs[2]), df)
         self._plot_rsi(fig.add_subplot(gs[3]), df)
         self._plot_adx(fig.add_subplot(gs[4]), df)
-        #self._plot_score(fig.add_subplot(gs[4]), decision)
+        #self._plot_score(fig.add_subplot(gs[4]), result)
 
         plt.tight_layout()
         if save_path:
@@ -68,18 +68,31 @@ class SwingChartVisualizer:
     # ── 개별 패널 ────────────────────────────────────────
 
     @staticmethod
-    def _plot_price(ax, df: pd.DataFrame, decision: SwingAnalysisResult) -> None:
+    def _plot_price(ax, df: pd.DataFrame, result: SwingAnalysisResult) -> None:
         ax.plot(df.index, df["Close"],     label="Close",     color="black", linewidth=1.2)
         ax.plot(df.index, df["bb_upper"],  label="BB Upper",  color="red",   linestyle="--", alpha=0.6)
         ax.plot(df.index, df["bb_middle"], label="BB Middle",  color="blue",  linestyle="--", alpha=0.6)
         ax.plot(df.index, df["bb_lower"],  label="BB Lower",  color="green", linestyle="--", alpha=0.6)
         ax.fill_between(df.index, df["bb_lower"], df["bb_upper"], alpha=0.05, color="blue")
         
-        if decision.position.stop_loss:
-            ax.axhline(decision.position.stop_loss,   color="red",   linewidth=0.8, linestyle=":", label=f"손절 {decision.position.stop_loss:,.0f}")
-        if decision.position.take_profit:
-            ax.axhline(decision.position.take_profit, color="green", linewidth=0.8, linestyle=":", label=f"익절 {decision.position.take_profit:,.0f}")
-        
+        # 포지션 사이징 - 손절
+        if result.position.stop_loss:
+            label = f"손절 {result.position.stop_loss:,.0f}" if ".K" in result.ticker else f"손절 {result.position.stop_loss:,.2f}"
+            ax.axhline(result.position.stop_loss,   color="coral",   linewidth=0.8, linestyle=":", label=label)
+        # 청산 전략
+        if result.exit_strategy.trailing_stop:
+            label = f"트레일링 스톱 {result.exit_strategy.trailing_stop:,.0f}" if ".K" in result.ticker else f"트레일링 스톱 {result.exit_strategy.trailing_stop:,.2f}"
+            ax.axhline(result.exit_strategy.trailing_stop,   color="red",   linewidth=0.8, linestyle="--", label=label)
+
+        # 1차 부분익절
+        if result.exit_strategy.partial_exit_price:
+            label = f"1차 부분익절 {result.exit_strategy.partial_exit_price:,.0f}" if ".K" in result.ticker else f"1차 부분익절 {result.exit_strategy.partial_exit_price:,.2f}"
+            ax.axhline(result.exit_strategy.partial_exit_price, color="green", linewidth=0.8, linestyle=":", label=label)
+        # 전량 청산
+        if result.exit_strategy.full_exit_price:
+            label = f"전량 청산 {result.exit_strategy.full_exit_price:,.0f}" if ".K" in result.ticker else f"전량 청산 {result.exit_strategy.full_exit_price:,.2f}"
+            ax.axhline(result.exit_strategy.full_exit_price, color="blue", linewidth=0.8, linestyle="--", label=label)
+
         ax.set_title("Price + Bollinger Bands")
         ax.legend(loc="upper left", fontsize=7)
 

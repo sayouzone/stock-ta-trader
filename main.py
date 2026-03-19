@@ -972,6 +972,7 @@ def agent_trade(ticker: str, period: str, style: str,
               help="투입 자본금 (원)")
 @click.option("--risk-pct", default=0.02, show_default=True, type=float,
               help="1회 거래 최대 손실 비율 (0.02 = 2%)")
+@click.option("--config",  default="configs/watchlist.yaml", show_default=True, help="종목 목록 YAML")
 @click.option("--save-chart", is_flag=True,   help="차트를 reports/ 폴더에 저장")
 @click.option("--no-chart",   is_flag=True,   help="차트 표시 안 함")
 @click.option("--save-report",is_flag=True,   help="분석결과를 reports/ 폴더에 저장")
@@ -982,7 +983,7 @@ def agent_trade(ticker: str, period: str, style: str,
               help="LLM Provider (기본값: 환경변수 자동 감지)")
 @click.option("--llm-model",  default=None,   help="LLM 모델명 (기본값: claude-sonnet-4-20250514)")
 def swing(ticker: str, period: str, interval: str, capital: float, risk_pct: float,
-            save_chart: bool, no_chart: bool, save_report: bool,
+            config: str, save_chart: bool, no_chart: bool, save_report: bool,
             llm: bool, llm_stream: bool, llm_provider: str | None, llm_model: str | None) -> None:
     """스윙 트레이딩 6단계 분석 (단일 종목)
 
@@ -1001,42 +1002,81 @@ def swing(ticker: str, period: str, interval: str, capital: float, risk_pct: flo
         python main.py swing AAPL --capital 50000000
         python main.py swing NVDA --period 2y --risk-pct 0.01
     """
-    style_tag = "swing"
-    try:
-        analyzer = SwingTradingAnalyzer(
-            ticker, period=period, interval=interval,
-            capital=capital, risk_pct=risk_pct,
-        )
-        decision = analyzer.analyze()
-        decision_str = format_swing_result(decision)
-        click.echo(decision_str)
+    from ta_trader.data.krx_stock_fetcher import KRXStockFetcher
 
-        if save_report:
-            out_dir = Path("reports")
-            out_dir.mkdir(parents=True, exist_ok=True)
-            report_path = out_dir / f"{ticker.replace('.', '_')}_{style_tag}_{decision.date.replace('-','')}.txt"
-            report_path.write_text(decision_str, encoding="utf-8")
-            click.echo(f"보고서 저장됨: {report_path}")
-            #summary_path = out_dir / f"summary_{style_tag}_{decision.date.replace('-','')}.txt"
-            #with summary_path.open("a", encoding="utf-8") as file:
-            #    file.write(make_summary(decision) + "\n")
-        
-        if not no_chart:
-            chart_path = (
-                Path("reports") / f"{ticker.replace('.', '_')}_{style_tag}_{decision.date.replace('-','')}.png"
-                if save_chart else None
-            )
-            df = analyzer.calculator.dataframe if analyzer.calculator else None
-            if df is not None:
-                #ChartVisualizer().plot(decision, df, save_path=chart_path, show=not save_chart)
-                SwingChartVisualizer().plot(decision, df, save_path=chart_path, show=not save_chart)
-                if save_chart and chart_path:
-                    click.echo(f"차트 저장됨: {chart_path}")
-    except Exception as e:
-        click.echo(f"❌ 스윙 분석 실패 [{ticker}]: {e}", err=True)
-        raise SystemExit(1) from e
-    finally:
-        pass
+    #fetcher = KRXStockFetcher(stock_path="src/ta_trader/data/stocks/krx_stock_data_4128_20260319.csv", etf_path="src/ta_trader/data/stocks/krx_etf_data_0437_20260319.csv")
+    fetcher = KRXStockFetcher()
+    fetcher.load()
+
+    style_tag = "swing"
+
+    tickers = None
+    if ticker in MARKETS:
+        config_path = Path(config)
+        if not config_path.exists():
+            click.echo(f"설정 파일을 찾을 수 없습니다: {config}", err=True)
+            sys.exit(1)
+
+        cfg = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+        tickers = cfg.get("watchlist", [])
+
+        if not tickers:
+            click.echo("watchlist 항목이 없습니다.", err=True)
+            sys.exit(1)
+
+        MARKET_FILTERS = {
+            "KOSPI": lambda t: ".KS" in t,
+            "KOSDAQ": lambda t: ".KQ" in t,
+            "US": lambda t: ".KS" not in t and ".KQ" not in t,
+        }
+        market_filter = MARKET_FILTERS.get(ticker)
+        if market_filter:
+            tickers = [t for t in tickers if market_filter(t)]
+    else:
+        info = fetcher.get_info(ticker)
+        #click.echo(f"Info: {info}", err=True)
+        if not info:
+            tickers = [ticker]
+        else:
+            tickers = [info.yahoo_ticker]
+    
+    with click.progressbar(tickers) as bar:
+        for ticker in bar:
+            try:
+                analyzer = SwingTradingAnalyzer(
+                    ticker, period=period, interval=interval,
+                    capital=capital, risk_pct=risk_pct,
+                )
+                decision = analyzer.analyze()
+                decision_str = format_swing_result(decision)
+                click.echo(decision_str)
+
+                stock_name = decision.name.replace(" ", "_")
+
+                if save_report:
+                    out_dir = Path("reports")
+                    out_dir.mkdir(parents=True, exist_ok=True)
+                    report_path = out_dir / f"{ticker.replace('.', '_')}_{style_tag}_{decision.date.replace('-','')}_{stock_name}.txt"
+                    report_path.write_text(decision_str, encoding="utf-8")
+                    click.echo(f"보고서 저장됨: {report_path}")
+                
+                if not no_chart:
+                    chart_path = (
+                        Path("reports") / f"{ticker.replace('.', '_')}_{style_tag}_{decision.date.replace('-','')}_{stock_name}.png"
+                        if save_chart else None
+                    )
+                    df = analyzer.calculator.dataframe if analyzer.calculator else None
+                    if df is not None:
+                        #ChartVisualizer().plot(decision, df, save_path=chart_path, show=not save_chart)
+                        SwingChartVisualizer().plot(decision, df, save_path=chart_path, show=not save_chart)
+                        if save_chart and chart_path:
+                            click.echo(f"차트 저장됨: {chart_path}")
+            except Exception as e:
+                click.echo(f"❌ 스윙 분석 실패 [{ticker}]: {e}", err=True)
+                #raise SystemExit(1) from e
+                continue
+            finally:
+                pass
 
 
 @cli.command("swing-screen")

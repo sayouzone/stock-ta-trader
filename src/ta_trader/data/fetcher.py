@@ -9,6 +9,7 @@ import os
 import pandas as pd
 import yfinance as yf
 
+from ta_trader.data.krx_stock_fetcher import KRXStockFetcher
 from sayou.stock.opendart import OpenDartCrawler
 
 from ta_trader.constants import DEFAULT_INTERVAL, DEFAULT_PERIOD, MIN_DATA_ROWS
@@ -28,6 +29,7 @@ class DataFetcher:
     ) -> None:
         self.period   = period
         self.interval = interval
+        self._krx_fetcher = None
 
     def fetch(self, ticker: str) -> pd.DataFrame:
         """
@@ -99,11 +101,19 @@ class DataFetcher:
             pass
 
         if ticker.endswith((".KS", ".KQ")):
+            """
             dart_api_key = os.getenv("DART_API_KEY", "")
             crawler = OpenDartCrawler(api_key=dart_api_key)
 
             corp_code = ticker.split(".")[0]
             corp_name = crawler.fetch_corp_name(corp_code)
-            name = corp_name or name
+            """
+            if not self._krx_fetcher:
+                self._krx_fetcher = KRXStockFetcher()
+                self._krx_fetcher.load()
+
+            stock = self._krx_fetcher.get_info(ticker)
+            logger.info("종목", ticker=ticker, stock=stock)
+            name = stock.name or name
 
         return name, info
