@@ -7,8 +7,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
+if TYPE_CHECKING:
+    from ta_trader.models.llm import LLMAnalysis
 
 class SwingSignal(Enum):
     """스윙 진입/청산 신호"""
@@ -194,6 +196,7 @@ class SwingAnalysisResult:
     overall_signal: SwingSignal
     overall_score: float                   # 0~100
     summary: str = ""
+    llm_analysis:      Optional["LLMAnalysis"]         = None
 
     @property
     def is_actionable(self) -> bool:
@@ -207,7 +210,7 @@ class SwingAnalysisResult:
 
     def to_dict(self) -> dict:
         """DataFrame 행 변환용"""
-        return {
+        d = {
             "Ticker": self.ticker,
             "Name": self.name,
             "Date": self.date,
@@ -224,3 +227,7 @@ class SwingAnalysisResult:
             "OverallSignal": self.overall_signal.value,
             "OverallScore": self.overall_score,
         }
+        if self.llm_analysis:
+            d["LLM_Confidence"] = self.llm_analysis.confidence
+            d["LLM_Assessment"] = self.llm_analysis.overall_assessment[:80] + "..."
+        return d

@@ -50,10 +50,12 @@ class DataFetcher:
 
         try:
             info = yf.Ticker(ticker).info
+            #logger.info("종목 정보", ticker=ticker, info=info)
+
             name = (
-                info.get("shortName")
+                info.get("displayName")
+                or info.get("shortName")
                 or info.get("longName")
-                or info.get("displayName")
                 or ticker
             )
             
@@ -91,10 +93,12 @@ class DataFetcher:
         try:
             tk = yf.Ticker(ticker)
             info = tk.info or {}
+            #logger.info("종목 정보", ticker=ticker, info=info)
+
             name = (
-                info.get("shortName")
+                info.get("displayName")
+                or info.get("shortName")
                 or info.get("longName")
-                or info.get("displayName")
                 or ticker
             )
         except Exception:

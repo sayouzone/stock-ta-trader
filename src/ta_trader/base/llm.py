@@ -17,8 +17,7 @@ from typing import Iterator
 import pandas as pd
 
 from ta_trader.models.llm import LLMAnalysis
-from ta_trader.llm.prompt_builder import PromptBuilder
-from ta_trader.models import TradingDecision
+from ta_trader.base.prompt_builder import SYSTEM_PROMPT
 from ta_trader.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -40,37 +39,30 @@ class BaseLLMAnalyzer(ABC):
 
     def __init__(self, model: str) -> None:
         self._model   = model
-        self._builder = PromptBuilder()
 
     # ── 공개 API (공통 구현) ──────────────────────────────
 
     def analyze(
         self,
-        decision:    TradingDecision,
-        df:          pd.DataFrame,
-        recent_days: int = 10,
+        ticker: str,
+        prompt: str,
     ) -> LLMAnalysis:
         """동기 분석 실행 → LLMAnalysis 반환"""
-        from ta_trader.llm.prompt_builder import SYSTEM_PROMPT
-        prompt = self._builder.build(decision, df, recent_days)
-        logger.info("LLM 분석 시작", ticker=decision.ticker,
+        logger.info("LLM 분석 시작", ticker=ticker,
                     provider=self.provider_name, model=self._model)
 
         raw = self._call_api(SYSTEM_PROMPT, prompt)
 
-        logger.info("LLM 분석 완료", ticker=decision.ticker, provider=self.provider_name)
+        logger.info("LLM 분석 완료", ticker=ticker, provider=self.provider_name)
         return self._parse_response(raw, self._model, self.provider_name)
 
     def analyze_stream(
         self,
-        decision:    TradingDecision,
-        df:          pd.DataFrame,
-        recent_days: int = 10,
+        ticker: str,
+        prompt: str,
     ) -> Iterator[str]:
         """스트리밍 분석 → 텍스트 청크 Iterator"""
-        from ta_trader.llm.prompt_builder import SYSTEM_PROMPT
-        prompt = self._builder.build(decision, df, recent_days)
-        logger.info("LLM 스트리밍 시작", ticker=decision.ticker, provider=self.provider_name)
+        logger.info("LLM 스트리밍 시작", ticker=ticker, provider=self.provider_name)
         yield from self._call_api_stream(SYSTEM_PROMPT, prompt)
 
     # ── Provider별 구현 의무 ──────────────────────────────

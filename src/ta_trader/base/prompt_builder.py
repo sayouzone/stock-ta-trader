@@ -11,10 +11,10 @@ TradingDecision → LLM 프롬프트 변환기
 from __future__ import annotations
 
 import json
-
 import pandas as pd
 
-from ta_trader.models import TradingDecision
+from abc import ABC, abstractmethod
+from typing import Any, Generic, TypeVar
 
 # LLM 응답 스키마 정의
 _RESPONSE_SCHEMA = {
@@ -38,13 +38,14 @@ SYSTEM_PROMPT = """\
 5. 데이터에 근거한 분석만 제시하고 추측성 표현을 최소화하세요.
 """
 
+InputT = TypeVar("InputT")
 
-class PromptBuilder:
+class BasePromptBuilder(ABC, Generic[InputT]):
     """TradingDecision + DataFrame → LLM 입력 프롬프트 생성"""
 
     def build(
         self,
-        decision: TradingDecision,
+        intput_data: InputT,
         df: pd.DataFrame,
         recent_days: int = 10,
     ) -> str:
@@ -58,9 +59,9 @@ class PromptBuilder:
             LLM user 메시지 문자열
         """
         sections = [
-            self._section_header(decision),
-            self._section_indicators(decision),
-            self._section_risk(decision),
+            self._section_header(intput_data),
+            self._section_indicators(intput_data),
+            self._section_risk(intput_data),
             self._section_price_trend(df, recent_days),
             self._section_instruction(),
         ]
@@ -68,41 +69,17 @@ class PromptBuilder:
 
     # ── 섹션 빌더 ────────────────────────────────────────
 
-    @staticmethod
-    def _section_header(d: TradingDecision) -> str:
-        return (
-            f"## 분석 대상\n"
-            f"- 티커: {d.ticker}\n"
-            f"- 분석 기준일: {d.date}\n"
-            f"- 현재가: {d.current_price:,.2f}\n"
-            f"- 시장 국면: {d.market_regime.value}\n"
-            f"- 적용 전략: {d.strategy_type.value}\n"
-            f"- 복합 점수: {d.composite_score:+.2f} / ±100\n"
-            f"- 최종 신호: **{d.final_signal.value}**"
-            + (f"\n- 체제 판별 근거: {d.regime_detail}" if d.regime_detail else "")
-        )
+    @abstractmethod
+    def _section_header(self, intput_data: InputT) -> str:
+        """분석 대상 헤더 텍스트"""
 
-    @staticmethod
-    def _section_indicators(d: TradingDecision) -> str:
-        lines = ["## 기술적 지표 상세"]
-        for ind in d.indicators:
-            lines.append(
-                f"- [{ind.name}] 신호={ind.signal.value} | 점수={ind.score:+.1f} | {ind.description}"
-            )
-        return "\n".join(lines)
+    @abstractmethod
+    def _section_indicators(self, intput_data: InputT) -> str:
+        """기술적 지표 상세 텍스트"""
 
-    @staticmethod
-    def _section_risk(d: TradingDecision) -> str:
-        if not d.risk:
-            return ""
-        return (
-            f"## 리스크 관리 수준\n"
-            f"- 손절가: {d.stop_loss:,.2f}  "
-            f"(현재가 대비 {(d.stop_loss / d.current_price - 1) * 100:.1f}%)\n"
-            f"- 목표가: {d.take_profit:,.2f}  "
-            f"(현재가 대비 +{(d.take_profit / d.current_price - 1) * 100:.1f}%)\n"
-            f"- 위험보상비율: 1 : {d.risk_reward_ratio}"
-        )
+    @abstractmethod
+    def _section_risk(self, intput_data: InputT) -> str:
+        """리스크 관리 수준 텍스트"""
 
     @staticmethod
     def _section_price_trend(df: pd.DataFrame, recent_days: int) -> str:

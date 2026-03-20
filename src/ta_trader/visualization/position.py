@@ -13,15 +13,15 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from ta_trader.constants import ADX_STRONG_TREND, ADX_WEAK_TREND, RSI_OVERBOUGHT, RSI_OVERSOLD
-from ta_trader.models.swing import SwingAnalysisResult
+from ta_trader.models.position import PositionAnalysisResult
 from ta_trader.utils.font import setup_korean_font
 
-class SwingChartVisualizer:
+class PositionChartVisualizer:
     """ADX·MACD·RSI·Bollinger Bands + 복합 점수 5패널 차트"""
 
     def plot(
         self,
-        result: SwingAnalysisResult,
+        result: PositionAnalysisResult,
         df: pd.DataFrame,
         save_path: Optional[str | Path] = None,
         show: bool = True,
@@ -35,7 +35,7 @@ class SwingChartVisualizer:
         """
         setup_korean_font()   # plt 임포트 직후 1회 호출
 
-        ##print(df)
+        print(df)
         print(df.columns)
 
         fig = plt.figure(figsize=(16, 14))
@@ -68,21 +68,22 @@ class SwingChartVisualizer:
     # ── 개별 패널 ────────────────────────────────────────
 
     @staticmethod
-    def _plot_price(ax, df: pd.DataFrame, result: SwingAnalysisResult) -> None:
+    def _plot_price(ax, df: pd.DataFrame, result: PositionAnalysisResult) -> None:
         ax.plot(df.index, df["Close"],     label="Close",     color="black", linewidth=1.2)
         ax.plot(df.index, df["bb_upper"],  label="BB Upper",  color="red",   linestyle="--", alpha=0.6)
         ax.plot(df.index, df["bb_middle"], label="BB Middle",  color="blue",  linestyle="--", alpha=0.6)
         ax.plot(df.index, df["bb_lower"],  label="BB Lower",  color="green", linestyle="--", alpha=0.6)
         ax.fill_between(df.index, df["bb_lower"], df["bb_upper"], alpha=0.05, color="blue")
+
+        # 진입가
+        if result.risk.entry_price:
+            label = f"진입 {result.risk.entry_price:,.0f}" if ".K" in result.ticker else f"진입 {result.risk.entry_price:,.2f}"
+            ax.axhline(result.risk.entry_price,   color="coral",   linewidth=0.8, linestyle=":", label=label)
         
         # 포지션 사이징 - 손절
-        if result.position.stop_loss:
-            label = f"손절 {result.position.stop_loss:,.0f}" if ".K" in result.ticker else f"손절 {result.position.stop_loss:,.2f}"
-            ax.axhline(result.position.stop_loss,   color="coral",   linewidth=0.8, linestyle=":", label=label)
-        # 청산 전략
-        if result.exit_strategy.trailing_stop:
-            label = f"트레일링 스톱 {result.exit_strategy.trailing_stop:,.0f}" if ".K" in result.ticker else f"트레일링 스톱 {result.exit_strategy.trailing_stop:,.2f}"
-            ax.axhline(result.exit_strategy.trailing_stop,   color="red",   linewidth=0.8, linestyle="--", label=label)
+        if result.risk.stop_loss:
+            label = f"손절 {result.risk.stop_loss:,.0f}" if ".K" in result.ticker else f"손절 {result.risk.stop_loss:,.2f}"
+            ax.axhline(result.risk.stop_loss,   color="red",   linewidth=0.8, linestyle="--", label=label)
 
         # 1차 부분익절
         if result.exit_strategy.partial_exit_price:

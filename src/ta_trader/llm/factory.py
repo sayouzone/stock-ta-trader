@@ -19,6 +19,7 @@ LLM Provider 팩토리
 
 from __future__ import annotations
 
+import importlib
 import os
 
 from ta_trader.exceptions import TATraderError
@@ -65,7 +66,7 @@ def create_llm_analyzer(
 
     # 지연 임포트: 사용하지 않는 Provider의 패키지 설치 여부에 영향받지 않도록
     module_path, class_name = _PROVIDERS[resolved].rsplit(".", 1)
-    import importlib
+    
     module = importlib.import_module(module_path)
     cls    = getattr(module, class_name)
 

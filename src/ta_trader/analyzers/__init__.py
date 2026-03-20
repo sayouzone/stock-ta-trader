@@ -6,6 +6,8 @@ ta_trader/analyzers/
 from ta_trader.analyzers.short import ShortTermAnalyzer
 from ta_trader.analyzers.growth import GrowthMomentumAnalyzer
 from ta_trader.analyzers.value import ValueInvestingAnalyzer
+from ta_trader.analyzers.swing import SwingTradingAnalyzer
+from ta_trader.analyzers.position import PositionTradingAnalyzer
 from ta_trader.analyzers.anthropic import AnthropicAnalyzer
 from ta_trader.analyzers.google import GoogleAnalyzer
 
@@ -16,4 +18,6 @@ __all__ = [
     "ValueInvestingAnalyzer",
     "AnthropicAnalyzer",
     "GoogleAnalyzer",
+    "SwingTradingAnalyzer",
+    "PositionTradingAnalyzer",
 ]

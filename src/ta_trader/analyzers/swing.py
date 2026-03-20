@@ -49,6 +49,8 @@ from ta_trader.models.swing import (
 )
 from ta_trader.utils.logger import get_logger
 
+from ta_trader.llm.swing_prompt_builder import SwingPromptBuilder
+
 logger = get_logger(__name__)
 
 
@@ -190,18 +192,21 @@ class SwingTradingAnalyzer(BaseAnalyzer[SwingAnalysisResult]):
 
         llm = create_llm_analyzer(provider=provider, api_key=api_key, model=model)
 
+        prompt_builder = SwingPromptBuilder()
+        prompt = prompt_builder.build(result, df, recent_days)
+
         if stream:
             print(f"\n{'─'*60}")
             print(f"  🤖 LLM 분석 중 [{self.ticker}] ...")
             print(f"{'─'*60}\n")
             full_text = ""
-            for chunk in llm.analyze_stream(result, df, recent_days):
+            for chunk in llm.analyze_stream(result.ticker, prompt):
                 print(chunk, end="", flush=True)
                 full_text += chunk
             print()
             llm_result = llm._parse_response(full_text, llm._model)
         else:
-            llm_result = llm.analyze(result, df, recent_days)
+            llm_result = llm.analyze(result.ticker, prompt)
 
         result.llm_analysis = llm_result
 

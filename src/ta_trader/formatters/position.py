@@ -1,13 +1,18 @@
 """
-ta_trader/formatters/swing.py
-스윙 트레이딩 6단계 분석 결과 포매터
+ta_trader/formatters/position.py
+포지션 트레이딩 7단계 분석 결과 포매터
 """
 
 from __future__ import annotations
 
-from ta_trader.models.swing import (
-    SwingAnalysisResult, SwingSignal,
-    MarketEnvironment, ScreeningGrade,
+from ta_trader.models.position import (
+    PositionAnalysisResult, PositionSignal,
+    PositionMarketEnv, PositionScreenGrade,
+    SectorStrength,
+)
+from ta_trader.position.constants import (
+    RISK_ATR_SL_MULTIPLIER,
+    RISK_ATR_TP_MULTIPLIER,
 )
 
 from typing import TYPE_CHECKING, Optional
@@ -18,41 +23,49 @@ if TYPE_CHECKING:
 # ── 신호 이모지 ───────────────────────────────────────────
 
 _SIGNAL_EMOJI = {
-    SwingSignal.STRONG_ENTRY: "🟢🟢",
-    SwingSignal.ENTRY: "🟢",
-    SwingSignal.HOLD: "🟡",
-    SwingSignal.PARTIAL_EXIT: "🟠",
-    SwingSignal.EXIT: "🔴",
-    SwingSignal.STRONG_EXIT: "🔴🔴",
+    PositionSignal.STRONG_ENTRY: "🟢🟢",
+    PositionSignal.ENTRY: "🟢",
+    PositionSignal.HOLD: "🟡",
+    PositionSignal.PARTIAL_EXIT: "🟠",
+    PositionSignal.EXIT: "🔴",
+    PositionSignal.STRONG_EXIT: "🔴🔴",
 }
 
 _ENV_EMOJI = {
-    MarketEnvironment.BULLISH_TREND: "📈",
-    MarketEnvironment.BULLISH_WEAK: "📊",
-    MarketEnvironment.BEARISH_TREND: "📉",
-    MarketEnvironment.SIDEWAYS: "➡️",
-    MarketEnvironment.HIGH_VOLATILITY: "⚡",
+    PositionMarketEnv.STRONG_BULLISH: "📈",
+    PositionMarketEnv.BULLISH: "📊",
+    PositionMarketEnv.BEARISH: "📉",
+    PositionMarketEnv.SIDEWAYS: "➡️",
+    PositionMarketEnv.HIGH_VOLATILITY: "⚡",
 }
 
 _GRADE_EMOJI = {
-    ScreeningGrade.A_PLUS: "⭐",
-    ScreeningGrade.A: "✅",
-    ScreeningGrade.B: "🔵",
-    ScreeningGrade.C: "⚪",
-    ScreeningGrade.F: "❌",
+    PositionScreenGrade.A_PLUS: "⭐",
+    PositionScreenGrade.A: "✅",
+    PositionScreenGrade.B: "🔵",
+    PositionScreenGrade.C: "⚪",
+    PositionScreenGrade.F: "❌",
+}
+
+_SECTOR_EMOJI = {
+    SectorStrength.LEADING: "🚀",
+    SectorStrength.STRONG: "💪",
+    SectorStrength.NEUTRAL: "➖",
+    SectorStrength.WEAK: "📉",
+    SectorStrength.LAGGING: "⬇️",
 }
 
 
 # ── 포매팅 함수 ───────────────────────────────────────────
 
-def format_swing_result(result: SwingAnalysisResult) -> str:
-    """스윙 트레이딩 6단계 분석 결과를 터미널용 문자열로 변환"""
-    W = 70
+def format_position_result(result: PositionAnalysisResult) -> str:
+    """포지션 트레이딩 7단계 분석 결과를 터미널용 문자열로 변환"""
+    W = 72
     lines: list[str] = []
 
     # 헤더
     lines.append("━" * W)
-    lines.append(f"  🔄 스윙 트레이딩 분석: {result.name} ({result.ticker})")
+    lines.append(f"  📐 포지션 트레이딩 분석: {result.name} ({result.ticker})")
     lines.append(f"  📅 {result.date}  |  💰 현재가: {result.current_price:,.0f}")
     lines.append("━" * W)
 
@@ -64,23 +77,33 @@ def format_swing_result(result: SwingAnalysisResult) -> str:
     lines.append(f"{'─'*W}")
     lines.append(f"  {e_emoji} 환경: {env.environment.value}")
     lines.append(f"     {env.detail}")
-
     fav = "✅ 유리" if env.is_favorable else "⚠️  불리"
-    lines.append(f"  → 스윙 매매 환경: {fav}")
+    lines.append(f"  → 포지션 매매 환경: {fav}")
 
-    # ── 2단계: 종목 스크리닝 ──
+    # ── 2단계: 섹터 분석 ──
+    sec = result.sector
+    s_emoji = _SECTOR_EMOJI.get(sec.strength, "")
+    lines.append(f"\n{'─'*W}")
+    lines.append(f"  🏭 2단계: 섹터/테마 선정  [{sec.score:.0f}/100점]")
+    lines.append(f"{'─'*W}")
+    lines.append(f"  {s_emoji} 강도: {sec.strength.value}")
+    lines.append(f"     {sec.detail}")
+    lead = "✅ 주도/강세" if sec.is_leading else "⚠️  비주도"
+    lines.append(f"  → 섹터 상태: {lead}")
+
+    # ── 3단계: 종목 스크리닝 ──
     scr = result.screening
     g_emoji = _GRADE_EMOJI.get(scr.grade, "")
     lines.append(f"\n{'─'*W}")
-    lines.append(f"  🔍 2단계: 종목 스크리닝  [{scr.score:.0f}/100점]")
+    lines.append(f"  🔍 3단계: 종목 선정  [{scr.score:.0f}/100점]")
     lines.append(f"{'─'*W}")
     lines.append(f"  {g_emoji} 등급: {scr.grade.value}  ({scr.checks_passed}/{scr.checks_total} 통과)")
     lines.append(f"     {scr.detail}")
 
-    # ── 3단계: 진입 타이밍 ──
+    # ── 4단계: 매수 타이밍 ──
     ent = result.entry
     lines.append(f"\n{'─'*W}")
-    lines.append(f"  🎯 3단계: 진입 타이밍  [{ent.score:.0f}/100점]")
+    lines.append(f"  🎯 4단계: 매수 타이밍  [{ent.score:.0f}/100점]")
     lines.append(f"{'─'*W}")
     for sig in ent.signals:
         mark = "✅" if sig.triggered else "  "
@@ -88,30 +111,54 @@ def format_swing_result(result: SwingAnalysisResult) -> str:
         lines.append(f"  {mark} {sig.name:<18} {score_str:>5}점  {sig.description}")
     lines.append(f"  → 진입 신호: {_SIGNAL_EMOJI.get(ent.signal, '')} {ent.signal.value} ({ent.detail})")
 
-    # ── 4단계: 포지션 사이징 ──
-    pos = result.position
+    # ── 5단계: 리스크 관리 ──
+    risk = result.risk
     lines.append(f"\n{'─'*W}")
-    lines.append(f"  💼 4단계: 포지션 사이징  [{pos.score:.0f}/100점]")
+    lines.append(f"  🛡️ 5단계: 리스크 관리  [{risk.score:.0f}/100점]")
     lines.append(f"{'─'*W}")
-    lines.append(f"  진입가:   {pos.entry_price:>12,.0f}")
-    lines.append(f"  손절가:   {pos.stop_loss:>12,.0f}  (ATR×{POSITION_ATR_SL_MULT})")
-    lines.append(f"  익절가:   {pos.take_profit:>12,.0f}  (ATR×{POSITION_ATR_TP_MULT})")
-    lines.append(f"  R배수:    1:{pos.risk_reward_ratio}  {'✅ 적합' if pos.is_acceptable else '⚠️  부적합'}")
-    lines.append(f"  매수수량: {pos.position_size:>8,}주  ({pos.position_value:,.0f}원)")
-    lines.append(f"  비중:     {pos.portfolio_pct:>8.1f}%  (자본금: {pos.capital:,.0f}원)")
-    lines.append(f"  최대손실: {pos.max_loss:>12,.0f}원  (자본의 {pos.max_loss/pos.capital*100:.1f}%)")
-    if pos.fibo_target_161 > 0:
-        lines.append(f"  피보목표: 161.8%={pos.fibo_target_161:,.0f}  261.8%={pos.fibo_target_261:,.0f}")
+    lines.append(f"  진입가:     {risk.entry_price:>12,.0f}")
+    lines.append(f"  손절가:     {risk.stop_loss:>12,.0f}  (ATR×{RISK_ATR_SL_MULTIPLIER})")
+    lines.append(f"  익절가:     {risk.take_profit:>12,.0f}  (ATR×{RISK_ATR_TP_MULTIPLIER})")
+    lines.append(f"  R배수:      1:{risk.risk_reward_ratio}  {'✅ 적합' if risk.is_acceptable else '⚠️  부적합'}")
+    lines.append(f"  총 매수수량: {risk.position_size:>8,}주  ({risk.position_value:,.0f}원)")
+    lines.append(f"    1차 매수: {risk.split_buy_1:>6,}주  (피벗/풀백 확인 시)")
+    lines.append(f"    2차 매수: {risk.split_buy_2:>6,}주  (추가 상승 확인 시)")
+    lines.append(f"    3차 매수: {risk.split_buy_3:>6,}주  (추세 안착 확인 시)")
+    lines.append(f"  비중:       {risk.portfolio_pct:>8.1f}%  (자본금: {risk.capital:,.0f}원)")
+    lines.append(f"  최대손실:   {risk.max_loss:>12,.0f}원  (자본의 {risk.max_loss/risk.capital*100:.1f}%)")
+    if risk.fibo_target_161 > 0:
+        lines.append(f"  피보목표:   161.8%={risk.fibo_target_161:,.0f}  261.8%={risk.fibo_target_261:,.0f}")
 
-    # ── 5단계: 익절/청산 전략 ──
+    # ── 6단계: 보유 관리 ──
+    hold = result.holding
+    lines.append(f"\n{'─'*W}")
+    lines.append(f"  📋 6단계: 보유 관리  [{hold.score:.0f}/100점]")
+    lines.append(f"{'─'*W}")
+    lines.append(f"  트레일링(ATR):   {hold.trailing_stop_atr:>10,.0f}")
+    lines.append(f"  트레일링(MA50):  {hold.trailing_stop_ma50:>10,.0f}")
+    lines.append(f"  파라볼릭 SAR:    {hold.parabolic_sar:>10,.0f}")
+    lines.append(f"  현재 수익률:     {hold.current_profit_pct:>+8.1f}%")
+    lines.append(f"  피라미딩:        {'✅ ' if hold.can_pyramid else '❌ '}{hold.pyramid_condition}")
+
+    # ── 7단계: 매도/청산 ──
     ext = result.exit_strategy
     lines.append(f"\n{'─'*W}")
-    lines.append(f"  🚪 5단계: 익절/청산 전략  [청산압력 {ext.score:.0f}/100]")
+    lines.append(f"  🚪 7단계: 매도/청산  [청산압력 {ext.score:.0f}/100]")
     lines.append(f"{'─'*W}")
-    lines.append(f"  트레일링 스톱:  {ext.trailing_stop:>10,.0f}")
-    lines.append(f"  1차 부분익절:   {ext.partial_exit_price:>10,.0f}  (50% 매도)")
-    lines.append(f"  전량 청산가:    {ext.full_exit_price:>10,.0f}")
-    lines.append(f"     {ext.detail}")
+    exit_checks = [
+        ("50일 MA 이탈", ext.ma50_broken),
+        ("200일 MA 이탈", ext.ma200_broken),
+        ("MACD 다이버전스", ext.macd_divergence),
+        ("RSI 다이버전스", ext.rsi_divergence),
+        ("ADX 하락 전환", ext.adx_declining),
+        ("거래량 고갈", ext.volume_dry_up),
+        ("RSI 과매수", ext.rsi_overbought),
+    ]
+    for name, triggered in exit_checks:
+        mark = "🔴" if triggered else "  "
+        lines.append(f"  {mark} {name}")
+    lines.append(f"  1차 부분익절:  {ext.partial_exit_price:>10,.0f}  (1/3 매도)")
+    lines.append(f"  전량 청산가:   {ext.full_exit_price:>10,.0f}")
     if ext.should_partial_exit:
         lines.append(f"  ⚠️  현재 부분 익절 권장")
     if ext.should_full_exit:
@@ -124,9 +171,9 @@ def format_swing_result(result: SwingAnalysisResult) -> str:
     lines.append(f"{'━'*W}")
     lines.append(f"  {result.summary}")
     if result.is_actionable:
-        lines.append(f"  ✅ 매수 실행 가능 조건 충족")
+        lines.append(f"  ✅ 매수 실행 가능 조건 충족 — 1차 분할 매수를 시작하세요.")
     else:
-        lines.append(f"  ⏸️  매수 실행 조건 미충족 - 관망 권장")
+        lines.append(f"  ⏸️  매수 실행 조건 미충족 — 관망 권장")
 
     # ── LLM 분석 섹션 ──────────────────────────────────
     if result.llm_analysis:
@@ -138,27 +185,20 @@ def format_swing_result(result: SwingAnalysisResult) -> str:
     return "\n".join(lines)
 
 
-# 상수 참조 (detail 표시용)
-from ta_trader.swing.constants import (
-    POSITION_ATR_SL_MULTIPLIER as POSITION_ATR_SL_MULT,
-    POSITION_ATR_TP_MULTIPLIER as POSITION_ATR_TP_MULT,
-)
-
-
-def format_swing_report(results: list[SwingAnalysisResult]) -> str:
-    """복수 종목 스윙 분석 요약 보고서"""
+def format_position_report(results: list[PositionAnalysisResult]) -> str:
+    """복수 종목 포지션 트레이딩 분석 요약 보고서"""
     if not results:
         return "분석 결과 없음"
 
-    W = 90
+    W = 95
     lines: list[str] = []
     lines.append("━" * W)
-    lines.append(f"  🔄 스윙 트레이딩 스크리닝 보고서  ({len(results)}종목)")
+    lines.append(f"  📐 포지션 트레이딩 스크리닝 보고서  ({len(results)}종목)")
     lines.append("━" * W)
 
     # 요약 테이블 헤더
     header = (
-        f"{'종목':<12} {'가격':>10} {'시장':^8} {'등급':^4} "
+        f"{'종목':<12} {'가격':>10} {'시장':^8} {'섹터':^8} {'등급':^4} "
         f"{'진입':^8} {'점수':>5} {'손절':>10} {'익절':>10} "
         f"{'RR':>5} {'수량':>6} {'종합':^8} {'점수':>5}"
     )
@@ -174,10 +214,11 @@ def format_swing_report(results: list[SwingAnalysisResult]) -> str:
         name = r.name[:10] if len(r.name) > 10 else r.name
         line = (
             f"{name:<12} {r.current_price:>10,.0f} "
-            f"{r.market_env.environment.value:^8} {r.screening.grade.value:^4} "
+            f"{r.market_env.environment.value:^8} {r.sector.strength.value:^8} "
+            f"{r.screening.grade.value:^4} "
             f"{ent_emoji}{r.entry.signal.value:^6} {r.entry.score:>5.0f} "
-            f"{r.position.stop_loss:>10,.0f} {r.position.take_profit:>10,.0f} "
-            f"{r.position.risk_reward_ratio:>5.1f} {r.position.position_size:>6,} "
+            f"{r.risk.stop_loss:>10,.0f} {r.risk.take_profit:>10,.0f} "
+            f"{r.risk.risk_reward_ratio:>5.1f} {r.risk.position_size:>6,} "
             f"{sig_emoji}{r.overall_signal.value:^6} {r.overall_score:>5.1f}"
         )
         lines.append(line)
@@ -189,7 +230,11 @@ def format_swing_report(results: list[SwingAnalysisResult]) -> str:
     if actionable:
         lines.append(f"\n  ✅ 매수 실행 가능 종목: {len(actionable)}개")
         for r in actionable:
-            lines.append(f"     → {r.name} ({r.ticker}) 점수={r.overall_score:.1f}")
+            lines.append(
+                f"     → {r.name} ({r.ticker}) "
+                f"점수={r.overall_score:.1f} RR=1:{r.risk.risk_reward_ratio} "
+                f"분할매수={r.risk.split_buy_1}+{r.risk.split_buy_2}+{r.risk.split_buy_3}주"
+            )
     else:
         lines.append(f"\n  ⏸️  현재 매수 실행 가능 종목 없음")
 

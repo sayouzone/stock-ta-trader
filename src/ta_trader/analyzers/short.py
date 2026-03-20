@@ -19,6 +19,8 @@ from ta_trader.signals.composer import SignalComposer
 from ta_trader.style_config import StyleConfig, get_style_config
 from ta_trader.utils.logger import get_logger
 
+from ta_trader.llm.short_prompt_builder import ShortPromptBuilder
+
 if TYPE_CHECKING:
     from ta_trader.models.llm import LLMAnalysis
 
@@ -157,19 +159,23 @@ class ShortTermAnalyzer(BaseAnalyzer[TradingDecision]):
         df = self._calc.dataframe
 
         llm = create_llm_analyzer(provider=provider, api_key=api_key, model=model)
+        
+        prompt_builder = ShortPromptBuilder()
+        prompt = prompt_builder.build(decision, df, recent_days)
 
         if stream:
             print(f"\n{'─'*60}")
             print(f"  🤖 LLM 분석 중 [{self.ticker}] ...")
             print(f"{'─'*60}\n")
             full_text = ""
-            for chunk in llm.analyze_stream(decision, df, recent_days):
+
+            for chunk in llm.analyze_stream(decision.ticker, prompt):
                 print(chunk, end="", flush=True)
                 full_text += chunk
             print()
             llm_result = llm._parse_response(full_text, llm._model)
         else:
-            llm_result = llm.analyze(decision, df, recent_days)
+            llm_result = llm.analyze(decision.ticker, prompt)
 
         decision.llm_analysis = llm_result
         logger.info("LLM 분석 결과 첨부 완료",
