@@ -395,7 +395,7 @@ ADX가 25이상이면 추세가 존재한다고 판단하고, MACD 시그널 크
 | 구분 | ShortTermAnalyzer | GrowthMomentumAnalyzer |
 | --- | ---------------------- | ---------------------- |
 | 목적 | 현재 시점 매매 신호 | 향후 1년 2배 상승 잠재력 평가 |
-| 출력 | TradingDecision (점수 -100~+100) | GrowthScreenResult (점수 0~100) |
+| 출력 | TradingDecision (점수 -100~+100) | GrowthAnalysisResult (점수 0~100) |
 | 등급 | 강력매수/매수/중립/매도/강력매도 | ★★★★★ 적극매수 ~ ★ 부적합 |
 | 지표 | ADX/MACD/RSI/BB 4개 | 4개 + 150/200일 SMA, 52주 고/저, 거래량, 펀더멘털 |
 | 기본 기간 | 6개월 | 1년 (200일 SMA 계산 필요) |
@@ -549,7 +549,7 @@ stock-ta-trader/
 │   ├── growth/                  ← 
 │   │   ├── __init__.py
 │   │   ├── constants.py         ← 6단계 전용 상수 (임계값, 점수 배분)
-│   │   ├── models.py            ← GrowthScreenResult, StageResult, CheckItem 등
+│   │   ├── models.py            ← GrowthAnalysisResult, StageResult, CheckItem 등
 │   │   ├── analyzer.py          ← ★ GrowthMomentumAnalyzer 핵심 엔진
 │   │   └── formatter.py         ← 터미널 출력 포매터
 │   ├── indicators/              ← ADX·RSI·MACD·Bollinger 개별 모듈

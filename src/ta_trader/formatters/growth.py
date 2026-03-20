@@ -1,6 +1,6 @@
 """
 ta_trader/growth/formatter.py
-GrowthScreenResult 터미널 출력 포매터
+GrowthAnalysisResult 터미널 출력 포매터
 
 recommend/report.py와 동일한 레이아웃:
   1. 요약 테이블 (순위·등급·종목·현재가·점수·스테이지 점수)
@@ -14,15 +14,15 @@ from __future__ import annotations
 
 from ta_trader.models.base import StageResult, StageStatus
 from ta_trader.models.growth import (
-    GrowthGrade, GrowthScreenResult, 
+    GrowthGrade, GrowthAnalysisResult, 
 )
 from ta_trader.utils.formatter import _wrap
 
 
 # ── 복수 종목 보고서 (growth-screen용) ────────────────────
 
-def format_growth_report(results: list[GrowthScreenResult]) -> str:
-    """복수 GrowthScreenResult를 recommend 형식 보고서로 변환"""
+def format_growth_report(results: list[GrowthAnalysisResult]) -> str:
+    """복수 GrowthAnalysisResult recommend 형식 보고서로 변환"""
     if not results:
         return "분석 결과가 없습니다."
 
@@ -101,8 +101,8 @@ def format_growth_report(results: list[GrowthScreenResult]) -> str:
 
 # ── 단일 종목 상세 보고서 (growth 명령용) ─────────────────
 
-def format_growth_result(result: GrowthScreenResult) -> str:
-    """단일 GrowthScreenResult를 recommend 형식 상세 보고서로 변환"""
+def format_growth_result(result: GrowthAnalysisResult) -> str:
+    """단일 GrowthAnalysisResult를 recommend 형식 상세 보고서로 변환"""
     bar  = "═" * 72
 
     lines = [
@@ -148,7 +148,7 @@ def format_growth_result(result: GrowthScreenResult) -> str:
 # ── 단일 종목 내부 포매터 ────────────────────────────────
 
 def _format_single_growth(
-    r: GrowthScreenResult, rank: int, brief: bool = False,
+    r: GrowthAnalysisResult, rank: int, brief: bool = False,
 ) -> list[str]:
     """단일 종목 결과를 recommend/_format_single_recommendation 스타일로 포매팅"""
     lines = [
@@ -267,7 +267,7 @@ _STAGE_CATEGORY = {
 
 
 def _classify_stage_checks(
-    r: GrowthScreenResult,
+    r: GrowthAnalysisResult,
 ) -> tuple[
     list[tuple[str, str, str]],
     list[tuple[str, str, str]],

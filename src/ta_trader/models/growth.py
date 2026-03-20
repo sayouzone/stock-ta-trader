@@ -64,7 +64,7 @@ class FundamentalData:
 
 
 @dataclass
-class GrowthScreenResult:
+class GrowthAnalysisResult:
     """6단계 종합 분석 결과"""
     ticker:           str
     name:             str

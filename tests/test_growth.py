@@ -13,7 +13,7 @@ import pytest
 
 from ta_trader.models.base import CheckItem, StageResult, StageStatus
 from ta_trader.models.value import (
-    ValueFundamentals, ValueGrade, ValueScreenResult,
+    ValueFundamentals, ValueGrade, ValueAnalysisResult,
 )
 from ta_trader.value.constants import (
     GRADE_STRONG_BUY, GRADE_BUY, GRADE_CONDITIONAL, GRADE_WATCH,
@@ -132,13 +132,13 @@ class TestValueFundamentals:
         assert f.net_cash == -300
 
 
-class TestValueScreenResult:
+class TestValueAnalysisResult:
     def test_get_stage(self) -> None:
         stages = [
             StageResult(stage_num=1, stage_name="밸류에이션", status=StageStatus.PASS, score=20, max_score=25),
             StageResult(stage_num=2, stage_name="수익성", status=StageStatus.PARTIAL, score=15, max_score=25),
         ]
-        result = ValueScreenResult(
+        result = ValueAnalysisResult(
             ticker="AAPL", name="Apple", date="2025-01-01",
             current_price=150.0, stages=stages,
         )
@@ -147,7 +147,7 @@ class TestValueScreenResult:
         assert result.get_stage(3) is None
 
     def test_to_dict(self) -> None:
-        result = ValueScreenResult(
+        result = ValueAnalysisResult(
             ticker="AAPL", name="Apple", date="2025-01-01",
             current_price=150.0,
             total_score=65.0,
@@ -172,13 +172,13 @@ class TestFormatter:
         ticker: str = "AAPL",
         score: float = 70.0,
         grade: ValueGrade = ValueGrade.BUY,
-    ) -> ValueScreenResult:
+    ) -> ValueAnalysisResult:
         stages = [
             StageResult(stage_num=i, stage_name=f"S{i}",
                         status=StageStatus.PASS, score=score / 5, max_score=25)
             for i in range(1, 6)
         ]
-        return ValueScreenResult(
+        return ValueAnalysisResult(
             ticker=ticker, name="Test Corp", date="2025-01-01",
             current_price=100.0,
             stages=stages,

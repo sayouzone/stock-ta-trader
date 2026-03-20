@@ -69,13 +69,14 @@ from ta_trader.value.constants import (
 )
 from ta_trader.models.base import CheckItem, StageResult, StageStatus
 from ta_trader.models.value import (
-    ValueFundamentals, ValueGrade, ValueScreenResult,
+    ValueFundamentals, ValueGrade, ValueAnalysisResult,
 )
+from ta_trader.llm.value_prompt_builder import ValuePromptBuilder
 
 logger = get_logger(__name__)
 
 
-class ValueInvestingAnalyzer(BaseAnalyzer[ValueScreenResult]):
+class ValueInvestingAnalyzer(BaseAnalyzer[ValueAnalysisResult]):
     """
     가치 투자 5단계 분석 엔진.
 
@@ -100,8 +101,8 @@ class ValueInvestingAnalyzer(BaseAnalyzer[ValueScreenResult]):
 
     # ── 공개 API ──────────────────────────────────────────
 
-    def analyze(self) -> ValueScreenResult:
-        """5단계 가치 투자 분석 실행 → ValueScreenResult 반환"""
+    def analyze(self) -> ValueAnalysisResult:
+        """5단계 가치 투자 분석 실행 → ValueAnalysisResult 반환"""
         logger.info("가치 투자 분석 시작", ticker=self.ticker)
 
         self._fetch_data()
@@ -144,7 +145,7 @@ class ValueInvestingAnalyzer(BaseAnalyzer[ValueScreenResult]):
         tp_check = next((c for c in s5.checks if c.name == "목표가"), None)
         rr_check = next((c for c in s5.checks if c.name == "R:R 비율"), None)
 
-        result = ValueScreenResult(
+        result = ValueAnalysisResult(
             ticker=self.ticker,
             name=self._name,
             date=self._df.index[-1].strftime("%Y-%m-%d") if self._df is not None else "",
@@ -179,7 +180,7 @@ class ValueInvestingAnalyzer(BaseAnalyzer[ValueScreenResult]):
         model:       str | None = None,
         recent_days: int = 10,
         stream:      bool = False,
-    ) -> ValueScreenResult:
+    ) -> ValueAnalysisResult:
         """
         기술적 분석 실행 후 LLM 해석을 추가하여 반환합니다.
         analyze() 를 내부적으로 먼저 호출하므로 별도 호출 불필요.
@@ -192,7 +193,7 @@ class ValueInvestingAnalyzer(BaseAnalyzer[ValueScreenResult]):
             stream:      True 이면 스트리밍으로 LLM 응답을 출력하고 결과 반환
 
         Returns:
-            llm_analysis 필드가 채워진 GrowthScreenResult
+            llm_analysis 필드가 채워진 GrowthAnalysisResult
         """
         from ta_trader.llm.factory import create_llm_analyzer
 
@@ -201,19 +202,22 @@ class ValueInvestingAnalyzer(BaseAnalyzer[ValueScreenResult]):
         df = self._calc.dataframe
 
         llm = create_llm_analyzer(provider=provider, api_key=api_key, model=model)
+
+        prompt_builder = ValuePromptBuilder()
+        prompt = prompt_builder.build(result, df, recent_days)
         
         if stream:
             print(f"\n{'─'*60}")
             print(f"  🤖 LLM 분석 중 [{self.ticker}] ...")
             print(f"{'─'*60}\n")
             full_text = ""
-            for chunk in llm.analyze_stream(decision, df, recent_days):
+            for chunk in llm.analyze_stream(result.ticker, prompt):
                 print(chunk, end="", flush=True)
                 full_text += chunk
             print()
             llm_result = llm._parse_response(full_text, llm._model)
         else:
-            llm_result = llm.analyze(decision, df, recent_days)
+            llm_result = llm.analyze(result.ticker, prompt)
 
         result.llm_analysis = llm_result
 

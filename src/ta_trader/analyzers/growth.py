@@ -65,13 +65,14 @@ from ta_trader.growth.constants import (
 )
 from ta_trader.models.base import CheckItem, StageResult, StageStatus
 from ta_trader.models.growth import (
-    FundamentalData, GrowthGrade, GrowthScreenResult,
+    FundamentalData, GrowthGrade, GrowthAnalysisResult,
 )
+from ta_trader.llm.growth_prompt_builder import GrowthPromptBuilder
 
 logger = get_logger(__name__)
 
 
-class GrowthMomentumAnalyzer(BaseAnalyzer[GrowthScreenResult]):
+class GrowthMomentumAnalyzer(BaseAnalyzer[GrowthAnalysisResult]):
     """
     100% 상승 후보 발굴을 위한 6단계 분석 엔진.
 
@@ -94,7 +95,7 @@ class GrowthMomentumAnalyzer(BaseAnalyzer[GrowthScreenResult]):
     def role(self) -> str:
         return "시장 데이터 수집 및 기술적 지표 연산"
 
-    def analyze(self) -> GrowthScreenResult:
+    def analyze(self) -> GrowthAnalysisResult:
         """6단계 전체 분석 파이프라인 실행"""
         # 0. 데이터 수집
         self._fetch_data()
@@ -132,7 +133,7 @@ class GrowthMomentumAnalyzer(BaseAnalyzer[GrowthScreenResult]):
         latest = self._calc.latest()
         price = float(latest["Close"])
 
-        result = GrowthScreenResult(
+        result = GrowthAnalysisResult(
             ticker        = self.ticker,
             name          = self._name,
             date          = str(self._df.index[-1].date()),
@@ -166,7 +167,7 @@ class GrowthMomentumAnalyzer(BaseAnalyzer[GrowthScreenResult]):
         model:       str | None = None,
         recent_days: int = 10,
         stream:      bool = False,
-    ) -> GrowthScreenResult:
+    ) -> GrowthAnalysisResult:
         """
         기술적 분석 실행 후 LLM 해석을 추가하여 반환합니다.
         analyze() 를 내부적으로 먼저 호출하므로 별도 호출 불필요.
@@ -179,7 +180,7 @@ class GrowthMomentumAnalyzer(BaseAnalyzer[GrowthScreenResult]):
             stream:      True 이면 스트리밍으로 LLM 응답을 출력하고 결과 반환
 
         Returns:
-            llm_analysis 필드가 채워진 GrowthScreenResult
+            llm_analysis 필드가 채워진 GrowthAnalysisResult
         """
         from ta_trader.llm.factory import create_llm_analyzer
 
@@ -188,19 +189,22 @@ class GrowthMomentumAnalyzer(BaseAnalyzer[GrowthScreenResult]):
         df = self._calc.dataframe
 
         llm = create_llm_analyzer(provider=provider, api_key=api_key, model=model)
+
+        prompt_builder = ValuePromptBuilder()
+        prompt = prompt_builder.build(result, df, recent_days)
         
         if stream:
             print(f"\n{'─'*60}")
             print(f"  🤖 LLM 분석 중 [{self.ticker}] ...")
             print(f"{'─'*60}\n")
             full_text = ""
-            for chunk in llm.analyze_stream(decision, df, recent_days):
+            for chunk in llm.analyze_stream(result.ticker, prompt):
                 print(chunk, end="", flush=True)
                 full_text += chunk
             print()
             llm_result = llm._parse_response(full_text, llm._model)
         else:
-            llm_result = llm.analyze(decision, df, recent_days)
+            llm_result = llm.analyze(result.ticker, prompt)
 
         result.llm_analysis = llm_result
 

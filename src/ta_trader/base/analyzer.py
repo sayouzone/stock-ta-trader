@@ -26,9 +26,11 @@ class BaseAnalyzer(ABC, Generic[OutputT]):
     분석 기반 추상 클래스.
 
     각 에이전트는 단일 책임 원칙에 따라 하나의 역할만 수행합니다:
-      - ShortTermAnalyzer:  1개월 단위 기술적 분석 트레이딩 시스템 → GrowthScreenResult
+      - ShortTermAnalyzer:  1개월 단위 기술적 분석 트레이딩 시스템 → GrowthAnalysisResult
       - GrowthMomentumAnalyzer:  100% 상승 후보 발굴 6단계 분석 → TradingDecision
-      - ValueInvestingAnalyzer:  가치 투자 5단계 분석 → ValueScreenResult
+      - ValueInvestingAnalyzer:  가치 투자 5단계 분석 → ValueAnalysisResult
+      - SwingTradingAnalyzer:  스윙 투자 6단계 분석 → SwingAnalysisResult
+      - PositionTradingAnalyzer:  포지션 투자 7단계 분석 → PositionAnalysisResult
     """
 
     def __init__(

@@ -30,10 +30,10 @@ from ta_trader.models.short import (
     Signal, StrategyType, TradingDecision, TradingStyle, WeightSet
 )
 from ta_trader.models.growth import (
-    FundamentalData, GrowthGrade, GrowthScreenResult,
+    FundamentalData, GrowthGrade, GrowthAnalysisResult,
 )
 from ta_trader.models.value import (
-    ValueFundamentals, ValueGrade, ValueScreenResult,
+    ValueFundamentals, ValueGrade, ValueAnalysisResult,
 )
 from ta_trader.models.swing import (
     SwingAnalysisResult, SwingSignal,
@@ -108,14 +108,14 @@ __all__ = [
     "WeightSet",
     # Growth
     "FundamentalData",
-    "GrowthScreenResult",
+    "GrowthAnalysisResult",
     "GrowthGrade",
     # Value Investing
     "CheckItem",
     "StageResult",
     "StageStatus",
     "ValueFundamentals",
-    "ValueScreenResult",
+    "ValueAnalysisResult",
     "ValueGrade",
     # Swing Trading
     "SwingAnalysisResult",

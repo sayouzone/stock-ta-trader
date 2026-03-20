@@ -31,6 +31,8 @@ from ta_trader.utils.formatter import make_decision, make_summary
 from ta_trader.visualization.chart import ChartVisualizer
 from ta_trader.visualization.swing import SwingChartVisualizer
 from ta_trader.visualization.position import PositionChartVisualizer
+from ta_trader.visualization.growth import GrowthChartVisualizer
+from ta_trader.visualization.value import ValueChartVisualizer
 from ta_trader.growth import format_growth_report, format_growth_result
 from ta_trader.value import format_value_report, format_value_result
 from ta_trader.formatters.swing import format_swing_result, format_swing_report
@@ -449,8 +451,22 @@ def screen(config: str, output: str, period: str, style: str) -> None:
 @cli.command()
 @click.argument("ticker")
 @click.option("--period", default="1y", show_default=True, help="데이터 기간 (예: 1y, 2y)")
+@click.option("--style", default="growth", show_default=True,
+              type=click.Choice(["swing", "position", "growth", "value", "all"], case_sensitive=False),
+              help="매매 스타일: swing / position / growth / value / all(양쪽 모두)")
+@click.option("--config",  default="configs/watchlist.yaml", show_default=True, help="종목 목록 YAML")
+@click.option("--save-chart", is_flag=True,   help="차트를 reports/ 폴더에 저장")
+@click.option("--no-chart",   is_flag=True,   help="차트 표시 안 함")
 @click.option("--save-report", is_flag=True, help="보고서를 reports/ 폴더에 저장")
-def growth(ticker: str, period: str, save_report: bool) -> None:
+@click.option("--llm",        is_flag=True,   help="Anthropic Claude LLM 해석 추가 (ANTHROPIC_API_KEY 필요)")
+@click.option("--llm-stream", is_flag=True,   help="LLM 응답을 스트리밍으로 출력")
+@click.option("--llm-provider", default=None,
+              type=click.Choice(["anthropic", "google"], case_sensitive=False),
+              help="LLM Provider (기본값: 환경변수 자동 감지)")
+@click.option("--llm-model",  default=None,   help="LLM 모델명 (기본값: claude-sonnet-4-20250514)")
+def growth(ticker: str, period: str, style: str,
+        config: str, save_chart: bool, no_chart: bool, save_report: bool,
+        llm: bool, llm_stream: bool, llm_provider: str | None, llm_model: str | None) -> None:
     """100% 상승 후보 6단계 분석 (단일 종목)
 
     이익가속·스테이지·기술적진입·리스크·건강도를 종합 평가하여
@@ -462,22 +478,80 @@ def growth(ticker: str, period: str, save_report: bool) -> None:
         python main.py growth NVDA
         python main.py growth AAPL --period 2y --save-report
     """
-    try:
-        analyzer = GrowthMomentumAnalyzer(ticker, period=period)
-        result = analyzer.analyze()
-    except Exception as e:
-        click.echo(f"❌ 분석 실패 [{ticker}]: {e}", err=True)
-        raise SystemExit(1) from e
+    styles = _resolve_styles(style)
+    is_multi = len(styles) > 1
 
-    report_str = format_growth_result(result)
-    click.echo(report_str)
+    fetcher = KRXStockFetcher()
+    fetcher.load()
 
-    if save_report:
-        out_dir = Path("reports")
-        out_dir.mkdir(parents=True, exist_ok=True)
-        report_path = out_dir / f"{ticker.replace('.', '_')}_growth_{result.date.replace('-','')}.txt"
-        report_path.write_text(report_str, encoding="utf-8")
-        click.echo(f"보고서 저장됨: {report_path}")
+    tickers = None
+    if ticker in MARKETS:
+        config_path = Path(config)
+        if not config_path.exists():
+            click.echo(f"설정 파일을 찾을 수 없습니다: {config}", err=True)
+            sys.exit(1)
+
+        cfg = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+        tickers = cfg.get("watchlist", [])
+
+        if not tickers:
+            click.echo("watchlist 항목이 없습니다.", err=True)
+            sys.exit(1)
+
+        MARKET_FILTERS = {
+            "KOSPI": lambda t: ".KS" in t,
+            "KOSDAQ": lambda t: ".KQ" in t,
+            "US": lambda t: ".KS" not in t and ".KQ" not in t,
+        }
+        market_filter = MARKET_FILTERS.get(ticker)
+        if market_filter:
+            tickers = [t for t in tickers if market_filter(t)]
+    else:
+        info = fetcher.get_info(ticker)
+        #click.echo(f"Info: {info}", err=True)
+        if not info:
+            tickers = [ticker]
+        else:
+            tickers = [info.yahoo_ticker]
+    
+    with click.progressbar(tickers) as bar:
+        for ticker in bar:
+            try:
+                analyzer = GrowthMomentumAnalyzer(ticker, period=period)
+
+                if llm or llm_stream:
+                    result = analyzer.analyze_with_llm(
+                            provider=llm_provider,
+                            model=llm_model,
+                            stream=llm_stream)
+                else:
+                    result = analyzer.analyze()
+
+                report_str = format_growth_result(result)
+                click.echo(report_str)
+
+                stock_name = result.name.replace(" ", "_")
+
+                if save_report:
+                    out_dir = Path("reports")
+                    out_dir.mkdir(parents=True, exist_ok=True)
+                    report_path = out_dir / f"{ticker.replace('.', '_')}_{style}_{result.date.replace('-','')}.txt"
+                    report_path.write_text(report_str, encoding="utf-8")
+                    click.echo(f"보고서 저장됨: {report_path}")
+
+                if not no_chart:
+                    chart_path = (
+                        Path("reports") / f"{ticker.replace('.', '_')}_{style}_{result.date.replace('-','')}_{stock_name}.png"
+                        if save_chart else None
+                    )
+                    df = analyzer.calculator.dataframe if analyzer.calculator else None
+                    if df is not None:
+                        GrowthChartVisualizer().plot(decision, df, save_path=chart_path, show=not save_chart)
+                        if save_chart and chart_path:
+                            click.echo(f"차트 저장됨: {chart_path}")
+            except Exception as e:
+                click.echo(f"❌ 분석 실패 [{ticker}]: {e}", err=True)
+                raise SystemExit(1) from e
 
 
 # ── growth-screen 명령 ────────────────────────────────────
@@ -558,8 +632,22 @@ def growth_screen(config: str, output: str, period: str, top_n: int, min_score: 
 @cli.command()
 @click.argument("ticker")
 @click.option("--period", default="2y", show_default=True, help="데이터 기간 (예: 2y, 3y)")
+@click.option("--style", default="value", show_default=True,
+              type=click.Choice(["swing", "position", "growth", "value", "all"], case_sensitive=False),
+              help="매매 스타일: swing / position / growth / value / all(양쪽 모두)")
+@click.option("--config",  default="configs/watchlist.yaml", show_default=True, help="종목 목록 YAML")
+@click.option("--save-chart", is_flag=True,   help="차트를 reports/ 폴더에 저장")
+@click.option("--no-chart",   is_flag=True,   help="차트 표시 안 함")
 @click.option("--save-report", is_flag=True, help="보고서를 reports/ 폴더에 저장")
-def value(ticker: str, period: str, save_report: bool) -> None:
+@click.option("--llm",        is_flag=True,   help="Anthropic Claude LLM 해석 추가 (ANTHROPIC_API_KEY 필요)")
+@click.option("--llm-stream", is_flag=True,   help="LLM 응답을 스트리밍으로 출력")
+@click.option("--llm-provider", default=None,
+              type=click.Choice(["anthropic", "google"], case_sensitive=False),
+              help="LLM Provider (기본값: 환경변수 자동 감지)")
+@click.option("--llm-model",  default=None,   help="LLM 모델명 (기본값: claude-sonnet-4-20250514)")
+def value(ticker: str, period: str, style: str,
+        config: str, save_chart: bool, no_chart: bool, save_report: bool,
+        llm: bool, llm_stream: bool, llm_provider: str | None, llm_model: str | None) -> None:
     """가치 투자 5단계 분석 (단일 종목)
 
     밸류에이션·수익성·재무건전성·안전마진·진입타이밍을 종합 평가하여
@@ -571,22 +659,82 @@ def value(ticker: str, period: str, save_report: bool) -> None:
         python main.py value AAPL
         python main.py value 005930.KS --period 3y --save-report
     """
-    try:
-        analyzer = ValueInvestingAnalyzer(ticker, period=period)
-        result = analyzer.analyze()
-    except Exception as e:
-        click.echo(f"❌ 분석 실패 [{ticker}]: {e}", err=True)
-        raise SystemExit(1) from e
+    styles = _resolve_styles(style)
+    is_multi = len(styles) > 1
 
-    report_str = format_value_result(result)
-    click.echo(report_str)
+    fetcher = KRXStockFetcher()
+    fetcher.load()
 
-    if save_report:
-        out_dir = Path("reports")
-        out_dir.mkdir(parents=True, exist_ok=True)
-        report_path = out_dir / f"{ticker.replace('.', '_')}_value_{result.date.replace('-','')}.txt"
-        report_path.write_text(report_str, encoding="utf-8")
-        click.echo(f"보고서 저장됨: {report_path}")
+    tickers = None
+    if ticker in MARKETS:
+        config_path = Path(config)
+        if not config_path.exists():
+            click.echo(f"설정 파일을 찾을 수 없습니다: {config}", err=True)
+            sys.exit(1)
+
+        cfg = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+        tickers = cfg.get("watchlist", [])
+
+        if not tickers:
+            click.echo("watchlist 항목이 없습니다.", err=True)
+            sys.exit(1)
+
+        MARKET_FILTERS = {
+            "KOSPI": lambda t: ".KS" in t,
+            "KOSDAQ": lambda t: ".KQ" in t,
+            "US": lambda t: ".KS" not in t and ".KQ" not in t,
+        }
+        market_filter = MARKET_FILTERS.get(ticker)
+        if market_filter:
+            tickers = [t for t in tickers if market_filter(t)]
+    else:
+        info = fetcher.get_info(ticker)
+        #click.echo(f"Info: {info}", err=True)
+        if not info:
+            tickers = [ticker]
+        else:
+            tickers = [info.yahoo_ticker]
+    
+    with click.progressbar(tickers) as bar:
+        for ticker in bar:
+            try:
+                analyzer = ValueInvestingAnalyzer(ticker, period=period)
+
+                if llm or llm_stream:
+                    result = analyzer.analyze_with_llm(
+                            provider=llm_provider,
+                            model=llm_model,
+                            stream=llm_stream)
+                else:
+                    result = analyzer.analyze()
+
+                report_str = format_value_result(result)
+                click.echo(report_str)
+
+                stock_name = result.name.replace(" ", "_")
+
+                if save_report:
+                    out_dir = Path("reports")
+                    out_dir.mkdir(parents=True, exist_ok=True)
+                    report_path = out_dir / f"{ticker.replace('.', '_')}_{style}_{result.date.replace('-','')}_{stock_name}.txt"
+                    report_path.write_text(report_str, encoding="utf-8")
+                    click.echo(f"보고서 저장됨: {report_path}")
+
+                if not no_chart:
+                    chart_path = (
+                        Path("reports") / f"{ticker.replace('.', '_')}_{style}_{result.date.replace('-','')}_{stock_name}.png"
+                        if save_chart else None
+                    )
+                    df = analyzer.calculator.dataframe if analyzer.calculator else None
+                    if df is not None:
+                        ValueChartVisualizer().plot(decision, df, save_path=chart_path, show=not save_chart)
+                        if save_chart and chart_path:
+                            click.echo(f"차트 저장됨: {chart_path}")
+            #except Exception as e:
+            #    click.echo(f"❌ 분석 실패 [{ticker}]: {e}", err=True)
+            #    raise SystemExit(1) from e
+            finally:
+                pass
 
 
 # ── value-screen 명령 ─────────────────────────────────────
@@ -981,6 +1129,9 @@ def agent_trade(ticker: str, period: str, style: str,
               help="투입 자본금 (원)")
 @click.option("--risk-pct", default=0.02, show_default=True, type=float,
               help="1회 거래 최대 손실 비율 (0.02 = 2%)")
+@click.option("--style", default="swing", show_default=True,
+              type=click.Choice(["swing", "position", "growth", "value", "all"], case_sensitive=False),
+              help="매매 스타일: swing / position / growth / value / all(양쪽 모두)")
 @click.option("--config",  default="configs/watchlist.yaml", show_default=True, help="종목 목록 YAML")
 @click.option("--save-chart", is_flag=True,   help="차트를 reports/ 폴더에 저장")
 @click.option("--no-chart",   is_flag=True,   help="차트 표시 안 함")
@@ -991,7 +1142,7 @@ def agent_trade(ticker: str, period: str, style: str,
               type=click.Choice(["anthropic", "google"], case_sensitive=False),
               help="LLM Provider (기본값: 환경변수 자동 감지)")
 @click.option("--llm-model",  default=None,   help="LLM 모델명 (기본값: claude-sonnet-4-20250514)")
-def swing(ticker: str, period: str, interval: str, capital: float, risk_pct: float,
+def swing(ticker: str, period: str, interval: str, capital: float, risk_pct: float, style: str,
             config: str, save_chart: bool, no_chart: bool, save_report: bool,
             llm: bool, llm_stream: bool, llm_provider: str | None, llm_model: str | None) -> None:
     """스윙 트레이딩 6단계 분석 (단일 종목)
@@ -1011,11 +1162,11 @@ def swing(ticker: str, period: str, interval: str, capital: float, risk_pct: flo
         python main.py swing AAPL --capital 50000000
         python main.py swing NVDA --period 2y --risk-pct 0.01
     """
-    #fetcher = KRXStockFetcher(stock_path="src/ta_trader/data/stocks/krx_stock_data_4128_20260319.csv", etf_path="src/ta_trader/data/stocks/krx_etf_data_0437_20260319.csv")
+    styles = _resolve_styles(style)
+    is_multi = len(styles) > 1
+
     fetcher = KRXStockFetcher()
     fetcher.load()
-
-    style_tag = "swing"
 
     tickers = None
     if ticker in MARKETS:
@@ -1071,13 +1222,13 @@ def swing(ticker: str, period: str, interval: str, capital: float, risk_pct: flo
                 if save_report:
                     out_dir = Path("reports")
                     out_dir.mkdir(parents=True, exist_ok=True)
-                    report_path = out_dir / f"{ticker.replace('.', '_')}_{style_tag}_{decision.date.replace('-','')}_{stock_name}.txt"
+                    report_path = out_dir / f"{ticker.replace('.', '_')}_{style}_{decision.date.replace('-','')}_{stock_name}.txt"
                     report_path.write_text(decision_str, encoding="utf-8")
                     click.echo(f"보고서 저장됨: {report_path}")
                 
                 if not no_chart:
                     chart_path = (
-                        Path("reports") / f"{ticker.replace('.', '_')}_{style_tag}_{decision.date.replace('-','')}_{stock_name}.png"
+                        Path("reports") / f"{ticker.replace('.', '_')}_{style}_{decision.date.replace('-','')}_{stock_name}.png"
                         if save_chart else None
                     )
                     df = analyzer.calculator.dataframe if analyzer.calculator else None
@@ -1179,6 +1330,9 @@ def swing_screen(config: str, market: str | None, period: str, interval: str,
               help="투입 자본금 (원)")
 @click.option("--risk-pct", default=0.02, show_default=True, type=float,
               help="1회 거래 최대 손실 비율 (0.02 = 2%)")
+@click.option("--style", default="position", show_default=True,
+              type=click.Choice(["swing", "position", "growth", "value", "all"], case_sensitive=False),
+              help="매매 스타일: swing / position / growth / value / all(양쪽 모두)")
 @click.option("--config",  default="configs/watchlist.yaml", show_default=True, help="종목 목록 YAML")
 @click.option("--save-chart", is_flag=True,   help="차트를 reports/ 폴더에 저장")
 @click.option("--no-chart",   is_flag=True,   help="차트 표시 안 함")
@@ -1189,7 +1343,7 @@ def swing_screen(config: str, market: str | None, period: str, interval: str,
               type=click.Choice(["anthropic", "google"], case_sensitive=False),
               help="LLM Provider (기본값: 환경변수 자동 감지)")
 @click.option("--llm-model",  default=None,   help="LLM 모델명 (기본값: claude-sonnet-4-20250514)")
-def position(ticker: str, period: str, interval: str, capital: float, risk_pct: float,
+def position(ticker: str, period: str, interval: str, capital: float, risk_pct: float, style, str,
              config: str, save_chart: bool, no_chart: bool, save_report: bool,
              llm: bool, llm_stream: bool, llm_provider: str | None, llm_model: str | None) -> None:
     """포지션 트레이딩 7단계 분석 (단일 종목)
@@ -1210,10 +1364,11 @@ def position(ticker: str, period: str, interval: str, capital: float, risk_pct: 
         python main.py position AAPL --capital 50000000
         python main.py position NVDA --period 2y --risk-pct 0.01
     """
+    styles = _resolve_styles(style)
+    is_multi = len(styles) > 1
+    
     fetcher = KRXStockFetcher()
     fetcher.load()
-
-    style_tag = "position"
 
     tickers = None
     if ticker in MARKETS:
@@ -1268,13 +1423,13 @@ def position(ticker: str, period: str, interval: str, capital: float, risk_pct: 
                 if save_report:
                     out_dir = Path("reports")
                     out_dir.mkdir(parents=True, exist_ok=True)
-                    report_path = out_dir / f"{ticker.replace('.', '_')}_{style_tag}_{decision.date.replace('-','')}_{stock_name}.txt"
+                    report_path = out_dir / f"{ticker.replace('.', '_')}_{style}_{decision.date.replace('-','')}_{stock_name}.txt"
                     report_path.write_text(decision_str, encoding="utf-8")
                     click.echo(f"보고서 저장됨: {report_path}")
 
                 if not no_chart:
                     chart_path = (
-                        Path("reports") / f"{ticker.replace('.', '_')}_{style_tag}_{decision.date.replace('-','')}_{stock_name}.png"
+                        Path("reports") / f"{ticker.replace('.', '_')}_{style}_{decision.date.replace('-','')}_{stock_name}.png"
                         if save_chart else None
                     )
                     df = analyzer.calculator.dataframe if analyzer.calculator else None

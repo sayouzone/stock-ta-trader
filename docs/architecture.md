@@ -54,7 +54,7 @@ ValueInvestingAnalyzer.analyze()
 [4단계] 안전마진 산출    → Graham Number, 비교 밸류에이션, 배당, PEG
 [5단계] 기술적 진입      → 이평선 지지, RSI 과매도, 52주 위치, R:R
   ↓
-ValueScreenResult (종합 등급 + 5단계 상세 + 리스크 관리)
+ValueAnalysisResult (종합 등급 + 5단계 상세 + 리스크 관리)
 ```
 
 ## 핵심 설계 결정

@@ -6,7 +6,7 @@ growth/models.py와 동일한 패턴:
   - ValueGrade (종합 등급)
   - StageStatus / CheckItem / StageResult (단계별 결과)
   - ValueFundamentals (펀더멘털 데이터)
-  - ValueScreenResult (종합 분석 결과)
+  - ValueAnalysisResult (종합 분석 결과)
 """
 
 from __future__ import annotations
@@ -127,7 +127,7 @@ class ValueFundamentals:
 
 
 @dataclass
-class ValueScreenResult:
+class ValueAnalysisResult:
     """5단계 가치 투자 종합 분석 결과"""
     ticker:           str
     name:             str

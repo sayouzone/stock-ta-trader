@@ -1,6 +1,6 @@
 """
 ta_trader/value/formatter.py
-ValueScreenResult 터미널 출력 포매터
+ValueAnalysisResult 터미널 출력 포매터
 
 growth/formatter.py와 동일한 레이아웃:
   1. 요약 테이블 (순위·등급·종목·현재가·점수·스테이지 점수)
@@ -14,15 +14,15 @@ from __future__ import annotations
 
 from ta_trader.models.base import StageResult, StageStatus
 from ta_trader.models.value import (
-    ValueGrade, ValueScreenResult,
+    ValueGrade, ValueAnalysisResult,
 )
 from ta_trader.utils.formatter import _wrap
 
 
 # ── 복수 종목 보고서 (value-screen용) ─────────────────────
 
-def format_value_report(results: list[ValueScreenResult]) -> str:
-    """복수 ValueScreenResult를 recommend 형식 보고서로 변환"""
+def format_value_report(results: list[ValueAnalysisResult]) -> str:
+    """복수 ValueAnalysisResult를 recommend 형식 보고서로 변환"""
     if not results:
         return "분석 결과가 없습니다."
 
@@ -105,8 +105,8 @@ def format_value_report(results: list[ValueScreenResult]) -> str:
 
 # ── 단일 종목 보고서 ─────────────────────────────────────
 
-def format_value_result(result: ValueScreenResult) -> str:
-    """단일 ValueScreenResult를 상세 보고서로 변환"""
+def format_value_result(result: ValueAnalysisResult) -> str:
+    """단일 ValueAnalysisResult를 상세 보고서로 변환"""
     bar  = "═" * 72
     thin = "─" * 72
 
@@ -225,7 +225,7 @@ def format_value_result(result: ValueScreenResult) -> str:
 # ── 내부 헬퍼 ─────────────────────────────────────────────
 
 def _format_single_value(
-    r: ValueScreenResult,
+    r: ValueAnalysisResult,
     rank: int,
     brief: bool = False,
 ) -> list[str]:
