@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from ta_trader.constants import BB_LOWER_THRESHOLD, BB_UPPER_THRESHOLD
+from ta_trader.constants.short import BB_LOWER_THRESHOLD, BB_UPPER_THRESHOLD
 from ta_trader.models import IndicatorResult, Signal
 
 

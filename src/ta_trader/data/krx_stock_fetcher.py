@@ -14,7 +14,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional
 
-from ta_trader.constants import DEFAULT_INTERVAL, DEFAULT_PERIOD, MIN_DATA_ROWS
+from ta_trader.constants.short import DEFAULT_INTERVAL, DEFAULT_PERIOD, MIN_DATA_ROWS
 from ta_trader.exceptions import DataFetchError, InsufficientDataError, InvalidTickerError
 from ta_trader.utils.logger import get_logger
 
@@ -222,14 +222,14 @@ class KRXStockFetcher:
  
         # 2) 종목코드 매칭
         code = name_or_code.zfill(6) if name_or_code.isdigit() else name_or_code
-        logger.info("종목코드: %s %s", name_or_code, code)
+        #logger.info("종목코드: %s %s", name_or_code, code)
         if code in self._code_map:
             return self._code_map[code]
 
         # 3) .KS 또는 .KQ 포함 코드 매칭
         index = name_or_code.find('.')
         code = name_or_code[:index] if index != -1 else name_or_code
-        logger.info("종목코드: %s %s", name_or_code, code)
+        #logger.info("종목코드: %s %s", name_or_code, code)
         if code in self._code_map:
             return self._code_map[code]
  

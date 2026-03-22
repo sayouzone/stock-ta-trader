@@ -12,7 +12,7 @@ import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from ta_trader.constants import ADX_STRONG_TREND, ADX_WEAK_TREND, RSI_OVERBOUGHT, RSI_OVERSOLD
+from ta_trader.constants.short import ADX_STRONG_TREND, ADX_WEAK_TREND, RSI_OVERBOUGHT, RSI_OVERSOLD
 from ta_trader.models.position import PositionAnalysisResult
 from ta_trader.utils.font import setup_korean_font
 
@@ -78,12 +78,12 @@ class PositionChartVisualizer:
         # 진입가
         if result.risk.entry_price:
             label = f"진입 {result.risk.entry_price:,.0f}" if ".K" in result.ticker else f"진입 {result.risk.entry_price:,.2f}"
-            ax.axhline(result.risk.entry_price,   color="coral",   linewidth=0.8, linestyle=":", label=label)
+            ax.axhline(result.risk.entry_price, color="dodgerblue", linewidth=1.5, linestyle="--", label=label)
         
         # 포지션 사이징 - 손절
         if result.risk.stop_loss:
             label = f"손절 {result.risk.stop_loss:,.0f}" if ".K" in result.ticker else f"손절 {result.risk.stop_loss:,.2f}"
-            ax.axhline(result.risk.stop_loss,   color="red",   linewidth=0.8, linestyle="--", label=label)
+            ax.axhline(result.risk.stop_loss, color="red", linewidth=0.8, linestyle="--", label=label)
 
         # 1차 부분익절
         if result.exit_strategy.partial_exit_price:

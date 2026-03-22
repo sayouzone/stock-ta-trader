@@ -16,7 +16,7 @@ from typing import Optional
 
 import pandas as pd
 
-from ta_trader.constants import (
+from ta_trader.constants.short import (
     SCORE_BUY, SCORE_SELL, SCORE_STRONG_BUY, SCORE_STRONG_SELL,
 )
 from ta_trader.models.short import IndicatorResult, MarketRegime, Signal, StrategyType, WeightSet

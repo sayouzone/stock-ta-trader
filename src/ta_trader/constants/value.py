@@ -1,5 +1,5 @@
 """
-ta_trader/value/constants.py
+ta_trader/constants/value.py
 가치 투자 5단계 분석 프로세스 전용 상수
 
 5단계 프로세스:

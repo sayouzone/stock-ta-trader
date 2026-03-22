@@ -139,7 +139,7 @@ def format_swing_result(result: SwingAnalysisResult) -> str:
 
 
 # 상수 참조 (detail 표시용)
-from ta_trader.swing.constants import (
+from ta_trader.constants.swing import (
     POSITION_ATR_SL_MULTIPLIER as POSITION_ATR_SL_MULT,
     POSITION_ATR_TP_MULTIPLIER as POSITION_ATR_TP_MULT,
 )

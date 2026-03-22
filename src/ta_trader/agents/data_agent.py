@@ -34,7 +34,7 @@ from ta_trader.indicators.rsi import RSIAnalyzer
 from ta_trader.models import IndicatorResult, TradingStyle
 from ta_trader.signals.regime import detect_regime, RegimeContext
 from ta_trader.style_config import StyleConfig, get_style_config
-
+from ta_trader.constants.short import MIN_DATA_ROWS
 
 @dataclass
 class DataAgentInput:
@@ -213,7 +213,6 @@ class DataAgent(BaseAgent[DataAgentInput, MarketDataReport]):
         quality = 1.0 - min(nan_ratio, 1.0)
 
         # 최소 데이터 행 수 반영
-        from ta_trader.constants import MIN_DATA_ROWS
         if len(df) < MIN_DATA_ROWS:
             quality *= len(df) / MIN_DATA_ROWS
 

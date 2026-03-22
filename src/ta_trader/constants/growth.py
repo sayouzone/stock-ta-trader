@@ -1,5 +1,5 @@
 """
-ta_trader/growth/constants.py
+ta_trader/constants/growth.py
 100% 상승 후보 발굴 6단계 프로세스 전용 상수
 
 6단계 프로세스:

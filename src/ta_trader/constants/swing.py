@@ -1,5 +1,5 @@
 """
-ta_trader/swing/constants.py
+ta_trader/constants/swing.py
 스윙 트레이딩 6단계 프로세스 전용 상수
 
 단계별 파라미터:

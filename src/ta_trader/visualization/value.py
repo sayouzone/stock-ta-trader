@@ -12,7 +12,7 @@ import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from ta_trader.constants import ADX_STRONG_TREND, ADX_WEAK_TREND, RSI_OVERBOUGHT, RSI_OVERSOLD
+from ta_trader.constants.short import ADX_STRONG_TREND, ADX_WEAK_TREND, RSI_OVERBOUGHT, RSI_OVERSOLD
 from ta_trader.models.value import ValueAnalysisResult
 from ta_trader.utils.font import setup_korean_font
 
@@ -39,10 +39,10 @@ class ValueChartVisualizer:
         print(df.columns)
 
         fig = plt.figure(figsize=(16, 14))
+        current_price = f"{result.current_price:,.0f}" if ".K" in result.ticker else f"{result.current_price:,.2f}"
         fig.suptitle(
             f"{result.ticker} ({result.name})  |  {result.date}  |  "
-            #f"{decision.final_signal.value}  (Score: {decision.composite_score:+.1f})",
-            f"{result.overall_signal.value} ({result.market_env.environment.value})  (Score: {result.overall_score:+.1f})",
+            f"현재가:{current_price} ({result.grade.value})  (Score: {result.total_score:+.1f})",
             fontsize=14,
             fontweight="bold",
         )
@@ -75,24 +75,25 @@ class ValueChartVisualizer:
         ax.plot(df.index, df["bb_lower"],  label="BB Lower",  color="green", linestyle="--", alpha=0.6)
         ax.fill_between(df.index, df["bb_lower"], df["bb_upper"], alpha=0.05, color="blue")
 
-        # 진입가
-        if result.risk.entry_price:
-            label = f"진입 {result.risk.entry_price:,.0f}" if ".K" in result.ticker else f"진입 {result.risk.entry_price:,.2f}"
-            ax.axhline(result.risk.entry_price,   color="coral",   linewidth=0.8, linestyle=":", label=label)
-        
-        # 포지션 사이징 - 손절
-        if result.risk.stop_loss:
-            label = f"손절 {result.risk.stop_loss:,.0f}" if ".K" in result.ticker else f"손절 {result.risk.stop_loss:,.2f}"
-            ax.axhline(result.risk.stop_loss,   color="red",   linewidth=0.8, linestyle="--", label=label)
+        # 52주 저가
+        if result.low_52w:
+            label = f"52주 저가 {result.low_52w:,.0f}" if ".K" in result.ticker else f"52주 저가 {result.low_52w:,.2f}"
+            ax.axhline(result.low_52w,   color="coral",   linewidth=0.8, linestyle=":", label=label)
 
-        # 1차 부분익절
-        if result.exit_strategy.partial_exit_price:
-            label = f"1차 부분익절 {result.exit_strategy.partial_exit_price:,.0f}" if ".K" in result.ticker else f"1차 부분익절 {result.exit_strategy.partial_exit_price:,.2f}"
-            ax.axhline(result.exit_strategy.partial_exit_price, color="green", linewidth=0.8, linestyle=":", label=label)
-        # 전량 청산
-        if result.exit_strategy.full_exit_price:
-            label = f"전량 청산 {result.exit_strategy.full_exit_price:,.0f}" if ".K" in result.ticker else f"전량 청산 {result.exit_strategy.full_exit_price:,.2f}"
-            ax.axhline(result.exit_strategy.full_exit_price, color="blue", linewidth=0.8, linestyle="--", label=label)
+        # 52주 고가
+        if result.high_52w:
+            label = f"52주 고가 {result.high_52w:,.0f}" if ".K" in result.ticker else f"52주 고가 {result.high_52w:,.2f}"
+            ax.axhline(result.high_52w, color="green", linewidth=0.8, linestyle=":", label=label)
+                
+        # 손절
+        if result.stop_loss:
+            label = f"손절 {result.stop_loss:,.0f}" if ".K" in result.ticker else f"손절 {result.stop_loss:,.2f}"
+            ax.axhline(result.stop_loss,   color="red",   linewidth=0.8, linestyle="--", label=label)
+
+        # 익절
+        if result.take_profit:
+            label = f"익절 {result.take_profit:,.0f}" if ".K" in result.ticker else f"익절 {result.take_profit:,.2f}"
+            ax.axhline(result.take_profit, color="blue", linewidth=0.8, linestyle="--", label=label)
 
         ax.set_title("Price + Bollinger Bands")
         ax.legend(loc="upper left", fontsize=7)

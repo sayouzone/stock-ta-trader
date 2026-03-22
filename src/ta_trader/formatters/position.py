@@ -10,7 +10,7 @@ from ta_trader.models.position import (
     PositionMarketEnv, PositionScreenGrade,
     SectorStrength,
 )
-from ta_trader.position.constants import (
+from ta_trader.constants.position import (
     RISK_ATR_SL_MULTIPLIER,
     RISK_ATR_TP_MULTIPLIER,
 )

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from ta_trader.constants import (
+from ta_trader.constants.short import (
     RSI_LOWER_NEUTRAL, RSI_OVERBOUGHT, RSI_OVERSOLD, RSI_UPPER_NEUTRAL,
 )
 from ta_trader.models import IndicatorResult, Signal

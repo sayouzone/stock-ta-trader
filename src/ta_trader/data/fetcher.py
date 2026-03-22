@@ -12,7 +12,7 @@ import yfinance as yf
 from ta_trader.data.krx_stock_fetcher import KRXStockFetcher
 from sayou.stock.opendart import OpenDartCrawler
 
-from ta_trader.constants import DEFAULT_INTERVAL, DEFAULT_PERIOD, MIN_DATA_ROWS
+from ta_trader.constants.short import DEFAULT_INTERVAL, DEFAULT_PERIOD, MIN_DATA_ROWS
 from ta_trader.exceptions import DataFetchError, InsufficientDataError, InvalidTickerError
 from ta_trader.utils.logger import get_logger
 

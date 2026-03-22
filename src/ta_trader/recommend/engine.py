@@ -21,7 +21,7 @@ ta_trader/recommend/engine.py
 
 from __future__ import annotations
 
-from ta_trader.constants import (
+from ta_trader.constants.short import (
     ADX_STRONG_TREND, ADX_WEAK_TREND,
     RSI_OVERBOUGHT, RSI_OVERSOLD, RSI_UPPER_NEUTRAL, RSI_LOWER_NEUTRAL,
     BB_UPPER_THRESHOLD, BB_LOWER_THRESHOLD,

@@ -32,7 +32,7 @@ from ta_trader.indicators.macd import MACDAnalyzer
 from ta_trader.indicators.rsi import RSIAnalyzer
 from ta_trader.utils.logger import get_logger
 
-from ta_trader.growth.constants import (
+from ta_trader.constants.growth import (
     # 1단계
     EPS_GROWTH_MIN, REVENUE_GROWTH_MIN, PROFIT_MARGIN_MIN,
     SCORE_EPS_GROWTH, SCORE_REVENUE_GROWTH,

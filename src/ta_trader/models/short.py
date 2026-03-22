@@ -50,8 +50,8 @@ class TradingStyle(Enum):
         return {
             TradingStyle.SWING:    "스윙 트레이딩 (2일~2주, 단기 파동 포착)",
             TradingStyle.POSITION: "포지션 트레이딩 (수주~수개월, 중장기 추세 추종)",
-            TradingStyle.GROWTH: "",
-            TradingStyle.VALUE: "",
+            TradingStyle.GROWTH:   "성장 트레이딩",
+            TradingStyle.VALUE:    "가치 트레이딩",
         }[self]
 
 

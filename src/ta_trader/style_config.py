@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ta_trader.constants import (
+from ta_trader.constants.short import (
     # 스윙 상수
     SWING_ATR_SL_MULTIPLIER, SWING_ATR_TP_MULTIPLIER,
     SWING_DEFAULT_SL_PCT, SWING_DEFAULT_TP_PCT,

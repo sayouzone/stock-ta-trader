@@ -15,7 +15,7 @@ from ta_trader.models.base import CheckItem, StageResult, StageStatus
 from ta_trader.models.value import (
     ValueFundamentals, ValueGrade, ValueAnalysisResult,
 )
-from ta_trader.value.constants import (
+from ta_trader.constants.value import (
     GRADE_STRONG_BUY, GRADE_BUY, GRADE_CONDITIONAL, GRADE_WATCH,
     PER_LOW_THRESHOLD, PBR_LOW_THRESHOLD,
     ROE_EXCELLENT, ROE_GOOD,

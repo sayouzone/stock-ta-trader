@@ -22,7 +22,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from ta_trader.constants import (
+from ta_trader.constants.short import (
     ADX_STRONG_TREND, ADX_WEAK_TREND,
     BB_BANDWIDTH_SQUEEZE, BB_BANDWIDTH_EXPAND,
     WEIGHT_ADX_DEFAULT, WEIGHT_RSI_DEFAULT, WEIGHT_MACD_DEFAULT, WEIGHT_BB_DEFAULT,

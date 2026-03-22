@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from ta_trader.constants import ADX_STRONG_TREND, ADX_WEAK_TREND
+from ta_trader.constants.short import ADX_STRONG_TREND, ADX_WEAK_TREND
 from ta_trader.models import IndicatorResult, Signal
 
 

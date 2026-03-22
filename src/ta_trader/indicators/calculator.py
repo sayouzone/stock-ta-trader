@@ -10,7 +10,7 @@ from ta.momentum import RSIIndicator
 from ta.trend import MACD, ADXIndicator
 from ta.volatility import BollingerBands
 
-from ta_trader.constants import (
+from ta_trader.constants.short import (
     ADX_WINDOW, BB_STD_DEV, BB_WINDOW,
     MACD_FAST, MACD_SIGNAL_PERIOD, MACD_SLOW, RSI_WINDOW,
 )

@@ -17,7 +17,7 @@ import pandas as pd
 from ta_trader.base.prompt_builder import BasePromptBuilder
 from ta_trader.models.position import PositionAnalysisResult
 
-from ta_trader.position.constants import (
+from ta_trader.constants.position import (
     RISK_ATR_SL_MULTIPLIER,
     RISK_ATR_TP_MULTIPLIER,
 )

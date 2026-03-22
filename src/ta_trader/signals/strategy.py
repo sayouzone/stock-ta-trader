@@ -20,7 +20,7 @@ from typing import Optional
 
 import pandas as pd
 
-from ta_trader.constants import (
+from ta_trader.constants.short import (
     SCORE_BUY, SCORE_SELL, SCORE_STRONG_BUY, SCORE_STRONG_SELL,
     STRATEGY_TREND_ADX, STRATEGY_TREND_RSI, STRATEGY_TREND_MACD, STRATEGY_TREND_BB,
     STRATEGY_REVERT_ADX, STRATEGY_REVERT_RSI, STRATEGY_REVERT_MACD, STRATEGY_REVERT_BB,

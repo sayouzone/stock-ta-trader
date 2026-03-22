@@ -1,5 +1,5 @@
 """
-ta_trader/position/constants.py
+ta_trader/constants/position.py
 포지션 트레이딩 7단계 프로세스 전용 상수
 
 단계별 파라미터:

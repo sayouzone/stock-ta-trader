@@ -28,7 +28,7 @@ from ta_trader.indicators.fibonacci import (
     compute_fibonacci_levels, find_swing_points,
 )
 
-from ta_trader.position.constants import *
+from ta_trader.constants.position import *
 from ta_trader.models.position import (
     PositionAnalysisResult, PositionSignal,
     MarketEnvResult, PositionMarketEnv,

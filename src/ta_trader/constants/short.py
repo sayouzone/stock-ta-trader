@@ -1,5 +1,5 @@
 """
-ta_trader/constants.py
+ta_trader/constants/short.py
 모든 상수 정의 (매직 넘버 금지 원칙)
 """
 

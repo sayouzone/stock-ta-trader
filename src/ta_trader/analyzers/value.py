@@ -28,7 +28,7 @@ from ta_trader.indicators.calculator import IndicatorCalculator
 from ta_trader.indicators.rsi import RSIAnalyzer
 from ta_trader.utils.logger import get_logger
 
-from ta_trader.value.constants import (
+from ta_trader.constants.value import (
     # 1단계 밸류에이션
     PER_LOW_THRESHOLD, PER_HIGH_THRESHOLD,
     PBR_LOW_THRESHOLD, PBR_DEEP_VALUE,

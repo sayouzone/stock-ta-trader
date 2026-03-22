@@ -36,8 +36,8 @@ from ta_trader.indicators.rsi import RSIAnalyzer
 from ta_trader.indicators.macd import MACDAnalyzer
 from ta_trader.indicators.bollinger import BollingerAnalyzer
 
-from ta_trader.swing.constants import *
-from ta_trader.constants import BB_BANDWIDTH_SQUEEZE
+from ta_trader.constants.swing import *
+from ta_trader.constants.short import BB_BANDWIDTH_SQUEEZE
 from ta_trader.models.base import CheckItem, StageResult, StageStatus
 from ta_trader.models.swing import (
     SwingAnalysisResult, SwingSignal,

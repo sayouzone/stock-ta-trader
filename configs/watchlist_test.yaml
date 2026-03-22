@@ -1,0 +1,65 @@
+# 관심 종목 목록
+# 한국: 종목코드.KS (KOSPI) / 종목코드.KQ (KOSDAQ)
+# 미국: 티커 심볼 그대로
+
+watchlist:
+  # ── KOSPI ─────────────────────
+  - "005930.KS"   # 삼성전자
+  - "000660.KS"   # SK하이닉스
+  - "005380.KS"   # 현대차
+  - "000270.KS"   # 기아자동차
+  - "373220.KS"   # LG에너지솔루션
+  - "402340.KS"   # SK스퀘어
+  - "207940.KS"   # 삼성바이오로직스
+  - "034020.KS"   # 두산에너빌리티
+  - "012450.KS"   # 한화에어로스페이스
+  - "329180.KS"   # HD현대중공업
+  - "028260.KS"   # 삼성물산
+  - "105560.KS"   # KB금융
+  - "068270.KS"   # 셀트리온
+  - "032830.KS"   # 삼성생명
+  - "012330.KS"   # 현대모비스
+  - "042660.KS"   # 한화오션
+  # ── 종목 검토 ─────────────────────
+  # ── KOSDAQ ─────────────────────
+  - "086520.KQ"   # 에코프로
+  - "196170.KQ"   # 알테오젠
+  - "247540.KQ"   # 에코프로비엠
+  - "000250.KQ"   # 삼천당제약
+  - "277810.KQ"   # 레인보우로보틱스
+  - "298380.KQ"   # 에이비엘바이오
+  - "950160.KQ"   # 코오롱티슈진
+  - "058470.KQ"   # 리노공업
+  - "214370.KQ"   # 케어젠
+  - "141080.KQ"   # 리가켐바이오
+  - "028300.KQ"   # HLB
+  - "087010.KQ"   # 펩트론
+  - "240810.KQ"   # 원익IPS
+
+  # ── 미국 ───────────────────────────
+  - "NVDA"        # NVIDIA Corporation
+  - "AAPL"        # Apple Inc.
+  - "GOOGL"       # Alphabet Inc.
+  - "MSFT"        # Microsoft Corporation
+  - "AMZN"        # Amazon.com, Inc.
+  - "TSM"         # Taiwan Semiconductor Manufacturing Company Limited
+  - "META"        # Meta Platforms, Inc.
+  - "AVGO"        # Broadcom Inc.
+  - "TSLA"        # Tesla, Inc.
+  - "BRK-A"       # Berkshire Hathaway Inc.
+  # ── 보유종목 ─────────────────────
+  - "DOW"         # Dow Inc
+  - "NNDM"        # Nano Dimension Ltd
+  - "INUV"        # Inuvo, Inc.
+  - "IONQ"        # IONQ Inc
+  - "MVIS"        # Microvision Inc
+  - "ARKG"        # ARK Genomic Revolution ETF
+  - "SPY"         # SPDR S&P 500 Trust ETF
+  # ── 배당 보유종목 ─────────────────────
+  - "JEPI"        # JPMorgan Equity Premium Income ETF
+  - "AGNC"        # AGNC Investment Corp
+  - "KBWY"        # Invesco KBW Premium Yield Equity REIT ETF
+  - "RA"          # Brookfield Real Assets Income Fund Inc
+  - "QYLD"        # Global X NASDAQ 100 Covered Call ETF
+  # ── 종목 검토 ─────────────────────
+  - "MRVL"        # Marvell Technology, Inc.

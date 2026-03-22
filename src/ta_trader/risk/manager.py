@@ -13,7 +13,7 @@ from typing import Optional
 
 import pandas as pd
 
-from ta_trader.constants import (
+from ta_trader.constants.short import (
     ATR_STOP_LOSS_MULTIPLIER, ATR_TAKE_PROFIT_MULTIPLIER,
     DEFAULT_STOP_LOSS_PCT, DEFAULT_TAKE_PROFIT_PCT,
 )
