@@ -36,13 +36,12 @@ class SwingChartVisualizer:
         setup_korean_font()   # plt 임포트 직후 1회 호출
 
         ##print(df)
-        print(df.columns)
+        #print(df.columns)
 
         fig = plt.figure(figsize=(16, 14))
         fig.suptitle(
-            f"{result.ticker} ({result.name})  |  {result.date}  |  "
-            #f"{decision.final_signal.value}  (Score: {decision.composite_score:+.1f})",
-            f"{result.overall_signal.value} ({result.market_env.environment.value})  (Score: {result.overall_score:+.1f})",
+            f"{result.trading_style.value} 트레이딩: {result.ticker} ({result.name})  |  {result.date}  |  "
+            f"{result.overall_signal.value} ({result.market_env.environment.value}) (Grade: {result.screening.grade.value}) (Score: {result.overall_score:+.1f})",
             fontsize=14,
             fontweight="bold",
         )

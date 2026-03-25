@@ -18,6 +18,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
+from ta_trader.models import TradingStyle
+
 if TYPE_CHECKING:
     from ta_trader.models.llm import LLMAnalysis
 
@@ -270,9 +272,10 @@ class PositionAnalysisResult:
 
     # 종합
     overall_signal: PositionSignal
-    overall_score: float                     # 0~100
+    overall_score:  float                     # 0~100
     summary: str = ""
-    llm_analysis: Optional["LLMAnalysis"] = None
+    trading_style:  TradingStyle            = TradingStyle.POSITION
+    llm_analysis:   Optional["LLMAnalysis"] = None
 
     @property
     def is_actionable(self) -> bool:

@@ -1,5 +1,5 @@
 """
-ta_trader/agents/strategy_agent.py
+ta_trader/agents/strategy.py
 Strategy & Decision Agent — 분석된 데이터를 바탕으로 매매 전략을 수립하는 브레인
 
 역할:

@@ -1,5 +1,5 @@
 """
-ta_trader/agents/risk_agent.py
+ta_trader/agents/risk.py
 Risk Management Agent — 감정에 휘둘리지 않고 자본을 보호하는 브레이크
 
 역할:

@@ -15,6 +15,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
+from ta_trader.models import TradingStyle
+
 if TYPE_CHECKING:
     from ta_trader.models.llm import LLMAnalysis
 
@@ -160,8 +162,9 @@ class ValueAnalysisResult:
     warnings:         list[str] = field(default_factory=list)
     action:           str = ""                   # 권장 행동
 
+    trading_style:     TradingStyle              = TradingStyle.VALUE
     # LLM 분석 결과
-    llm_analysis:      Optional["LLMAnalysis"]         = None
+    llm_analysis:      Optional["LLMAnalysis"]   = None
 
     def get_stage(self, num: int) -> Optional[StageResult]:
         """단계 번호로 결과 조회"""

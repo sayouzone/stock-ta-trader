@@ -35,13 +35,13 @@ class GrowthChartVisualizer:
         """
         setup_korean_font()   # plt 임포트 직후 1회 호출
 
-        print(df)
-        print(df.columns)
+        #print(df)
+        #print(df.columns)
 
         fig = plt.figure(figsize=(16, 14))
         current_price = f"{result.current_price:,.0f}" if ".K" in result.ticker else f"{result.current_price:,.2f}"
         fig.suptitle(
-            f"{result.ticker} ({result.name})  |  {result.date}  |  "
+            f"{result.trading_style.value} 트레이딩: {result.ticker} ({result.name})  |  {result.date}  |  "
             f"현재가:{current_price} ({result.grade.value})  (Score: {result.total_score:+.1f})",
             fontsize=14,
             fontweight="bold",

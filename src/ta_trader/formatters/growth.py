@@ -218,7 +218,10 @@ def _format_single_growth(
                 fund_parts.append(f"이익률 {f.profit_margin:.1%}")
             if f.market_cap:
                 fund_parts.append(f"시총 ${f.market_cap/1e9:.1f}B")
-            if f.forward_pe:
+            if f.forward_pe and isinstance(f.forward_pe, str):
+                fund_parts.append(f"FwdPE {f.forward_pe}")
+            elif f.forward_pe:
+                #print(f.forward_pe, type(f.forward_pe))
                 fund_parts.append(f"FwdPE {f.forward_pe:.1f}")
             if f.peg_ratio:
                 fund_parts.append(f"PEG {f.peg_ratio:.2f}")

@@ -1,5 +1,5 @@
 """
-ta_trader/agents/data_agent.py
+ta_trader/agents/data.py
 Data & Analysis Agent — 시장의 모든 정보를 수집하고 정량적/정성적 지표로 가공하는 눈과 귀
 
 역할:

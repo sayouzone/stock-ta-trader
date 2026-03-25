@@ -609,6 +609,11 @@ python main.py analyze --save-chart --save-report NVDA
 python main.py analyze --save-chart --save-report KOSPI
 python main.py analyze --save-chart --save-report KOSDAQ
 python main.py analyze --save-chart --save-report US
+
+# 포지션 트레이딩 마켓별 종목 기술 분석
+python main.py analyze --save-chart --save-report --style position KOSPI
+python main.py analyze --save-chart --save-report --style position KOSDAQ
+python main.py analyze --save-chart --save-report --style position US
 ```
 
 ```bash
@@ -813,6 +818,14 @@ python main.py recommend --config my_stocks.yaml
 # 매매 스타일별 추천
 python main.py recommend --save-report --style swing
 python main.py recommend --save-report --style position
+python main.py recommend --save-report --style growth
+python main.py recommend --save-report --style value
+
+# 스크리닝 CSV 저장
+python main.py recommend --save-report --save-screen --style swing
+
+# Config Yaml 파일 설정
+python main.py recommend --config configs/watchlist_test.yaml --save-report --save-screen --style swing
 ```
 
 ### 종목 추천 출력 예시

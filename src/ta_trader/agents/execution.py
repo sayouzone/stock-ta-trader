@@ -1,5 +1,5 @@
 """
-ta_trader/agents/execution_agent.py
+ta_trader/agents/execution.py
 Execution Agent — 시장에 직접 주문을 넣고 관리하는 행동 대장
 
 역할:

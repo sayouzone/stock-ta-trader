@@ -29,16 +29,17 @@ import time
 from dataclasses import dataclass
 from typing import Optional
 
-from ta_trader.agents.data_agent import DataAgent, DataAgentInput
-from ta_trader.agents.execution_agent import (
+from ta_trader.agents.data import DataAgent, DataAgentInput
+from ta_trader.agents.execution import (
     DryRunBackend, ExecutionAgent, ExecutionBackend, ExecutionConfig,
 )
 from ta_trader.models.agent import (
     ExecutionResult, MarketDataReport, PipelineResult,
     RiskApproval, StrategyReport, TradeSignal,
 )
-from ta_trader.agents.risk_agent import RiskAgent, RiskConfig
-from ta_trader.agents.strategy_agent import StrategyAgent
+from ta_trader.agents.risk import RiskAgent, RiskConfig
+from ta_trader.agents.strategy import StrategyAgent
+
 from ta_trader.models import TradingDecision, TradingStyle
 from ta_trader.utils.logger import get_logger
 

@@ -2118,7 +2118,7 @@ watchlist:
   # ── 미국 ───────────────────────────
   - "NVDA"        # NVIDIA Corporation
   - "AAPL"        # Apple Inc.
-  - "GOOGL"       # Alphabet Inc.
+  - "GOOG"        # Alphabet Inc.
   - "MSFT"        # Microsoft Corporation
   - "AMZN"        # Amazon.com, Inc.
   - "TSM"         # Taiwan Semiconductor Manufacturing Company Limited
@@ -2218,19 +2218,1035 @@ watchlist:
   - "DHR"         # Danaher Corporation
   - "PDD"         # PDD Holdings Inc.
   - "ETN"         # Eaton Corporation, PLC
+
+  - "GEV"         # GE Vernova Inc.
+  - "ANET"        # Arista Networks, Inc.
+  - "ARM"         # ARM Holdings PLC Sponsored ADR
+  - "BKNG"        # Booking Holdings Inc.
+  - "PANW"        # Palo Alto Networks, Inc.
+  - "BX"          # Blackstone Inc.
+  - "SPGI"        # S&P Global, Inc.
+  - "CB"          # Chubb Limited
+  - "INTU"        # Intuit Inc.
+  - "ACN"         # Accenture Plc Class A
+  - "PLD"         # Prologis, Inc.
+  - "PGR"         # Progressive Corporation
+  - "BMY"         # Bristol-Myers Squibb Company
+  - "NOW"         # ServiceNow, Inc.
+  - "IBKR"        # Interactive Brokers Group, Inc. Class A
+  - "VRTX"        # Vertex Pharmaceuticals Incorporated
+  - "COF"         # Capital One Financial Corp
+  - "PH"          # Parker-Hannifin Corporation
+  - "GLW"         # Corning Inc
+  - "MDT"         # Medtronic Plc
+  - "HCA"         # HCA Healthcare Inc
+  - "CME"         # CME Group Inc. Class A
+  - "MO"          # Altria Group, Inc.
+  - "MCK"         # McKesson Corporation
+  - "SBUX"        # Starbucks Corporation
+  - "NEM"         # Newmont Corporation
+  - "DELL"        # Dell Technologies, Inc. Class C
+  - "SO"          # Southern Company
+  - "CEG"         # Constellation Energy Corporation
+  - "CRWD"        # CrowdStrike Holdings, Inc. Class A
+  - "CCZ"         # Comcast Corp
+  - "CMCSA"       # Comcast Corporation Class A
+  - "SNDK"        # Sandisk Corporation
+  - "BSX"         # Boston Scientific Corporation
+  - "ADBE"        # Adobe Inc.
+  - "SPOT"        # Spotify Technology SA
+  - "WDC"         # Western Digital Corporation
+  - "DUK"         # Duke Energy Corporation
+  - "VRT"         # Vertiv Holdings Co. Class A
+  - "BN"          # Brookfield Corporation
+  - "NOC"         # Northrop Grumman Corp.
+  - "HWM"         # Howmet Aerospace Inc.
+  - "EQIX"        # Equinix, Inc.
+  - "TT"          # Trane Technologies plc
+  - "GD"          # General Dynamics Corporation
+  - "WM"          # Waste Management, Inc.
+  - "CVS"         # CVS Health Corporation
+  - "WMB"         # Williams Companies, Inc.
+  - "ICE"         # Intercontinental Exchange, Inc.
+  - "STX"         # Seagate Technology Holdings PLC
+  - "MAR"         # Marriott International, Inc. Class A
+  - "PWR"         # Quanta Services, Inc.
+  - "FDX"         # FedEx Corporation
+  - "MELI"        # MercadoLibre, Inc.
+  - "ADP"         # Automatic Data Processing, Inc.
+  - "MRSH"        # Marsh & McLennan Companies, Inc.
+  - "UPS"         # United Parcel Service, Inc. Class B
+  - "SNPS"        # Synopsys, Inc.
+  - "AMT"         # American Tower Corporation
+  - "EPD"         # Enterprise Products Partners L.P.
+  - "PNC"         # PNC Financial Services Group, Inc.
+  - "JCI"         # Johnson Controls International plc
+  - "KKR"         # KKR & Co Inc
+  - "ABNB"        # Airbnb, Inc. Class A
+  - "USB"         # U.S. Bancorp
+  - "BK"          # Bank of New York Mellon Corp
+  - "CDNS"        # Cadence Design Systems, Inc.
+  - "FCX"         # Freeport-McMoRan, Inc.
+  - "MRVL"        # Marvell Technology, Inc.
+  - "MCO"         # Moody's Corporation
+  - "NKE"         # NIKE, Inc. Class B
+  - "REGN"        # Regeneron Pharmaceuticals, Inc.
+  - "SHW"         # Sherwin-Williams Company
+  - "NET"         # Cloudflare Inc Class A
+  - "MMM"         # 3M Company
+  - "CMI"         # Cummins Inc.
+  - "ITW"         # Illinois Tool Works Inc.
+  - "MSI"         # Motorola Solutions, Inc.
+  - "RCL"         # Royal Caribbean Group
+  - "KMI"         # Kinder Morgan Inc Class P
+  - "EOG"         # EOG Resources, Inc.
+  - "ORLY"        # O'Reilly Automotive, Inc.
+  - "SLB"         # SLB Limited
+  - "ECL"         # Ecolab Inc.
+  - "EMR"         # Emerson Electric Co.
+  - "MDLZ"        # Mondelez International, Inc. Class A
+  - "CTAS"        # Cintas Corporation
+  - "CSX"         # CSX Corporation
+  - "MNST"        # Monster Beverage Corporation
+  - "NTES"        # Netease Inc Sponsored ADR
+  - "NU"          # Nu Holdings Ltd. Class A
+  - "BAM"         # Brookfield Asset Management Ltd. Class A
+  - "VLO"         # Valero Energy Corporation
+  - "PSX"         # Phillips 66
+  - "AON"         # Aon Plc Class A
+  - "CRH"         # CRH public limited company
+  - "DASH"        # DoorDash, Inc. Class A
+  - "AEP"         # American Electric Power Company, Inc.
+  - "HLT"         # Hilton Worldwide Holdings Inc.
+  - "ROST"        # Ross Stores, Inc.
+  - "CI"          # Cigna Group
+  - "MPC"         # Marathon Petroleum Corporation
+  - "GM"          # General Motors Company
+  - "CL"          # Colgate-Palmolive Company
+  - "WBD"         # Warner Bros. Discovery, Inc. Series A
+  - "RSG"         # Republic Services, Inc.
+  - "CVNA"        # Carvana Co. Class A
+  - "ET"          # Energy Transfer LP
+  - "HOOD"        # Robinhood Markets, Inc. Class A
+  - "TDG"         # TransDigm Group Incorporated
+  - "LHX"         # L3Harris Technologies Inc
+  - "NSC"         # Norfolk Southern Corporation
+  - "TRV"         # Travelers Companies, Inc.
+  - "ELV"         # Elevance Health, Inc.
+  - "APO"         # Apollo Global Management Inc
+  - "COR"         # Cencora, Inc.
+  - "APD"         # Air Products and Chemicals, Inc.
+  - "BKR"         # Baker Hughes Company Class A
+  - "FTNT"        # Fortinet, Inc.
+  - "SRE"         # Sempra
+  - "LNG"         # Cheniere Energy, Inc.
+  - "PCAR"        # PACCAR Inc
+  - "SPG"         # Simon Property Group, Inc.
+  - "SNOW"        # Snowflake, Inc.
+  - "DLR"         # Digital Realty Trust, Inc.
+  - "MPLX"        # MPLX LP
+  - "OXY"         # Occidental Petroleum Corporation
+  - "TEL"         # TE Connectivity plc
+  - "CIEN"        # Ciena Corporation
+  - "O"           # Realty Income Corporation
+  - "OKE"         # ONEOK, Inc.
+  - "TFC"         # Truist Financial Corporation
+  - "MDLN"        # Medline, Inc. Class A
+  - "AJG"         # Arthur J. Gallagher & Co.
+  - "AZO"         # AutoZone, Inc.
+  - "AFL"         # Aflac Incorporated
+  - "FANG"        # Diamondback Energy, Inc.
+  - "ALL"         # Allstate Corporation
+  - "COIN"        # Coinbase Global, Inc. Class A
+  - "MPWR"        # Monolithic Power Systems, Inc.
+  - "D"           # Dominion Energy Inc
+  - "CTVA"        # Corteva Inc
+  - "ADSK"        # Autodesk, Inc.
+  - "LITE"        # Lumentum Holdings, Inc.
+  - "TGT"         # Target Corporation
+  - "TRGP"        # Targa Resources Corp.
+  - "FAST"        # Fastenal Company
+  - "VST"         # Vistra Corp.
+  - "EA"          # Electronic Arts Inc.
+  - "GWW"         # W.W. Grainger, Inc.
+  - "KEYS"        # Keysight Technologies Inc
+  - "FIX"         # Comfort Systems USA, Inc.
+  - "NDAQ"        # Nasdaq, Inc.
+  - "UI"          # Ubiquiti Inc.
+  - "NXPI"        # NXP Semiconductors NV
+  - "AME"         # AMETEK, Inc.
+  - "CARR"        # Carrier Global Corp.
+  - "ZTS"         # Zoetis, Inc. Class A
+  - "CAH"         # Cardinal Health, Inc.
+  - "EXC"         # Exelon Corporation
+  - "XEL"         # Xcel Energy Inc.
+  - "COHR"        # Coherent Corp.
+  - "EW"          # Edwards Lifesciences Corporation
+  - "TER"         # Teradyne, Inc.
+  - "F"           # Ford Motor Company
+  - "SE"          # Sea Limited Sponsored ADR Class A
+  - "PSA"         # Public Storage
+  - "MSTR"        # Strategy Inc Class A
+  - "URI"         # United Rentals, Inc.
+  - "IDXX"        # IDEXX Laboratories, Inc.
+  - "KR"          # Kroger Co.
+  - "GRMN"        # Garmin Ltd.
+  - "ETR"         # Entergy Corporation
+  - "DDOG"        # Datadog, Inc. Class A
+  - "MET"         # MetLife, Inc.
+  - "BDX"         # Becton, Dickinson and Company
+  - "YUM"         # Yum! Brands, Inc.
+  - "HSY"         # Hershey Company
+  - "CMG"         # Chipotle Mexican Grill, Inc.
+  - "FERG"        # Ferguson Enterprises Inc.
+  - "CRWV"        # CoreWeave, Inc. Class A
+  - "DAL"         # Delta Air Lines, Inc.
+  - "PYPL"        # PayPal Holdings, Inc.
+  - "CCEP"        # Coca-Cola Europacific Partners plc
+  - "WAB"         # Westinghouse Air Brake Technologies Corporation
+  - "FITB"        # Fifth Third Bancorp
+  - "AXON"        # Axon Enterprise Inc
+  - "EQT"         # EQT Corporation
+  - "ALNY"        # Alnylam Pharmaceuticals, Inc
+  - "MSCI"        # MSCI Inc. Class A
+  - "AMP"         # Ameriprise Financial, Inc.
+  - "AU"          # Anglogold Ashanti PLC
+  - "AIG"         # American International Group, Inc.
+  - "RBLX"        # Roblox Corp. Class A
+  - "EBAY"        # eBay Inc.
+  - "DHI"         # D.R. Horton, Inc.
+  - "RKT"         # Rocket Companies, Inc. Class A
+  - "ROK"         # Rockwell Automation, Inc.
+  - "VTR"         # Ventas, Inc.
+  - "CBRE"        # CBRE Group, Inc. Class A
+  - "PEG"         # Public Service Enterprise Group Inc
+  - "BE"          # Bloom Energy Corporation Class A
+  - "ED"          # Consolidated Edison, Inc.
+  - "ODFL"        # Old Dominion Freight Line, Inc.
+  - "SYY"         # Sysco Corporation
+  - "BIDU"        # Baidu, Inc. Sponsored ADR Class A
+  - "VG"          # Venture Global, Inc. Class A
+  - "RKLB"        # Rocket Lab Corporation
+  - "PCG"         # PG&E Corporation
+  - "TKO"         # TKO Group Holdings, Inc. Class A
+  - "HIG"         # Hartford Insurance Group, Inc.
+  - "TTWO"        # Take-Two Interactive Software, Inc.
+  - "XYZ"         # Block, Inc. Class A
+  - "NUE"         # Nucor Corporation
+  - "WEC"         # WEC Energy Group Inc
+  - "TPL"         # Texas Pacific Land Corporation
+  - "ROP"         # Roper Technologies, Inc.
+  - "LVS"         # Las Vegas Sands Corp.
+  - "KDP"         # Keurig Dr Pepper Inc.
+  - "CCI"         # Crown Castle Inc.
+  - "JD"          # JD.com, Inc. Sponsored ADR Class A
+  - "CPNG"        # Coupang, Inc. Class A
+  - "CCL"         # Carnival Corporation
+  - "LYV"         # Live Nation Entertainment, Inc.
+  - "WDAY"        # Workday, Inc. Class A
+  - "MLM"         # Martin Marietta Materials, Inc.
+  - "MCHP"        # Microchip Technology Incorporated
+  - "VMC"         # Vulcan Materials Company
+  - "STT"         # State Street Corporation
+  - "QSR"         # Restaurant Brands International, Inc.
+  - "ASTS"        # AST SpaceMobile, Inc. Class A
+  - "KVUE"        # Kenvue, Inc.
+  - "PAYX"        # Paychex, Inc.
+  - "HEI"         # HEICO Corporation
+  - "ACGL"        # Arch Capital Group Ltd.
+  - "RMD"         # ResMed Inc.
+  - "CQP"         # Cheniere Energy Partners, L.P.
+  - "EME"         # EMCOR Group, Inc.
+  - "KMB"         # Kimberly-Clark Corporation
+  - "PRU"         # Prudential Financial, Inc.
+  - "ADM"         # Archer-Daniels-Midland Company
+  - "GEHC"        # GE Healthcare Technologies Inc.
+  - "NRG"         # NRG Energy, Inc.
+  - "IR"          # Ingersoll Rand Inc.
+  - "CPRT"        # Copart, Inc.
+  - "VIK"         # Viking Holdings Ltd
+  - "SYM"         # Symbotic, Inc. Class A
+  - "A"           # Agilent Technologies, Inc.
+  - "SATS"        # EchoStar Corporation Class A
+  - "HAL"         # Halliburton Company
+  - "CRCL"        # Circle Internet Group, Inc. Class A
+  - "HBAN"        # Huntington Bancshares Incorporated
+  - "INSM"        # Insmed Incorporated지
+  - "FISV"        # Fiserv, Inc.
+  - "CHTR"        # Charter Communications, Inc. Class A
+  - "OTIS"        # Otis Worldwide Corporation
+  - "AMRZ"        # Amrize Ltd
+  - "VEEV"        # Veeva Systems Inc Class A
+  - "UAL"         # United Airlines Holdings, Inc.
+  - "DVN"         # Devon Energy Corporation
+  - "ATO"         # Atmos Energy Corporation
+  - "MTB"         # M&T Bank Corporation
+  - "CTSH"        # Cognizant Technology Solutions Corporation Class A
+  - "HPE"         # Hewlett Packard Enterprise Co.
+  - "WAT"         # Waters Corporation
+  - "DTE"         # DTE Energy Company
+  - "AEE"         # Ameren Corporation
+  - "IRM"         # Iron Mountain, Inc.
+  - "CBOE"        # Cboe Global Markets Inc
+  - "TW"          # Tradeweb Markets, Inc. Class A
+  - "TPR"         # Tapestry, Inc.
+  - "XYL"         # Xylem Inc.
+  - "EXPE"        # Expedia Group, Inc.
+  - "TDY"         # Teledyne Technologies Incorporated
+  - "NBIS"        # Nebius Group N.V. Class A
+  - "EL"          # Estee Lauder Companies Inc. Class A
+  - "VICI"        # VICI Properties Inc
+  - "RJF"         # Raymond James Financial, Inc.
+  - "DOV"         # Dover Corporation
+  - "NTRA"        # Natera, Inc.
+  - "IQV"         # IQVIA Holdings Inc
+  - "FE"          # FirstEnergy Corp.
+  - "JBL"         # Jabil Inc.
+  - "SUNB"        # Sunbelt Rentals Holdings Inc
+  - "WTW"         # Willis Towers Watson Public Limited Company
+  - "PPL"         # PPL Corporation
+  - "VRSK"        # Verisk Analytics, Inc.
+  - "DG"          # Dollar General Corporation
+  - "EXR"         # Extra Space Storage Inc.
+  - "CNP"         # CenterPoint Energy, Inc.
+  - "FTI"         # TechnipFMC plc
+  - "EIX"         # Edison International
+  - "BIIB"        # Biogen Inc.
+  - "RDDT"        # Reddit, Inc. Class A
+  - "FWONA"       # Liberty Media Corporation Series A Liberty Formula One
+  - "AWK"         # American Water Works Company, Inc.
+  - "STZ"         # Constellation Brands, Inc. Class A
+  - "RPRX"        # Royalty Pharma Plc Class A
+  - "BAP"         # Credicorp Ltd.
+  - "HUBB"        # Hubbell Incorporated
+  - "EXE"         # Expand Energy Corporation
+  - "DOW"         # Dow, Inc.
+  - "CTRA"        # Coterra Energy Inc.
+  - "ROL"         # Rollins, Inc.
+  - "FIS"         # Fidelity National Information Services, Inc.
+  - "NTRS"        # Northern Trust Corporation
+  - "ES"          # Eversource Energy
+  - "CW"          # Curtiss-Wright Corporation
+  - "DXCM"        # DexCom, Inc.
+  - "FICO"        # Fair Isaac Corporation
+  - "MTD"         # Mettler-Toledo International Inc.
+  - "KHC"         # Kraft Heinz Company
+  - "CASY"        # Casey's General Stores, Inc.
+  - "CINF"        # Cincinnati Financial Corporation
+  - "FTAI"        # FTAI Aviation Ltd.
+  - "CFG"         # Citizens Financial Group, Inc.
+  - "WRB"         # W. R. Berkley Corporation
+  - "MTZ"         # MasTec, Inc.
+  - "GFS"         # GlobalFoundries Inc.
+  - "ZS"          # Zscaler, Inc.
+  - "STLD"        # Steel Dynamics, Inc.
+  - "Q"           # Qnity Electronics, Inc.
+  - "LPLA"        # LPL Financial Holdings Inc.
+  - "TSCO"        # Tractor Supply Company
+  - "FLEX"        # Flex Ltd
+  - "MKL"         # Markel Group Inc.
+  - "ARES"        # Ares Management Corporation
+  - "ON"          # ON Semiconductor Corporation
+  - "OMC"         # Omnicom Group Inc
+  - "BG"          # Bunge Global SA
+  - "SYF"         # Synchrony Financial
+  - "FOX"         # Fox Corporation Class B
+  - "LYB"         # LyondellBasell Industries NV
+  - "LEN"         # Lennar Corporation Class A
+  - "ZM"          # Zoom Communications, Inc. Class A
+  - "ULTA"        # Ulta Beauty Inc.
+  - "CMS"         # CMS Energy Corporation
+  - "UTHR"        # United Therapeutics Corporation
+  - "PPG"         # PPG Industries, Inc.
+  - "PHM"         # PulteGroup, Inc.
+  - "BRO"         # Brown & Brown, Inc.
+  - "AVB"         # AvalonBay Communities, Inc.
+  - "DRI"         # Darden Restaurants, Inc.
+  - "AER"         # AerCap Holdings NV
+  - "BNTX"        # BioNTech SE Sponsored ADR
+  - "CHD"         # Church & Dwight Co., Inc.
+  - "VRSN"        # VeriSign, Inc.
+  - "RF"          # Regions Financial Corporation
+  - "FCNCA"       # First Citizens BancShares, Inc. Class A
+  - "MDB"         # MongoDB, Inc. Class A
+  - "L"           # Loews Corporation
+  - "VLTO"        # Veralto Corporation
+  - "WSM"         # Williams-Sonoma, Inc.
+  - "EQR"         # Equity Residential
+  - "SOFI"        # SoFi Technologies Inc
+  - "LH"          # Labcorp Holdings Inc.
+  - "NI"          # NiSource Inc
+  - "XPO"         # XPO, Inc.
+  - "STE"         # STERIS plc
+  - "EFX"         # Equifax Inc.
+  - "WWD"         # Woodward, Inc.
+  - "DGX"         # Quest Diagnostics Incorporated
+  - "KEY"         # KeyCorp
+  - "DLTR"        # Dollar Tree, Inc.
+  - "PSTG"        # Everpure, Inc. Class A
+  - "ALAB"        # Astera Labs, Inc.
+  - "TSN"         # Tyson Foods, Inc. Class A
+  - "LDOS"        # Leidos Holdings, Inc.
+  - "RL"          # Ralph Lauren Corporation Class A
+  - "HUM"         # Humana Inc.
+  - "FSLR"        # First Solar, Inc.
+  - "MRNA"        # Moderna, Inc.
+  - "SW"          # Smurfit Westrock PLC
+  - "ATI"         # ATI Inc.
+  - "EXAS"        # Exact Sciences Corporation
+  - "NTAP"        # NetApp, Inc.
+  - "ROIV"        # Roivant Sciences Ltd.
+  - "BURL"        # Burlington Stores, Inc.
+  - "CPAY"        # Corpay, Inc.
+  - "BR"          # Broadridge Financial Solutions, Inc.
+  - "GIS"         # General Mills, Inc.
+  - "GPN"         # Global Payments Inc.
+  - "LULU"        # Lululemon athletica inc.
+  - "LUV"         # Southwest Airlines Co.
+  - "CHRW"        # C.H. Robinson Worldwide, Inc.
+  - "ALB"         # Albemarle Corporation
+  - "USFD"        # US Foods Holding Corp.
+  - "TEAM"        # Atlassian Corp Class A
+  - "FN"          # Fabrinet
+  - "RIVN"        # Rivian Automotive, Inc. Class A
+  - "NVT"         # nVent Electric plc
+  - "CRDO"        # Credo Technology Group Holding Ltd.
+  - "DIDIY"       # DiDi Global Inc. Sponsored ADR Class A
+  - "TWLO"        # Twilio, Inc. Class A
+  - "TSEM"        # Tower Semiconductor Ltd
+  - "TROW"        # T. Rowe Price Group, Inc.
+  - "JBHT"        # J.B. Hunt Transport Services, Inc.
+  - "FLUT"        # Flutter Entertainment Plc
+  - "RVMD"        # Revolution Medicines, Inc.
+  - "IOT"         # Samsara, Inc. Class A
+  - "ILMN"        # Illumina, Inc.
+  - "AS"          # Amer Sports, Inc.
+  - "RGLD"        # Royal Gold, Inc.
+  - "IP"          # International Paper Company
+  - "SNA"         # Snap-on Incorporated
+  - "FUTU"        # Futu Holdings Ltd. Sponsored ADR Class A
+  - "PFG"         # Principal Financial Group, Inc.
+  - "EXPD"        # Expeditors International of Washington, Inc.
+  - "BWXT"        # BWX Technologies, Inc.
+  - "PKG"         # Packaging Corporation of America
+  - "CRS"         # Carpenter Technology Corporation
+  - "CF"          # CF Industries Holdings, Inc.
+  - "SBAC"        # SBA Communications Corp. Class A
+  - "YUMC"        # Yum China Holdings, Inc.
+  - "EVRG"        # Evergy, Inc.
+  - "NVR"         # NVR, Inc.
+  - "AMCR"        # Amcor PLC
+  - "APG"         # APi Group Corporation
+  - "DD"          # DuPont de Nemours, Inc.
+  - "CSGP"        # CoStar Group, Inc.
+  - "INCY"        # Incyte Corporation
+  - "LNT"         # Alliant Energy Corporation
+  - "PTC"         # PTC Inc.
+  - "THC"         # Tenet Healthcare Corporation
+  - "ENTG"        # Entegris, Inc.
+  - "IFF"         # International Flavors & Fragrances Inc.
+  - "WST"         # West Pharmaceutical Services, Inc.
+  - "NXT"         # Nextpower Inc. Class A
+  - "DKS"         # Dick's Sporting Goods, Inc.
+  - "ULS"         # UL Solutions Inc. Class A
+  - "CG"          # Carlyle Group Inc
+  - "SSNC"        # SS&C Technologies Holdings, Inc.
+  - "MTSI"        # MACOM Technology Solutions Holdings, Inc.
+  - "ZBH"         # Zimmer Biomet Holdings, Inc.
+  - "FTV"         # Fortive Corp.
+  - "RBC"         # RBC Bearings Incorporated
+  - "HPQ"         # HP Inc.
+  - "VNOM"        # Viper Energy, Inc.
+  - "HOLX"        # Hologic, Inc.
+  - "PR"          # Permian Resources Corporation Class A
+  - "LII"         # Lennox International Inc.
+  - "AKAM"        # Akamai Technologies, Inc.
+  - "PHYS"        # Sprott Physical Gold Trust Units
+  - "WES"         # Western Midstream Partners, LP
+  - "BIP"         # Brookfield Infrastructure Partners L.P.
+  - "FFIV"        # F5, Inc.
+  - "CHKP"        # Check Point Software Technologies Ltd.
+  - "TOST"        # Toast, Inc. Class A
+  - "WY"          # Weyerhaeuser Company
+  - "ITT"         # ITT, Inc.
+  - "CNC"         # Centene Corporation
+  - "OVV"         # Ovintiv Inc
+  - "JBS"         # JBS N.V. Class A
+  - "SUI"         # Sun Communities, Inc.
+  - "SGI"         # Somnigroup International Inc.
+  - "PODD"        # Insulet Corporation
+  - "MKSI"        # MKS Inc.
+  - "WSO"         # Watsco, Inc.
+  - "TRMB"        # Trimble Inc.
+  - "KTOS"        # Kratos Defense & Security Solutions, Inc.
+  - "HII"         # Huntington Ingalls Industries, Inc.
+  - "BALL"        # Ball Corporation
+  - "TXT"         # Textron Inc.
+  - "CDW"         # CDW Corporation
+  - "ESS"         # Essex Property Trust, Inc.
+  - "AFRM"        # Affirm Holdings, Inc. Class A
+  - "PAA"         # Plains All American Pipeline, L.P.
+  - "TPG"         # TPG Inc Class A
+  - "VTRS"        # Viatris, Inc.
+  - "J"           # Jacobs Solutions Inc.
+  - "CLH"         # Clean Harbors, Inc.
+  - "APTV"        # Aptiv PLC
+  - "RS"          # Reliance, Inc.
+  - "KIM"         # Kimco Realty Corporation
+  - "TYL"         # Tyler Technologies, Inc.
+  - "NDSN"        # Nordson Corporation
+  - "NVMI"        # Nova Ltd.
+  - "NLY"         # Annaly Capital Management, Inc.
+  - "GRAB"        # Grab Holdings Limited Class A
+  - "INVH"        # Invitation Homes, Inc.
+  - "SN"          # SharkNinja, Inc.
+  - "WPC"         # W. P. Carey Inc.
+  - "AA"          # Alcoa Corporation
+  - "DECK"        # Deckers Outdoor Corporation
+  - "EWBC"        # East West Bancorp, Inc.
+  - "PNR"         # Pentair plc
+  - "ROKU"        # Roku, Inc. Class A
+  - "QXO"         # QXO, Inc.
+  - "OKTA"        # Okta, Inc. Class A
+  - "MKC"         # McCormick & Company, Incorporated
+  - "MAA"         # Mid-America Apartment Communities, Inc.
+  - "TLN"         # Talen Energy Corp
+  - "OWL"         # Blue Owl Capital, Inc. Class A
+  - "GGG"         # Graco Inc.
+  - "JLL"         # Jones Lang LaSalle Incorporated
+  - "IEX"         # IDEX Corporation
+  - "NWS"         # News Corporation Class B
+  - "IREN"        # IREN Limited
+  - "DTM"         # DT Midstream, Inc.
+  - "PSLV"        # Sprott Physical Silver Trust
+  - "GPC"         # Genuine Parts Company
+  - "WLK"         # Westlake Corporation
+  - "LECO"        # Lincoln Electric Holdings, Inc.
+  - "APA"         # APA Corporation
+  - "TRU"         # TransUnion
+  - "HUBS"        # HubSpot, Inc.
+  - "CSL"         # Carlisle Companies Incorporated
+  - "H"           # Hyatt Hotels Corporation Class A
+  - "COO"         # Cooper Companies, Inc.
+  - "REG"         # Regency Centers Corporation
+  - "ASND"        # Ascendis Pharma A/S Sponsored ADR
+  - "KRMN"        # Karman Holdings Inc.
+  - "BBIO"        # BridgeBio Pharma, Inc.
+  - "CPT"         # Camden Property Trust
+  - "BBY"         # Best Buy Co., Inc.
+  - "NYT"         # New York Times Company Class A
+  - "SUN"         # Sunoco LP
+  - "GWRE"        # Guidewire Software, Inc.
+  - "OHI"         # Omega Healthcare Investors, Inc.
+  - "ONON"        # On Holding AG Class A
+  - "RGA"         # Reinsurance Group of America, Incorporated
+  - "PEN"         # Penumbra, Inc.
+  - "AR"          # Antero Resources Corporation
+  - "ARCC"        # Ares Capital Corporation
+  - "EG"          # Everest Group, Ltd.
+  - "HAS"         # Hasbro, Inc.
+  - "TOL"         # Toll Brothers, Inc.
+  - "PFGC"        # Performance Food Group Co
+  - "GLPI"        # Gaming and Leisure Properties, Inc.
+  - "CACI"        # CACI International Inc Class A
+  - "MEDP"        # Medpace Holdings, Inc.
+  - "CNH"         # CNH Industrial NV
+  - "STRL"        # Sterling Infrastructure, Inc.
+  - "SMCI"        # Super Micro Computer, Inc.
+  - "ALGN"        # Align Technology, Inc.
+  - "WCC"         # WESCO International, Inc.
+  - "PAYP"        # PayPay Corporation Unsponsored ADR
+  - "CLX"         # Clorox Company
+  - "HST"         # Host Hotels & Resorts, Inc.
+  - "RNR"         # RenaissanceRe Holdings Ltd.
+  - "NBIX"        # Neurocrine Biosciences, Inc.
+  - "FIVE"        # Five Below, Inc.
+  - "GEN"         # Gen Digital Inc.
+  - "PNFP"        # Pinnacle Financial Partners, Inc.
+  - "AVY"         # Avery Dennison Corporation
+  - "LSCC"        # Lattice Semiconductor Corporation
+  - "LAMR"        # Lamar Advertising Company Class A
+  - "WMG"         # Warner Music Group Corp. Class A
+  - "SNX"         # TD SYNNEX Corporation
+  - "COKE"        # Coca-Cola Consolidated, Inc.
+  - "RGC"         # Regencell Bioscience Holdings Ltd.
+  - "BJ"          # BJ's Wholesale Club Holdings, Inc.
+  - "ELS"         # Equity LifeStyle Properties, Inc.
+  - "TIGO"        # Millicom International Cellular SA
+  - "AEIS"        # Advanced Energy Industries, Inc.
+  - "BEN"         # Franklin Resources, Inc.
+  - "NIO"         # NIO Inc. Sponsored ADR Class A
+  - "ALLE"        # Allegion Public Limited Company
+  - "RPM"         # RPM International Inc.
+  - "HRL"         # Hormel Foods Corporation
+  - "DPZ"         # Domino's Pizza, Inc.
+  - "CNA"         # CNA Financial Corporation
+  - "MAS"         # Masco Corporation
+  - "RRX"         # Regal Rexnord Corporation
+  - "MLI"         # Mueller Industries, Inc.
+  - "ELAN"        # Elanco Animal Health, Inc.
+  - "DOC"         # Healthpeak Properties, Inc.
+  - "IONQ"        # IonQ, Inc.
+  - "PINS"        # Pinterest, Inc. Class A
+  - "ALLY"        # Ally Financial Inc
+  - "FIG"         # Figma, Inc. Class A
+  - "SMMT"        # Summit Therapeutics Inc
+  - "FNF"         # Fidelity National Financial, Inc. - FNF Group
+  - "UNM"         # Unum Group
+  - "HL"          # Hecla Mining Company
+  - "GNRC"        # Generac Holdings Inc.
+  - "DKNG"        # DraftKings, Inc. Class A
+  - "DRS"         # Leonardo DRS, Inc.
+  - "PNW"         # Pinnacle West Capital Corp
+  - "JKHY"        # Jack Henry & Associates, Inc.
+  - "GMED"        # Globus Medical Inc Class A
+  - "ENSG"        # Ensign Group, Inc.
+  - "IONS"        # Ionis Pharmaceuticals, Inc.
+  - "ACM"         # AECOM
+  - "BSY"         # Bentley Systems, Incorporated Class B
+  - "UHS"         # Universal Health Services, Inc. Class B
+  - "CDE"         # Coeur Mining, Inc.
+  - "PL"          # Planet Labs PBC Class A
+  - "IT"          # Gartner, Inc.
+  - "ERIE"        # Erie Indemnity Company Class A
+  - "DT"          # Dynatrace, Inc.
+  - "CRBG"        # Corebridge Financial, Inc.
+  - "CCK"         # Crown Holdings, Inc.
+  - "AMKR"        # Amkor Technology, Inc.
+  - "TTD"         # Trade Desk, Inc. Class A
+  - "SOLV"        # Solventum Corporation
+  - "JHX"         # James Hardie Industries PLC
+  - "WTRG"        # Essential Utilities, Inc.
+  - "SOLS"        # Solstice Advanced Materials, Inc.
+  - "JAZZ"        # Jazz Pharmaceuticals Public Limited Company
+  - "GDDY"        # GoDaddy, Inc. Class A
+  - "UDR"         # UDR, Inc.
+  - "BWA"         # BorgWarner Inc.
+  - "WBS"         # Webster Financial Corporation
+  - "SF"          # Stifel Financial Corp
+  - "MOD"         # Modine Manufacturing Company
+  - "GH"          # Guardant Health, Inc.
+  - "EVR"         # Evercore Inc. Class A
+  - "TXRH"        # Texas Roadhouse, Inc.
+  - "AGNC"        # AGNC Investment Corp.
+  - "AM"          # Antero Midstream Corp.
+  - "SWK"         # Stanley Black & Decker, Inc.
+  - "FHN"         # First Horizon Corporation
+  - "AIZ"         # Assurant, Inc.
+  - "GL"          # Globe Life Inc.
+  - "EXEL"        # Exelixis, Inc.
+  - "WMS"         # Advanced Drainage Systems, Inc.
+  - "Z"           # Zillow Group, Inc. Class C
+  - "NTNX"        # Nutanix, Inc. Class A
+  - "DINO"        # HF Sinclair Corporation
+  - "EQH"         # Equitable Holdings, Inc.
+  - "SCI"         # Service Corporation International
+  - "AFG"         # American Financial Group, Inc.
+  - "ARMK"        # Aramark
+  - "BF.A"        # Brown-Forman Corporation Class A
+  - "WYNN"        # Wynn Resorts, Limited
+  - "IVZ"         # Invesco Ltd.
+  - "FPS"         # Forgent Power Solutions, Inc. Class A
+  - "BMRN"        # BioMarin Pharmaceutical Inc.
+  - "RRC"         # Range Resources Corporation
+  - "SJM"         # J.M. Smucker Company
+  - "TTMI"        # TTM Technologies, Inc.
+  - "DY"          # Dycom Industries, Inc.
+  - "ONTO"        # Onto Innovation, Inc.
+  - "BILI"        # Bilibili Inc. Sponsored ADR Class Z
+  - "GME"         # GameStop Corp. Class A
+  - "AVAV"        # AeroVironment, Inc.
+  - "XP"          # XP Inc. Class A
+  - "MDGL"        # Madrigal Pharmaceuticals, Inc.
+  - "CELH"        # Celsius Holdings, Inc.
+  - "DVA"         # DaVita Inc.
+  - "PSKY"        # Paramount Skydance Corporation Class B
+  - "CAVA"        # CAVA Group, Inc.
+  - "ZBRA"        # Zebra Technologies Corporation Class A
+  - "RBRK"        # Rubrik, Inc. Class A
+  - "RMBS"        # Rambus Inc.
+  - "CR"          # Crane Company
+  - "AES"         # AES Corporation
+  - "W"           # Wayfair, Inc. Class A
+  - "EQX"         # Equinox Gold Corp.
+  - "AMH"         # American Homes 4 Rent Class A
+  - "DCI"         # Donaldson Company, Inc.
+  - "GTLS"        # Chart Industries, Inc.
+  - "WTS"         # Watts Water Technologies, Inc. Class A
+  - "HLI"         # Houlihan Lokey, Inc. Class A
+  - "CHWY"        # Chewy, Inc. Class A
+  - "AIT"         # Applied Industrial Technologies, Inc.
+  - "OKLO"        # Oklo Inc. Class A
+  - "EGP"         # EastGroup Properties, Inc.
+  - "BLD"         # TopBuild Corp.
+  - "RVTY"        # Revvity, Inc.
+  - "SPXC"        # SPX Technologies, Inc.
+  - "EHC"         # Encompass Health Corporation
+  - "BMNR"        # BitMine Immersion Technologies Inc
+  - "IBRX"        # ImmunityBio Inc
+  - "BAH"         # Booz Allen Hamilton Holding Corporation Class A
+  - "OGE"         # OGE Energy Corp.
+  - "SEIC"        # SEI Investments Company
+  - "PAG"         # Penske Automotive Group, Inc.
+  - "ALSN"        # Allison Transmission Holdings, Inc.
+  - "DOCU"        # DocuSign, Inc.
+  - "MP"          # MP Materials Corp Class A
+  - "CNM"         # Core & Main, Inc. Class A
+  - "MGM"         # MGM Resorts International
+  - "FLS"         # Flowserve Corporation
+  - "MOG.A"       # Moog Inc. Class A
+  - "IESC"        # IES Holdings, Inc.
+  - "ORI"         # Old Republic International Corporation
+  - "BLDR"        # Builders FirstSource, Inc.
+  - "MASI"        # Masimo Corporation
+  - "EDU"         # New Oriental Education & Technology Group, Inc. Sponsored A
+  - "LKNCY"       # Luckin Coffee, Inc. Sponsored ADR Class A
+  - "SFD"         # Smithfield Foods, Inc.
+  - "GAP"         # Gap, Inc.
+  - "CART"        # Maplebear Inc.
+  - "NCLH"        # Norwegian Cruise Line Holdings Ltd.
+  - "AHR"         # American Healthcare REIT, Inc.
+  - "ADC"         # Agree Realty Corporation
+  - "RYAN"        # Ryan Specialty Holdings, Inc. Class A
+  - "SITM"        # SiTime Corporation
+  - "JOBY"        # Joby Aviation, Inc.
+  - "TTC"         # Toro Company
+  - "OSK"         # Oshkosh Corp
+  - "WTFC"        # Wintrust Financial Corporation
+  - "AOS"         # A. O. Smith Corporation
+  - "DAR"         # Darling Ingredients Inc
+  - "FRT"         # Federal Realty Investment Trust
+  - "SSB"         # SouthState Bank Corporation
+  - "DDS"         # Dillard's, Inc. Class A
+  - "NFG"         # National Fuel Gas Company
+  - "PCOR"        # Procore Technologies Inc
+  - "ACI"         # Albertsons Companies, Inc. Class A
+  - "BRX"         # Brixmor Property Group, Inc.
+  - "KNX"         # Knight-Swift Transportation Holdings Inc. Class A
+  - "SAIA"        # Saia, Inc.
+  - "TEM"         # Tempus AI, Inc. Class A
+  - "SARO"        # StandardAero, Inc.
+  - "BROS"        # Dutch Bros, Inc. Class A
+  - "FRHC"        # Freedom Holding Corp.
+  - "YMM"         # Full Truck Alliance Co. Ltd. Sponsored ADR
+  - "CEF"         # Sprott Physical Gold and Silver Trust Units
+  - "BPOP"        # Popular, Inc.
+  - "AYI"         # Acuity Inc.
+  - "OC"          # Owens Corning
+  - "BAX"         # Baxter International Inc.
+  - "HSIC"        # Henry Schein, Inc.
+  - "AUR"         # Aurora Innovation, Inc. Class A
+  - "FCFS"        # FirstCash Holdings, Inc.
+  - "MUSA"        # Murphy USA, Inc.
+  - "UMBF"        # UMB Financial Corporation
+  - "CFR"         # Cullen/Frost Bankers, Inc.
+  - "GLXY"        # Galaxy Digital Inc. Class A
+  - "CGNX"        # Cognex Corporation
+  - "ONB"         # Old National Bancorp
+  - "TAP"         # Molson Coors Beverage Company Class B
+  - "MANH"        # Manhattan Associates, Inc.
+  - "CUBE"        # CubeSmart
+  - "UHAL"        # U-Haul Holding Company
+  - "HESM"        # Hess Midstream LP Class A
+  - "PPC"         # Pilgrim's Pride Corporation
+  - "LFUS"        # Littelfuse, Inc.
+  - "AGCO"        # AGCO Corporation
+  - "BXP"         # BXP Inc
+  - "ARE"         # Alexandria Real Estate Equities, Inc.
+  - "SWKS"        # Skyworks Solutions, Inc.
+  - "PRAX"        # Praxis Precision Medicines, Inc.
+  - "JEF"         # Jefferies Financial Group Inc.
+  - "BTSG"        # BrightSpring Health Services, Inc.
+  - "TTEK"        # Tetra Tech, Inc.
+  - "ZION"        # Zions Bancorporation NA
+  - "TECH"        # Bio-Techne Corporation
+  - "U"           # Unity Software, Inc.
+  - "ESI"         # Element Solutions Inc
+  - "NNN"         # NNN REIT, Inc.
+  - "CTRE"        # CareTrust REIT, Inc.
+  - "LLYVA"       # Liberty Live Holdings, Inc. Registered Series -A-
+  - "PCVX"        # Vaxcyte, Inc.
+  - "AXSM"        # Axsome Therapeutics, Inc.
+  - "IDCC"        # InterDigital, Inc.
+  - "ATR"         # AptarGroup, Inc.
+  - "LINE"        # Lineage, Inc.
+  - "COLB"        # Columbia Banking System, Inc.
+  - "ARWR"        # Arrowhead Pharmaceuticals, Inc.
+  - "DOCN"        # DigitalOcean Holdings, Inc.
+  - "PRI"         # Primerica, Inc.
+  - "CAMT"        # Camtek Ltd
+  - "REXR"        # Rexford Industrial Realty, Inc.
+  - "VICR"        # Vicor Corporation
+  - "R"           # Ryder System, Inc.
+  - "JHG"         # Janus Henderson Group PLC
+  - "CWEN"        # Clearway Energy, Inc. Class C
+  - "ALV"         # Autoliv Inc.
+  - "GSAT"        # Globalstar, Inc.
+  - "VMI"         # Valmont Industries, Inc.
+  - "FR"          # First Industrial Realty Trust, Inc.
+  - "CRL"         # Charles River Laboratories International, Inc.
+  - "VIAV"        # Viavi Solutions Inc
+  - "EMN"         # Eastman Chemical Company
+  - "FDS"         # FactSet Research Systems Inc.
+  - "UGI"         # UGI Corporation
+  - "PRIM"        # Primoris Services Corporation
+  - "ICLR"        # ICON Plc
+  - "BOKF"        # BOK Financial Corporation
+  - "MOS"         # Mosaic Company
+  - "APLD"        # Applied Digital Corporation
+  - "NE"          # Noble Corporation PLC Class A
+  - "SNAP"        # Snap, Inc. Class A
+  - "WAL"         # Western Alliance Bancorp
+  - "KNSL"        # Kinsale Capital Group, Inc.
+  - "VIPS"        # Vipshop Holdings Ltd Sponsored ADR
+  - "NUVL"        # Nuvalent, Inc. Class A
+  - "FORM"        # FormFactor, Inc.
+  - "POOL"        # Pool Corporation
+  - "ZWS"         # Zurn Elkay Water Solutions Corporation
+  - "FRO"         # Frontline Plc
+  - "SIRI"        # SiriusXM Holdings Inc.
+  - "CYTK"        # Cytokinetics, Incorporated
+  - "IDA"         # IDACORP, Inc.
+  - "PEGA"        # Pegasystems Inc.
+  - "MSGS"        # Madison Square Garden Sports Corp. Class A
+  - "SFM"         # Sprouts Farmers Market, Inc.
+  - "CHRD"        # Chord Energy Corporation
+  - "KNTK"        # Kinetik Holdings Inc. Class A
+  - "AXS"         # Axis Capital Holdings Limited
+  - "HALO"        # Halozyme Therapeutics, Inc.
+  - "CHYM"        # Chime Financial, Inc. Class A
+  - "CAG"         # Conagra Brands, Inc.
+  - "JXN"         # Jackson Financial Incorporation Class A
+  - "TX"          # Ternium S.A. Sponsored ADR
+  - "EPAM"        # EPAM Systems, Inc.
+  - "AMG"         # Affiliated Managers Group, Inc.
+  - "LKQ"         # LKQ Corporation
+  - "MTDR"        # Matador Resources Company
+  - "KRYS"        # Krystal Biotech, Inc.
+  - "QRVO"        # Qorvo, Inc.
+  - "LEVI"        # Levi Strauss & Co. Class A
+  - "MTCH"        # Match Group, Inc.
+  - "AL"          # Air Lease Corporation Class A
+  - "IBP"         # Installed Building Products, Inc.
+  - "LBRDA"       # Liberty Broadband Corp. Class A
+  - "AAOI"        # Applied Optoelectronics, Inc.
+  - "SANM"        # Sanmina Corporation
+  - "BIO"         # Bio-Rad Laboratories, Inc. Class A
+  - "FIGR"        # Figure Technology Solutions, Inc. Class A
+  - "ARW"         # Arrow Electronics, Inc.
+  - "AAL"         # American Airlines Group Inc.
+  - "YOU"         # Clear Secure, Inc. Class A
+  - "RIG"         # Transocean Ltd.
+  - "AWI"         # Armstrong World Industries, Inc.
+  - "SSD"         # Simpson Manufacturing Co., Inc.
+  - "SMTC"        # Semtech Corporation
+  - "SAIL"        # SailPoint, Inc.
+  - "CBSH"        # Commerce Bancshares, Inc.
+  - "CDP"         # COPT Defense Properties
+  - "DOX"         # Amdocs Limited
+  - "KEX"         # Kirby Corporation
+  - "STAG"        # STAG Industrial, Inc.
+  - "NXST"        # Nexstar Media Group, Inc.
+  - "CRUS"        # Cirrus Logic, Inc.
+  - "MOH"         # Molina Healthcare, Inc.
+  - "INGR"        # Ingredion Incorporated
+  - "NOV"         # NOV Inc.
+  - "ESE"         # ESCO Technologies Inc.
+  - "LUMN"        # Lumen Technologies, Inc.
+  - "SM"          # SM Energy Company
+  - "TAL"         # TAL Education Group Sponsored ADR Class A
+  - "HQY"         # HealthEquity Inc
+  - "MORN"        # Morningstar, Inc.
+  - "TKR"         # Timken Company
+  - "FLR"         # Fluor Corporation
+  - "CWAN"        # Clearwater Analytics Holdings, Inc. Class A
+  - "PAYC"        # Paycom Software, Inc.
+  - "WULF"        # TeraWulf Inc.
+  - "CMC"         # Commercial Metals Company
+  - "PRMB"        # Primo Brands Corporation Class A
+  - "SLAB"        # Silicon Laboratories Inc.
+  - "VFS"         # VinFast Auto Ltd.
+  - "TEX"         # Terex Corporation
+  - "MSA"         # MSA Safety, Inc.
+  - "PB"          # Prosperity Bancshares, Inc.(R)
+  - "ACLX"        # Arcellx, Inc.
+  - "VSAT"        # ViaSat, Inc.
+  - "EPRT"        # Essential Properties Realty Trust, Inc.
+  - "VLY"         # Valley National Bancorp
+  - "JBTM"        # JBT Marel Corporation
+  - "ORA"         # Ormat Technologies, Inc.
+  - "VIRT"        # Virtu Financial, Inc. Class A
+  - "VFC"         # V.F. Corporation
+  - "FSS"         # Federal Signal Corporation
+  - "VAL"         # Valaris Ltd.
+  - "LNC"         # Lincoln National Corp
+  - "POWL"        # Powell Industries, Inc.
+  - "G"           # Genpact Limited
+  - "AN"          # AutoNation, Inc.
+  - "WFRD"        # Weatherford International plc
+  - "MBLY"        # Mobileye Global, Inc. Class A
+  - "RGEN"        # Repligen Corporation
+  - "AAON"        # AAON, Inc.
+  - "BZ"          # Kanzhun Ltd. Sponsored ADR
+  - "AMTM"        # Amentum Holdings, Inc.
+  - "BIRK"        # Birkenstock Holding plc
+  - "MIDD"        # Middleby Corporation
+  - "PATH"        # UiPath, Inc. Class A
+  - "FNMA"        # Federal National Mortgage Association
+  - "AROC"        # Archrock Inc.
+  - "POR"         # Portland General Electric Company
+  - "AGX"         # Argan, Inc.
+  - "PDI"         # PIMCO Dynamic Income Fund
+  - "EAT"         # Brinker International, Inc.
+  - "COMP"        # Compass Inc Class A
+  - "TXNM"        # TXNM Energy, Inc.
+  - "ROAD"        # Construction Partners, Inc. Class A
+  - "STWD"        # Starwood Property Trust, Inc.
+  - "VOYA"        # Voya Financial, Inc.
+  - "ENS"         # EnerSys
+  - "TRNO"        # Terreno Realty Corporation
+  - "PTGX"        # Protagonist Therapeutics, Inc.
+  - "KYMR"        # Kymera Therapeutics, Inc.
+  - "TTAN"        # ServiceTitan, Inc. Class A
+  - "CPB"         # Campbell's Company
+  - "MHK"         # Mohawk Industries, Inc.
+  - "CRK"         # Comstock Resources, Inc.
+  - "GKOS"        # Glaukos Corp
+  - "SWX"         # Southwest Gas Holdings, Inc.
+  - "PCTY"        # Paylocity Holding Corp.
+  - "BYD"         # Boyd Gaming Corporation
+  - "SEE"         # Sealed Air Corporation
+  - "OMF"         # OneMain Holdings, Inc.
+  - "CE"          # Celanese Corporation
+  - "UEC"         # Uranium Energy Corp.
+  - "RRR"         # Red Rock Resorts, Inc. Class A
+  - "KMX"         # CarMax, Inc.
+  - "BLTE"        # Belite Bio, Inc. ADR
+  - "SRAD"        # Sportradar Group AG Class A
+  - "MKTX"        # MarketAxess Holdings Inc.
+  - "QBTS"        # D-Wave Quantum Inc.
+  - "CIFR"        # Cipher Digital Inc.
+  - "LEA"         # Lear Corporation
+  - "THG"         # Hanover Insurance Group, Inc.
+  - "HXL"         # Hexcel Corporation
+  - "APPF"        # AppFolio Inc Class A
+  - "HR"          # Healthcare Realty Trust Incorporated Class A
+  - "GATX"        # GATX Corporation
+  - "PLNT"        # Planet Fitness, Inc. Class A
+  - "OS"          # Onestream, Inc. Class A
+  - "UWMC"        # UWM Holdings Corp. Class A
+  - "ECG"         # Everus Construction Group, Inc.
+  - "SITE"        # SiteOne Landscape Supply, Inc.
+  - "BLSH"        # Bullish
+  - "RYN"         # Rayonier Inc.
+  - "FAF"         # First American Financial Corporation
+  - "LAD"         # Lithia Motors, Inc.
+  - "GXO"         # GXO Logistics Inc
+  - "CHDN"        # Churchill Downs Incorporated
+  - "ALGM"        # Allegro MicroSystems, Inc.
+  - "HUT"         # Hut 8 Corp.
+  - "LTH"         # Life Time Group Holdings, Inc.
+  - "FNB"         # F.N.B. Corporation
+  - "ESAB"        # ESAB Corporation
+  - "WH"          # Wyndham Hotels & Resorts, Inc.
+  - "NEU"         # NewMarket Corporation
+  - "CNX"         # CNX Resources Corporation
+  - "GTES"        # Gates Industrial Corporation plc
+  - "KVYO"        # Klaviyo, Inc. Class A
+  - "RYTM"        # Rhythm Pharmaceuticals, Inc.
+  - "MGY"         # Magnolia Oil & Gas Corp. Class A
+  - "GBCI"        # Glacier Bancorp, Inc.
+  - "OLLI"        # Ollie's Bargain Outlet Holdings Inc
+  - "COGT"        # Cogent Biosciences, Inc.
+  - "EXP"         # Eagle Materials Inc.
+  - "TMHC"        # Taylor Morrison Home Corporation
+  - "ACT"         # Enact Holdings Inc
+  - "OTF"         # Blue Owl Technology Finance Corp.
+  - "DLB"         # Dolby Laboratories, Inc. Class A
+  - "RHP"         # Ryman Hospitality Properties, Inc.
+  - "HLNE"        # Hamilton Lane Incorporated Class A
+  - "DBX"         # Dropbox, Inc. Class A
+  - "BXSL"        # Blackstone Secured Lending Fund
+  - "STEP"        # StepStone Group, Inc. Class A
+  - "LW"          # Lamb Weston Holdings, Inc.
+  - "CRC"         # California Resources Corp
+  - "CBC"         # Central Bancompany, Inc.
+  - "OBDC"        # Blue Owl Capital Corporation
+  - "FND"         # Floor & Decor Holdings, Inc. Class A
+  - "AXTA"        # Axalta Coating Systems Ltd.
+  - "UBSI"        # United Bankshares, Inc.
+  - "BLCO"        # Bausch + Lomb Corporation
+  - "BEPC"        # Brookfield Renewable Holdings Corporation Class A
+  - "LB"          # LandBridge Company LLC Class A
+  - "MTG"         # MGIC Investment Corporation
+  - "IFS"         # Intercorp Financial Services Inc.
+  - "URBN"        # Urban Outfitters, Inc.
+  - "GLNG"        # Golar LNG Limited
+  - "LOAR"        # Loar Holdings Inc.
+  - "APGE"        # Apogee Therapeutics, Inc.
+  - "PTCT"        # PTC Therapeutics, Inc.
+  - "CGON"        # CG Oncology, Inc.
+  - "ESTC"        # Elastic NV
+  - "AUGO"        # Aura Minerals Inc
+  - "GLBE"        # Global-e Online Ltd.
+  - "ESNT"        # Essent Group Ltd.
+  - "RIOT"        # Riot Platforms, Inc.
+  - "PBF"         # PBF Energy, Inc. Class A
+  - "NJR"         # New Jersey Resources Corporation
+  - "PSN"         # Parsons Corporation
+  - "CAI"         # Caris Life Sciences, Inc.
+  - "PLXS"        # Plexus Corp.
+  - "GOLF"        # Acushnet Holdings Corp.
+  - "MIRM"        # Mirum Pharmaceuticals, Inc.
+  - "NPO"         # Enpro Inc.
+  - "CZR"         # Caesars Entertainment, Inc.
+  - "MUR"         # Murphy Oil Corporation
+  - "PACS"        # PACS Group, Inc.
+  - "SGHC"        # Super Group (SGHC) Limited
+  - "WEX"         # WEX Inc.
+  - "ENPH"        # Enphase Energy, Inc.
+  - "SR"          # Spire Inc.
+  - "WTM"         # White Mountains Insurance Group Ltd
+  - "OGS"         # ONE Gas, Inc.
+  - "PIPR"        # Piper Sandler Companies
+  - "LYFT"        # Lyft, Inc. Class A
+  - "BRKR"        # Bruker Corporation
+  - "RLI"         # RLI Corp.
+  - "TERN"        # Terns Pharmaceuticals, Inc.
+  - "RGTI"        # Rigetti Computing, Inc.
+  - "VSNT"        # Versant Media Group, Inc. Class A
+  - "BCPC"        # Balchem Corp
+  - "CNR"         # Core Natural Resources, Inc.
+  - "FCN"         # FTI Consulting, Inc.
+  - "FLG"         # Flagstar Bank, National Association
+  - "FLG/PU"      # Flagstar Bank, National Association Bifurcated Option Note
+  - "REZI"        # Resideo Technologies, Inc.
+  - "CORZ"        # Core Scientific Inc
+  - "HOMB"        # Home BancShares, Inc.
+  - "GVA"         # Granite Construction Incorporated
+  - "AVTR"        # Avantor, Inc.
+  - "VNT"         # Vontier Corp
+  - "INGM"        # Ingram Micro Holding Corporation
+  - "BKH"         # Black Hills Corporation
+  - "ABCB"        # Ameris Bancorp
+  - "CHE"         # Chemed Corporation
+  - "HWC"         # Hancock Whitney Corporation
+  - "LSTR"        # Landstar System, Inc.
+  - "HIMS"        # Hims & Hers Health, Inc. Class A
+  - "ACA"         # Arcosa, Inc.
+  - "GPGI"        # GPGI, Inc. Class A
+  - "EQPT"        # EquipmentShare.com, Inc. Class A
+
   # ── 보유종목 ─────────────────────
-  - "DOW"         # Dow Inc
   - "NNDM"        # Nano Dimension Ltd
   - "INUV"        # Inuvo, Inc.
-  - "IONQ"        # IONQ Inc
   - "MVIS"        # Microvision Inc
   - "ARKG"        # ARK Genomic Revolution ETF
   - "SPY"         # SPDR S&P 500 Trust ETF
   # ── 배당 보유종목 ─────────────────────
   - "JEPI"        # JPMorgan Equity Premium Income ETF
-  - "AGNC"        # AGNC Investment Corp
   - "KBWY"        # Invesco KBW Premium Yield Equity REIT ETF
   - "RA"          # Brookfield Real Assets Income Fund Inc
   - "QYLD"        # Global X NASDAQ 100 Covered Call ETF
   # ── 종목 검토 ─────────────────────
-  - "MRVL"        # Marvell Technology, Inc.
+
