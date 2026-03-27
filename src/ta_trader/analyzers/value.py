@@ -101,7 +101,7 @@ class ValueInvestingAnalyzer(BaseAnalyzer[ValueAnalysisResult]):
 
     # ── 공개 API ──────────────────────────────────────────
 
-    def analyze(self) -> ValueAnalysisResult:
+    def analyze(self, df: pd.DataFrame | None = None) -> ValueAnalysisResult:
         """5단계 가치 투자 분석 실행 → ValueAnalysisResult 반환"""
         logger.info("가치 투자 분석 시작", ticker=self.ticker)
 
@@ -175,6 +175,7 @@ class ValueInvestingAnalyzer(BaseAnalyzer[ValueAnalysisResult]):
 
     def analyze_with_llm(
         self,
+        df:          pd.DataFrame | None = None,
         provider:    str | None = None,
         api_key:     str | None = None,
         model:       str | None = None,
@@ -198,7 +199,7 @@ class ValueInvestingAnalyzer(BaseAnalyzer[ValueAnalysisResult]):
         from ta_trader.llm.factory import create_llm_analyzer
 
         # 기술적 분석이 아직 실행되지 않았으면 실행
-        result = self.analyze()
+        result = self.analyze(df)
         df = self._calc.dataframe
 
         llm = create_llm_analyzer(provider=provider, api_key=api_key, model=model)

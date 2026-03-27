@@ -32,7 +32,12 @@ class IndicatorCalculator:
 
     def __init__(self, df: pd.DataFrame) -> None:
         self._df = df.copy()
-        self._compute()
+
+        # ── 여러 컬럼 존재 체크 ─────────────────────────────
+        required = ["macd", "bb_upper", "adx", "atr"]
+        
+        if not all(col in df.columns for col in required):
+            self._compute()
 
     def _compute(self) -> None:
         try:

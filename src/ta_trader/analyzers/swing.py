@@ -72,12 +72,14 @@ class SwingTradingAnalyzer(BaseAnalyzer[SwingAnalysisResult]):
     def __init__(
         self,
         ticker: str,
+        name: str = None,
         period: str = "1y",
         interval: str = "1d",
         capital: float = POSITION_DEFAULT_CAPITAL,
         risk_pct: float = POSITION_RISK_PER_TRADE_PCT,
+        last_trading_day: str = None,
     ) -> None:
-        super().__init__(ticker, period=period, interval=interval)
+        super().__init__(ticker, period=period, interval=interval, last_trading_day=last_trading_day)
         self.capital = capital
         self.risk_pct = risk_pct
 
@@ -95,16 +97,16 @@ class SwingTradingAnalyzer(BaseAnalyzer[SwingAnalysisResult]):
 
     # ── 데이터 수집 (SwingIndicatorCalculator 사용) ────────
 
-    def _fetch_data(self) -> None:
-        """BaseAnalyzer의 _fetch_data를 오버라이드하여 SwingIndicatorCalculator 사용"""
-        fetcher = DataFetcher(period=self.period, interval=self.interval)
-        self._name, self._df = fetcher.fetch(self.ticker)
-        self._calc = SwingIndicatorCalculator(self._df)
-        self._name, self._info = fetcher.info(self.ticker)
+    #def _fetch_data(self) -> None:
+    #    """BaseAnalyzer의 _fetch_data를 오버라이드하여 SwingIndicatorCalculator 사용"""
+    #    fetcher = DataFetcher(period=self.period, interval=self.interval)
+    #    self._name, self._df = fetcher.fetch(self.ticker)
+    #    self._calc = SwingIndicatorCalculator(self._df)
+    #    self._name, self._info = fetcher.info(self.ticker)
 
     # ── 메인 분석 ─────────────────────────────────────────
 
-    def analyze(self) -> SwingAnalysisResult:
+    def analyze(self, df: pd.DataFrame | None = None) -> SwingAnalysisResult:
         """6단계 스윙 트레이딩 분석 파이프라인 실행"""
 
         # 0. 데이터 수집 & 지표 계산
@@ -164,6 +166,7 @@ class SwingTradingAnalyzer(BaseAnalyzer[SwingAnalysisResult]):
 
     def analyze_with_llm(
         self,
+        df:          pd.DataFrame | None = None,
         provider:    str | None = None,
         api_key:     str | None = None,
         model:       str | None = None,
@@ -187,7 +190,7 @@ class SwingTradingAnalyzer(BaseAnalyzer[SwingAnalysisResult]):
         from ta_trader.llm.factory import create_llm_analyzer
 
         # 기술적 분석이 아직 실행되지 않았으면 실행
-        result = self.analyze()
+        result = self.analyze(df)
         df = self._calc.dataframe
 
         llm = create_llm_analyzer(provider=provider, api_key=api_key, model=model)

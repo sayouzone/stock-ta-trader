@@ -13,8 +13,9 @@ from typing import Any, Generic, TypeVar
 
 from ta_trader.data.fetcher import DataFetcher
 from ta_trader.indicators.calculator import IndicatorCalculator
+from ta_trader.indicators.swing_calculator import SwingIndicatorCalculator
 from ta_trader.models import TradingStyle
-from ta_trader.style_config import get_style_config
+from ta_trader.config.style_config import get_style_config
 from ta_trader.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -36,9 +37,11 @@ class BaseAnalyzer(ABC, Generic[OutputT]):
     def __init__(
         self,
         ticker: str,
+        name: str = None,
         period: str = "6mo",
         interval: str = "1d",
         trading_style: TradingStyle = TradingStyle.SWING,
+        last_trading_day: str = None,
     ) -> None:
         self._logger = get_logger(self.__class__.__name__)
 
@@ -50,10 +53,14 @@ class BaseAnalyzer(ABC, Generic[OutputT]):
         self._calc: Optional[IndicatorCalculator] = None
         self._df: Optional[pd.DataFrame] = None
         self._info: dict = {}
-        self._name: str = ticker
+        self._name: str = name or ticker
         # Short-Term : SHORT_DEFAULT_PERIOD = "6mo"
         # Value : VALUE_DEFAULT_PERIOD = "2y"
         # Growth : GROWTH_DEFAULT_PERIOD = "1y"
+
+        self.last_trading_day = last_trading_day
+        if not self.last_trading_day:
+            self.last_trading_day = self._last_trading_day()
 
     @property
     def calculator(self) -> IndicatorCalculator | None:
@@ -71,7 +78,7 @@ class BaseAnalyzer(ABC, Generic[OutputT]):
         """에이전트 역할 설명 (한국어)"""
 
     @abstractmethod
-    def analyze(self) -> OutputT:
+    def analyze(self, df: pd.DataFrame | None = None) -> OutputT:
         """
         에이전트 메인 실행 로직.
 
@@ -85,6 +92,7 @@ class BaseAnalyzer(ABC, Generic[OutputT]):
     @abstractmethod
     def analyze_with_llm(
         self, 
+        df:          pd.DataFrame | None = None,
         provider:    str | None = None,
         api_key:     str | None = None,
         model:       str | None = None,
@@ -107,13 +115,20 @@ class BaseAnalyzer(ABC, Generic[OutputT]):
 
     # ── 데이터 수집 ───────────────────────────────────────
 
-    def _fetch_data(self) -> None:
+    def _fetch_data(self, df: pd.DataFrame | None = None) -> None:
         """OHLCV + yfinance info 수집"""
         fetcher = DataFetcher(period=self.period, interval=self.interval)
-        self._name, self._df = fetcher.fetch(self.ticker)
+        
+        self._df = fetcher.fetch(self.ticker) if not df else df.copy()
 
-        self._calc = IndicatorCalculator(self._df)
+        #self._calc = IndicatorCalculator(self._df)
+        self._calc = SwingIndicatorCalculator(self._df)
         self._name, self._info = fetcher.info(self.ticker)
+
+    def _last_trading_day(self) -> str | None:
+        """ticker의 마지막 거래일 반환"""
+        fetcher = DataFetcher(period=self.period, interval=self.interval)
+        return fetcher.last_trading_day(self.ticker)
 
     def on_error(self, error: Exception, input_data: InputT) -> None:
         """에러 발생 시 훅 (기본: 로깅)"""

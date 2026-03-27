@@ -95,7 +95,7 @@ class GrowthMomentumAnalyzer(BaseAnalyzer[GrowthAnalysisResult]):
     def role(self) -> str:
         return "시장 데이터 수집 및 기술적 지표 연산"
 
-    def analyze(self) -> GrowthAnalysisResult:
+    def analyze(self, df: pd.DataFrame | None = None) -> GrowthAnalysisResult:
         """6단계 전체 분석 파이프라인 실행"""
         # 0. 데이터 수집
         self._fetch_data()
@@ -162,6 +162,7 @@ class GrowthMomentumAnalyzer(BaseAnalyzer[GrowthAnalysisResult]):
 
     def analyze_with_llm(
         self,
+        df:          pd.DataFrame | None = None,
         provider:    str | None = None,
         api_key:     str | None = None,
         model:       str | None = None,
@@ -185,7 +186,7 @@ class GrowthMomentumAnalyzer(BaseAnalyzer[GrowthAnalysisResult]):
         from ta_trader.llm.factory import create_llm_analyzer
 
         # 기술적 분석이 아직 실행되지 않았으면 실행
-        result = self.analyze()
+        result = self.analyze(df)
         df = self._calc.dataframe
 
         llm = create_llm_analyzer(provider=provider, api_key=api_key, model=model)

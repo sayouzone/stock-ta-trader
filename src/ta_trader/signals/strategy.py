@@ -33,7 +33,7 @@ from ta_trader.constants.short import (
 )
 from ta_trader.models.short import IndicatorResult, Signal, WeightSet
 from ta_trader.signals.regime import RegimeContext
-from ta_trader.style_config import StyleConfig
+from ta_trader.config.style_config import StyleConfig
 
 
 class BaseStrategy(ABC):

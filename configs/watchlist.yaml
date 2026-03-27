@@ -3219,7 +3219,7 @@ watchlist:
   - "CNR"         # Core Natural Resources, Inc.
   - "FCN"         # FTI Consulting, Inc.
   - "FLG"         # Flagstar Bank, National Association
-  - "FLG/PU"      # Flagstar Bank, National Association Bifurcated Option Note
+  #- "FLG/PU"      # Flagstar Bank, National Association Bifurcated Option Note
   - "REZI"        # Resideo Technologies, Inc.
   - "CORZ"        # Core Scientific Inc
   - "HOMB"        # Home BancShares, Inc.

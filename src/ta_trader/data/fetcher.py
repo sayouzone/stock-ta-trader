@@ -48,17 +48,7 @@ class DataFetcher:
         """
         logger.info("데이터 수집 시작", ticker=ticker, period=self.period, interval=self.interval)
 
-        try:
-            info = yf.Ticker(ticker).info
-            #logger.info("종목 정보", ticker=ticker, info=info)
-
-            name = (
-                info.get("displayName")
-                or info.get("shortName")
-                or info.get("longName")
-                or ticker
-            )
-            
+        try:            
             df = yf.download(
                 ticker,
                 period=self.period,
@@ -84,7 +74,7 @@ class DataFetcher:
             )
 
         logger.info("데이터 수집 완료", ticker=ticker, rows=len(df))
-        return name, df
+        return df
 
     def info(self, ticker: str) -> tuple[str, dict]:
         # yfinance info (펀더멘털)
@@ -121,3 +111,12 @@ class DataFetcher:
             name = stock.name or name
 
         return name, info
+
+    def last_trading_day(self, ticker: str) -> str | None:
+        """ticker의 마지막 거래일 반환"""
+        hist = yf.Ticker(ticker).history(period="5d")  # 최근 5거래일만
+
+        if hist.empty:
+            return None
+
+        return hist.index[-1].date().strftime("%Y%m%d")

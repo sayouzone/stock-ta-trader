@@ -41,9 +41,8 @@ from ta_trader.visualization.swing import SwingChartVisualizer
 from ta_trader.visualization.position import PositionChartVisualizer
 from ta_trader.visualization.growth import GrowthChartVisualizer
 from ta_trader.visualization.value import ValueChartVisualizer
-
+from ta_trader.data.fetcher import DataFetcher
 from ta_trader.data.krx_stock_fetcher import KRXStockFetcher
-
 from ta_trader.agents import AgentOrchestrator, OrchestratorConfig
 from ta_trader.agents.risk import RiskConfig
 from ta_trader.agents.execution import DryRunBackend, ExecutionConfig
@@ -103,6 +102,7 @@ def cli() -> None:
 @click.option("--save-chart", is_flag=True,   help="차트를 reports/ 폴더에 저장")
 @click.option("--no-chart",   is_flag=True,   help="차트 표시 안 함")
 @click.option("--save-report",is_flag=True,   help="분석결과를 reports/ 폴더에 저장")
+@click.option("--save-csv",   is_flag=True,   help="마켓과 기술지표 분석 데이터를 reports/ 폴더에 저장")
 @click.option("--llm",        is_flag=True,   help="Anthropic Claude LLM 해석 추가 (ANTHROPIC_API_KEY 필요)")
 @click.option("--llm-stream", is_flag=True,   help="LLM 응답을 스트리밍으로 출력")
 @click.option("--llm-provider", default=None,
@@ -110,7 +110,7 @@ def cli() -> None:
               help="LLM Provider (기본값: 환경변수 자동 감지)")
 @click.option("--llm-model",  default=None,   help="LLM 모델명 (기본값: claude-sonnet-4-20250514)")
 def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: float, style: str,
-            config: str, save_chart: bool, no_chart: bool, save_report: bool,
+            config: str, save_chart: bool, no_chart: bool, save_report: bool, save_csv: bool,
             llm: bool, llm_stream: bool, llm_provider: str | None, llm_model: str | None) -> None:
     """단일 종목 기술적 분석
 
@@ -125,8 +125,7 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
         python main.py analyze US --save-report --save-chart
         python main.py analyze NVDA --llm --llm-stream --save-chart
     """
-    krx_fetcher = KRXStockFetcher()
-    krx_fetcher.load()
+    fetcher = DataFetcher()
 
     styles = _resolve_styles(style)
     is_multi = len(styles) > 1
@@ -147,6 +146,7 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
         MARKET_FILTERS = {
             "KOSPI": lambda t: ".KS" in t,
             "KOSDAQ": lambda t: ".KQ" in t,
+            "KRX": lambda t: ".KS" in t or ".KQ" in t,
             "US": lambda t: ".KS" not in t and ".KQ" not in t,
         }
         market_filter = MARKET_FILTERS.get(ticker)
@@ -155,44 +155,75 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
     else:
         tickers = [ticker]
 
+    out_dir = Path("reports")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    
+    last_trading_day = None
+
     for idx, trading_style in enumerate(styles):
         if is_multi:
             click.echo(f"\n{'━'*68}")
             click.echo(f"  ▶ [{idx+1}/{len(styles)}] {trading_style.description}")
             click.echo(f"{'━'*68}")
 
+        style_tag = trading_style.name.lower()
+
         label = f"분석 중 ({trading_style.value})" if is_multi else "분석 중"
         with click.progressbar(tickers, label=label, show_pos=True) as bar:
             for ticker in bar:
-                info = krx_fetcher.get_info(ticker)
-                name = info.name if info else ""
+                click.echo(f"\n{'━'*68}")
+                name, _ = fetcher.info(ticker)
                 click.echo(f"\nTicker {ticker} ({name})")
                 try:
                     if trading_style == TradingStyle.SWING:
                         analyzer = SwingTradingAnalyzer(
-                            ticker, period=period, interval=interval,
+                            ticker, name=name, period=period, interval=interval,
                             capital=capital, risk_pct=risk_pct,
+                            last_trading_day=last_trading_day,
                         )
                     elif trading_style == TradingStyle.POSITION:
                         analyzer = PositionTradingAnalyzer(
-                            ticker, period=period, interval=interval,
+                            ticker, name=name, period=period, interval=interval,
                             capital=capital, risk_pct=risk_pct,
+                            last_trading_day=last_trading_day,
                         )
                     elif trading_style == TradingStyle.GROWTH:
-                        analyzer = GrowthMomentumAnalyzer(ticker, period=period)
+                        analyzer = GrowthMomentumAnalyzer(
+                            ticker, name=name, period=period,
+                            last_trading_day=last_trading_day,
+                        )
                     elif trading_style == TradingStyle.VALUE:
-                        analyzer = ValueInvestingAnalyzer(ticker, period=period)
+                        analyzer = ValueInvestingAnalyzer(
+                            ticker, name=name, period=period,
+                            last_trading_day=last_trading_day,
+                        )
                     elif trading_style in [TradingStyle.SWING, TradingStyle.POSITION]:
-                        analyzer = ShortTermAnalyzer(ticker, period=period, interval=interval,
-                                                    trading_style=trading_style)
+                        analyzer = ShortTermAnalyzer(
+                            ticker, period=period, interval=interval,
+                            trading_style=trading_style)
+
+                    df = None
+                    if save_csv:
+                        last_trading_day = analyzer.last_trading_day
+                        csv_path = f"{ticker.replace('.', '_')}_technical_{last_trading_day.replace('-','')}_*.csv"
+                        if any(out_dir.glob(csv_path)):
+                            files = list(out_dir.glob(csv_path))
+                            names = [f.name for f in files]
+                            df = pd.read_csv(
+                                out_dir / names[0],
+                                index_col=0,            # 첫 번째 컬럼을 인덱스로
+                                parse_dates=["Date"],   # 날짜 컬럼 자동 변환
+                                encoding="utf-8",       # 한글 포함 시
+                            )
                     
                     if llm or llm_stream:
                         decision = analyzer.analyze_with_llm(
+                            df=df,
                             provider=llm_provider,
                             model=llm_model,
                             stream=llm_stream)
                     else:
-                        decision = analyzer.analyze()
+                        decision = analyzer.analyze(df)
                     
                 except Exception as e:
                     if llm or llm_stream:
@@ -216,14 +247,11 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
                 elif trading_style in [TradingStyle.SWING, TradingStyle.POSITION]:
                     decision_str = make_decision(decision)
                 
-                click.echo(decision_str)
+                #click.echo(decision_str)
 
-                style_tag = trading_style.name.lower()
                 stock_name = decision.name.replace("/", "").replace(" ", "_")
 
                 if save_report:
-                    out_dir = Path("reports")
-                    out_dir.mkdir(parents=True, exist_ok=True)
                     report_path = out_dir / f"{ticker.replace('.', '_')}_{style_tag}_{decision.date.replace('-','')}_{stock_name}.txt"
                     report_path.write_text(decision_str, encoding="utf-8")
                     click.echo(f"보고서 저장됨: {report_path}")
@@ -233,9 +261,39 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
                     #    with summary_path.open("a", encoding="utf-8") as file:
                     #        file.write(make_summary(decision) + "\n")
 
+                if save_csv:
+                    csv_path = out_dir / f"{ticker.replace('.', '_')}_technical_{decision.date.replace('-','')}_{stock_name}.csv"
+                    df = analyzer.calculator.dataframe if analyzer.calculator else None
+                    #print(df)
+                    #print(df.info())
+                    #print(df.columns)
+                    #print(df.dtypes)
+                    if not csv_path.is_file():
+                        df.to_csv(csv_path, index=True)
+                        click.echo(f"CSV 저장됨: {csv_path}")
+
+                    """
+                    from sqlalchemy import create_engine
+
+                    # 1. 데이터베이스 연결 설정 (ID, PW, Host, Port, DB이름 순)
+                    # 형식: 'postgresql://사용자:비밀번호@localhost:5432/데이터베이스명'
+                    engine = create_engine('postgresql://stock_root:root!23$@localhost:5432/postgres')
+
+                    df.insert(0, 'Ticker', ticker)
+                    # 2. PostgreSQL로 저장
+                    df.to_sql(
+                        'technical_indicator', # 생성할 테이블 이름
+                        engine,                # SQLAlchemy 엔진
+                        if_exists='replace',   # 'fail'(기본), 'replace'(교체), 'append'(추가)
+                        index=True             # 데이터프레임 인덱스는 저장 안 함
+                    )
+
+                    click.echo(f"PostgreSQL 저장됨")
+                    """
+
                 if not no_chart:
                     chart_path = (
-                        Path("reports") / f"{ticker.replace('.', '_')}_{style_tag}_{decision.date.replace('-','')}_{stock_name}.png"
+                        out_dir / f"{ticker.replace('.', '_')}_{style_tag}_{decision.date.replace('-','')}_{stock_name}.png"
                         if save_chart else None
                     )
                     df = analyzer.calculator.dataframe if analyzer.calculator else None
@@ -561,6 +619,7 @@ def growth(ticker: str, period: str, style: str,
         MARKET_FILTERS = {
             "KOSPI": lambda t: ".KS" in t,
             "KOSDAQ": lambda t: ".KQ" in t,
+            "KRX": lambda t: ".KS" in t or ".KQ" in t,
             "US": lambda t: ".KS" not in t and ".KQ" not in t,
         }
         market_filter = MARKET_FILTERS.get(ticker)
@@ -735,11 +794,12 @@ def value(ticker: str, period: str, style: str,
               type=click.Choice(["swing", "position", "growth", "value", "all"], case_sensitive=False),
               help="매매 스타일: swing / position / growth / value / all(양쪽 모두)")
 @click.option("--save-report", is_flag=True,                 help="보고서를 reports/ 폴더에 저장")
+@click.option("--save-csv",    is_flag=True,                 help="마켓과 기술지표 분석 데이터를 reports/ 폴더에 저장")
 @click.option("--save-screen", is_flag=True,                 help="일괄 스크리닝 csv를 reports/ 폴더에 저장")
-@click.option("--top-n",   default=0, type=int,              help="상위 N개만 상세 출력 (0=전체)")
-@click.option("--min-score", default=0.0, type=float, help="최소 점수 필터")
+@click.option("--top-n",       default=0, type=int,          help="상위 N개만 상세 출력 (0=전체)")
+@click.option("--min-score",   default=0.0, type=float,      help="최소 점수 필터")
 def recommend(market: str, config: str, output: str, period: str, style: str, 
-            save_report: bool, save_screen: bool, top_n: int, min_score: float) -> None:
+            save_report: bool, save_csv: bool, save_screen: bool, top_n: int, min_score: float) -> None:
     """관심 종목 일괄 분석 후 매수 추천 및 근거 제시
 
     watchlist.yaml의 종목을 분석하고, 각 종목에 대해
@@ -751,8 +811,7 @@ def recommend(market: str, config: str, output: str, period: str, style: str,
         python main.py recommend --config my_stocks.yaml --top-n 5
         python main.py recommend --style position --save-report
     """
-    krx_fetcher = KRXStockFetcher()
-    krx_fetcher.load()
+    fetcher = DataFetcher()
 
     styles = _resolve_styles(style)
     is_multi = len(styles) > 1
@@ -781,28 +840,100 @@ def recommend(market: str, config: str, output: str, period: str, style: str,
         if market_filter:
             tickers = [t for t in tickers if market_filter(t)]
 
+    out_dir = Path(output)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    
+    last_trading_day = None
+
     for idx, trading_style in enumerate(styles):
         if is_multi:
             click.echo(f"\n{'━'*68}")
             click.echo(f"  ▶ [{idx+1}/{len(styles)}] {trading_style.description}")
             click.echo(f"{'━'*68}")
 
+        style_tag = trading_style.name.lower()
+
         decisions = []
         label = f"분석 중 ({trading_style.value})" if is_multi else "분석 중"
         with click.progressbar(tickers, label=label, show_pos=True) as bar:
             for ticker in bar:
-                info = krx_fetcher.get_info(ticker)
-                name = info.name if info else ""
+                click.echo(f"\n{'━'*68}")
+                name, _ = fetcher.info(ticker)
                 click.echo(f"\nTicker {ticker} ({name})")
+                click.echo(f"Last Trading Day: {last_trading_day}")
                 try:
-                    if trading_style in [TradingStyle.SWING, TradingStyle.POSITION]:
-                        decision = ShortTermAnalyzer(
-                            ticker, period=period, trading_style=trading_style,
-                        ).analyze()
+                    if trading_style == TradingStyle.SWING:
+                        analyzer = SwingTradingAnalyzer(
+                            ticker, name=name, period=period,
+                            last_trading_day=last_trading_day,
+                        )
+                    elif trading_style == TradingStyle.POSITION:
+                        analyzer = PositionTradingAnalyzer(
+                            ticker, name=name, period=period,
+                            last_trading_day=last_trading_day,
+                        )
                     elif trading_style == TradingStyle.GROWTH:
-                        decision = GrowthMomentumAnalyzer(ticker, period=period).analyze()
+                        analyzer = GrowthMomentumAnalyzer(
+                            ticker, name=name, period=period,
+                            last_trading_day=last_trading_day
+                        )
                     elif trading_style == TradingStyle.VALUE:
-                        decision = ValueInvestingAnalyzer(ticker, period=period).analyze()
+                        analyzer = ValueInvestingAnalyzer(
+                            ticker, name=name, period=period,
+                            last_trading_day=last_trading_day
+                        )
+                    elif trading_style in [TradingStyle.SWING, TradingStyle.POSITION]:
+                        analyzer = ShortTermAnalyzer(ticker, period=period,
+                                                    trading_style=trading_style)
+
+                    df = None
+                    if save_csv:
+                        last_trading_day = analyzer.last_trading_day
+                        csv_path = f"{ticker.replace('.', '_')}_technical_{last_trading_day}_*.csv"
+                        if any(out_dir.glob(csv_path)):
+                            files = list(out_dir.glob(csv_path))
+                            names = [f.name for f in files]
+                            df = pd.read_csv(
+                                out_dir / names[0],
+                                index_col=0,            # 첫 번째 컬럼을 인덱스로
+                                parse_dates=["Date"],   # 날짜 컬럼 자동 변환
+                                encoding="utf-8",       # 한글 포함 시
+                            )
+
+                    decision = analyzer.analyze(df)
+
+                    stock_name = name.replace("/", "").replace(" ", "_")
+                    if save_csv:
+                        csv_path = f"{ticker.replace('.', '_')}_technical_{last_trading_day}_*.csv"
+                        if not any(out_dir.glob(csv_path)):    
+                            csv_path = out_dir / f"{ticker.replace('.', '_')}_technical_{last_trading_day}_{stock_name}.csv"
+                            df = analyzer.calculator.dataframe if analyzer.calculator else None
+                            #print(df)
+                            #print(df.info())
+                            #print(df.columns)
+                            #print(df.dtypes)
+                            #if not csv_path.is_file():
+                            df.to_csv(csv_path, index=True)
+                            click.echo(f"CSV 저장됨: {csv_path}")
+
+                        """
+                        from sqlalchemy import create_engine
+
+                        # 1. 데이터베이스 연결 설정 (ID, PW, Host, Port, DB이름 순)
+                        # 형식: 'postgresql://사용자:비밀번호@localhost:5432/데이터베이스명'
+                        engine = create_engine('postgresql://stock_root:root!23$@localhost:5432/postgres')
+
+                        df.insert(0, 'Ticker', ticker)
+                        # 2. PostgreSQL로 저장
+                        df.to_sql(
+                            'technical_indicator', # 생성할 테이블 이름
+                            engine,                # SQLAlchemy 엔진
+                            if_exists='replace',   # 'fail'(기본), 'replace'(교체), 'append'(추가)
+                            index=True             # 데이터프레임 인덱스는 저장 안 함
+                        )
+
+                        click.echo(f"PostgreSQL 저장됨")
+                        """
                     
                     decisions.append(decision)
                 except Exception as e:
@@ -814,18 +945,24 @@ def recommend(market: str, config: str, output: str, period: str, style: str,
             click.echo("분석 가능한 종목이 없습니다.")
             continue
 
-        if trading_style in [TradingStyle.SWING, TradingStyle.POSITION]:
-            engine = RecommendationEngine()
-            report = engine.analyze(decisions)
-
-            # top-n 필터링
+        if trading_style == TradingStyle.SWING:
+            # 상위 N개
+            decisions.sort(key=lambda r: r.overall_score, reverse=True)
+            if min_score > 0:
+                decisions = [r for r in decisions if r.total_score >= min_score]
             if top_n > 0:
-                report.recommendations = report.recommendations[:top_n]
-                report.buy_picks = [r for r in report.buy_picks if r.rank <= top_n]
-                report.watch_list = [r for r in report.watch_list if r.rank <= top_n]
-                report.avoid_list = [r for r in report.avoid_list if r.rank <= top_n]
-
-            report_str = format_recommendation_report(trading_style, report)
+                decisions = decisions[:top_n]
+            
+            report_str = format_swing_report(decisions)
+        elif trading_style == TradingStyle.POSITION:
+            # 상위 N개
+            decisions.sort(key=lambda r: r.overall_score, reverse=True)
+            if min_score > 0:
+                decisions = [r for r in decisions if r.total_score >= min_score]
+            if top_n > 0:
+                decisions = decisions[:top_n]
+            
+            report_str = format_position_report(decisions)
         elif trading_style == TradingStyle.GROWTH:
             # 점수 필터링 및 정렬
             decisions.sort(key=lambda r: r.total_score, reverse=True)
@@ -846,25 +983,32 @@ def recommend(market: str, config: str, output: str, period: str, style: str,
 
             # recommend 형식 보고서 출력
             report_str = format_value_report(decisions)
+        elif trading_style in [TradingStyle.SWING, TradingStyle.POSITION]:
+            engine = RecommendationEngine()
+            report = engine.analyze(decisions)
+
+            # top-n 필터링
+            if top_n > 0:
+                report.recommendations = report.recommendations[:top_n]
+                report.buy_picks = [r for r in report.buy_picks if r.rank <= top_n]
+                report.watch_list = [r for r in report.watch_list if r.rank <= top_n]
+                report.avoid_list = [r for r in report.avoid_list if r.rank <= top_n]
+
+            report_str = format_recommendation_report(trading_style, report)
         
         click.echo(report_str)
 
         if save_report:
-            out_dir = Path(output)
-            out_dir.mkdir(parents=True, exist_ok=True)
             style_tag = trading_style.name.lower()
             report_path = out_dir / f"recommend_{style_tag}_{date.today().strftime('%Y%m%d')}_{market.lower()}.txt"
             report_path.write_text(report_str, encoding="utf-8")
             click.echo(f"보고서 저장됨: {report_path}")
-
-        
+            
         if save_screen:
             screenings = [d.to_dict() for d in decisions]
             df = pd.DataFrame(screenings).sort_values(["Score"], ascending=[False]).reset_index(drop=True)
             click.echo("\n" + df.to_string(index=False))
 
-            out_dir = Path(output)
-            out_dir.mkdir(parents=True, exist_ok=True)
             style_tag = style.lower()
             csv_path = out_dir / f"recommend_{style_tag}_{date.today().strftime('%Y%m%d')}_{market.lower()}.csv"
             df.to_csv(csv_path, index=False, encoding="utf-8-sig")
@@ -886,8 +1030,7 @@ def screen(config: str, output: str, period: str, style: str) -> None:
         python main.py screen
         python main.py screen --style all
     """
-    krx_fetcher = KRXStockFetcher()
-    krx_fetcher.load()
+    fetcher = DataFetcher()
 
     styles = _resolve_styles(style)
     is_multi = len(styles) > 1
@@ -915,8 +1058,7 @@ def screen(config: str, output: str, period: str, style: str) -> None:
         label = f"스크리닝 중 ({trading_style.value})" if len(styles) > 1 else "스크리닝 중"
         with click.progressbar(tickers, label=label, show_pos=True) as bar:
             for ticker in bar:
-                info = krx_fetcher.get_info(ticker)
-                name = info.name if info else ""
+                name, _ = fetcher.info(ticker)
                 click.echo(f"\nTicker {ticker} ({name})")
                 try:
                     if trading_style in [TradingStyle.SWING, TradingStyle.POSITION]:

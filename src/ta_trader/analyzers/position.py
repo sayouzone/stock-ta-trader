@@ -61,14 +61,14 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
     def __init__(
         self,
         ticker: str,
+        name: str = None,
         period: str = "1y",
         interval: str = "1d",
         capital: float = RISK_DEFAULT_CAPITAL,
         risk_pct: float = RISK_PER_TRADE_PCT,
+        last_trading_day: str = None,
     ) -> None:
-        self.ticker = ticker
-        self.period = period
-        self.interval = interval
+        super().__init__(ticker, period=period, interval=interval, last_trading_day=last_trading_day)
         self.capital = capital
         self.risk_pct = risk_pct
 
@@ -91,7 +91,7 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
 
     # ── 메인 분석 ─────────────────────────────────────────
 
-    def analyze(self) -> PositionAnalysisResult:
+    def analyze(self, df: pd.DataFrame | None = None) -> PositionAnalysisResult:
         """7단계 포지션 트레이딩 분석 실행"""
 
         # 0. 데이터 수집 & 지표 계산
@@ -103,25 +103,25 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
         date = str(df.index[-1].date())
 
         # 1단계: 시장 환경 판단
-        market_env = self._step1_market_environment(latest, df)
+        market_env = self._step1_market_environment()
 
         # 2단계: 섹터/테마 선정
-        sector = self._step2_sector_analysis(latest, df)
+        sector = self._step2_sector_analysis()
 
         # 3단계: 종목 선정
-        screening = self._step3_stock_screening(latest, df)
+        screening = self._step3_stock_screening()
 
         # 4단계: 매수 타이밍
-        entry = self._step4_entry_timing(latest, prev, df)
+        entry = self._step4_entry_timing()
 
         # 5단계: 리스크 관리
-        risk = self._step5_risk_management(latest, entry, df)
+        risk = self._step5_risk_management(entry)
 
         # 6단계: 보유 관리
-        holding = self._step6_holding_management(latest, prev, risk)
+        holding = self._step6_holding_management(risk)
 
         # 7단계: 매도/청산
-        exit_strategy = self._step7_exit_strategy(latest, prev, risk, df)
+        exit_strategy = self._step7_exit_strategy(risk)
 
         # 종합 점수 & 신호
         overall_score = self._compute_overall_score(
@@ -165,6 +165,7 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
 
     def analyze_with_llm(
         self,
+        df:          pd.DataFrame | None = None,
         provider:    str | None = None,
         api_key:     str | None = None,
         model:       str | None = None,
@@ -188,7 +189,7 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
         from ta_trader.llm.factory import create_llm_analyzer
 
         # 기술적 분석이 아직 실행되지 않았으면 실행
-        result = self.analyze()
+        result = self.analyze(df)
         df = self._calc.dataframe
 
         llm = create_llm_analyzer(provider=provider, api_key=api_key, model=model)
@@ -215,17 +216,18 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
 
     # ── 데이터 수집 ───────────────────────────────────────
 
-    def _fetch_data(self) -> None:
-        fetcher = DataFetcher(period=self.period, interval=self.interval)
-        self._name, self._df = fetcher.fetch(self.ticker)
-        self._calc = SwingIndicatorCalculator(self._df)
-        self._name, self._info = fetcher.info(self.ticker)
+    #def _fetch_data(self) -> None:
+    #    fetcher = DataFetcher(period=self.period, interval=self.interval)
+    #    self._name, self._df = fetcher.fetch(self.ticker)
+    #    self._calc = SwingIndicatorCalculator(self._df)
+    #    self._name, self._info = fetcher.info(self.ticker)
 
     # ── 1단계: 시장 환경 판단 ─────────────────────────────
 
-    def _step1_market_environment(
-        self, row: pd.Series, df: pd.DataFrame,
-    ) -> MarketEnvResult:
+    def _step1_market_environment(self) -> MarketEnvResult:
+        df = self._calc.dataframe
+        row = self._calc.latest()
+
         adx_val = float(row["adx"])
         adx_trend = adx_val >= MARKET_ADX_TREND_THRESHOLD
         above_200 = is_bullish_market(row)
@@ -283,13 +285,14 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
 
     # ── 2단계: 섹터/테마 선정 ─────────────────────────────
 
-    def _step2_sector_analysis(
-        self, row: pd.Series, df: pd.DataFrame,
-    ) -> SectorResult:
+    def _step2_sector_analysis(self) -> SectorResult:
         """
         섹터 RS를 종목 자체의 시장 대비 상대강도로 대리 산출.
         (개별 종목 분석 시 섹터 데이터가 없으므로 종목 RS를 섹터 대리로 사용)
         """
+        df = self._calc.dataframe
+        row = self._calc.latest()
+
         lookback = min(SECTOR_RS_LOOKBACK_DAYS, len(df) - 1)
         if lookback > 0:
             rs_return = (
@@ -337,9 +340,10 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
 
     # ── 3단계: 종목 선정 ──────────────────────────────────
 
-    def _step3_stock_screening(
-        self, row: pd.Series, df: pd.DataFrame,
-    ) -> ScreeningResult:
+    def _step3_stock_screening(self) -> ScreeningResult:
+        df = self._calc.dataframe
+        row = self._calc.latest()
+
         # RS (상대강도)
         lookback = min(SCREEN_RS_LOOKBACK_DAYS, len(df) - 1)
         if lookback > 0:
@@ -427,9 +431,11 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
 
     # ── 4단계: 매수 타이밍 ────────────────────────────────
 
-    def _step4_entry_timing(
-        self, row: pd.Series, prev: pd.Series | None, df: pd.DataFrame,
-    ) -> EntryResult:
+    def _step4_entry_timing(self) -> EntryResult:
+        df = self._calc.dataframe
+        row = self._calc.latest()
+        prev = self._calc.previous()
+
         signals: list[EntrySignalDetail] = []
         price = float(row["Close"])
 
@@ -548,10 +554,11 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
 
     def _step5_risk_management(
         self,
-        row: pd.Series,
         entry: EntryResult,
-        df: pd.DataFrame,
     ) -> RiskManagementResult:
+        df = self._calc.dataframe
+        row = self._calc.latest()
+
         price = float(row["Close"])
         atr = float(row["atr"])
 
@@ -644,10 +651,11 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
 
     def _step6_holding_management(
         self,
-        row: pd.Series,
-        prev: pd.Series | None,
         risk: RiskManagementResult,
     ) -> HoldingManagementResult:
+        row = self._calc.latest()
+        prev = self._calc.previous()
+
         price = float(row["Close"])
         atr = float(row["atr"])
 
@@ -706,11 +714,12 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
 
     def _step7_exit_strategy(
         self,
-        row: pd.Series,
-        prev: pd.Series | None,
         risk: RiskManagementResult,
-        df: pd.DataFrame,
     ) -> ExitResult:
+        df = self._calc.dataframe
+        row = self._calc.latest()
+        prev = self._calc.previous()
+
         price = float(row["Close"])
         atr = float(row["atr"])
 

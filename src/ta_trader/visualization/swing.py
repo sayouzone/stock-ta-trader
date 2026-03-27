@@ -73,27 +73,58 @@ class SwingChartVisualizer:
         ax.plot(df.index, df["bb_middle"], label="BB Middle",  color="blue",  linestyle="--", alpha=0.6)
         ax.plot(df.index, df["bb_lower"],  label="BB Lower",  color="green", linestyle="--", alpha=0.6)
         ax.fill_between(df.index, df["bb_lower"], df["bb_upper"], alpha=0.05, color="blue")
-        
-        # 포지션 사이징 - 손절
-        if result.position.stop_loss:
-            label = f"손절 {result.position.stop_loss:,.0f}" if ".K" in result.ticker else f"손절 {result.position.stop_loss:,.2f}"
-            ax.axhline(result.position.stop_loss,   color="coral",   linewidth=0.8, linestyle=":", label=label)
-        # 청산 전략
-        if result.exit_strategy.trailing_stop:
-            label = f"트레일링 스톱 {result.exit_strategy.trailing_stop:,.0f}" if ".K" in result.ticker else f"트레일링 스톱 {result.exit_strategy.trailing_stop:,.2f}"
-            ax.axhline(result.exit_strategy.trailing_stop,   color="red",   linewidth=0.8, linestyle="--", label=label)
+
+        # 손절/익절은 label 없이 그리고, handle을 별도 보관
+        right_handles = []
+        # 전량 청산
+        if result.exit_strategy.full_exit_price:
+            label = f"전량익절 {result.exit_strategy.full_exit_price:,.0f}" if ".K" in result.ticker else f"전량익절 {result.exit_strategy.full_exit_price:,.2f}"
+            line = ax.axhline(result.exit_strategy.full_exit_price, color="blue", linewidth=0.8, linestyle="--", label=label)
+            line.set_label(label)
+            right_handles.append(line)
 
         # 1차 부분익절
         if result.exit_strategy.partial_exit_price:
-            label = f"1차 부분익절 {result.exit_strategy.partial_exit_price:,.0f}" if ".K" in result.ticker else f"1차 부분익절 {result.exit_strategy.partial_exit_price:,.2f}"
-            ax.axhline(result.exit_strategy.partial_exit_price, color="green", linewidth=0.8, linestyle=":", label=label)
-        # 전량 청산
-        if result.exit_strategy.full_exit_price:
-            label = f"전량 청산 {result.exit_strategy.full_exit_price:,.0f}" if ".K" in result.ticker else f"전량 청산 {result.exit_strategy.full_exit_price:,.2f}"
-            ax.axhline(result.exit_strategy.full_exit_price, color="blue", linewidth=0.8, linestyle="--", label=label)
+            label = f"부분익절 {result.exit_strategy.partial_exit_price:,.0f}" if ".K" in result.ticker else f"부분익절 {result.exit_strategy.partial_exit_price:,.2f}"
+            line = ax.axhline(result.exit_strategy.partial_exit_price, color="green", linewidth=0.8, linestyle=":", label=label)
+            line.set_label(label)
+            right_handles.append(line)
+
+        # 포지션 사이징 - 손절
+        if result.position.stop_loss:
+            label = f"손절 {result.position.stop_loss:,.0f}" if ".K" in result.ticker else f"손절 {result.position.stop_loss:,.2f}"
+            line = ax.axhline(result.position.stop_loss,   color="coral",   linewidth=0.8, linestyle=":", label=label)
+            line.set_label(label)
+            right_handles.append(line)
+        
+        # 청산 전략
+        if result.exit_strategy.trailing_stop:
+            label = f"트레일링 스톱 {result.exit_strategy.trailing_stop:,.0f}" if ".K" in result.ticker else f"트레일링 스톱 {result.exit_strategy.trailing_stop:,.2f}"
+            line = ax.axhline(result.exit_strategy.trailing_stop,   color="red",   linewidth=0.8, linestyle="--", label=label)
+            line.set_label(label)
+            right_handles.append(line)
+        
+        # 왼쪽 범례: 손절/익절 제외
+        left_handles, left_labels = ax.get_legend_handles_labels()
+        left_handles = [h for h in left_handles if h not in right_handles]
+        left_labels  = [l for h, l in zip(*ax.get_legend_handles_labels()) if h not in right_handles]
+        ax.legend(left_handles, left_labels, loc="upper left", fontsize=7)
+
+        # 오른쪽 범례: 손절/익절만
+        if right_handles:
+            right_legend = ax.add_artist(
+                ax.legend(
+                    right_handles,
+                    [h.get_label() for h in right_handles],
+                    loc="upper right",
+                    #loc="best",
+                    fontsize=6,
+                )
+            )
+            # add_artist 후 왼쪽 범례 재설정 (legend() 호출이 기존 범례를 덮어쓰므로)
+            ax.legend(left_handles, left_labels, loc="upper left", fontsize=7)
 
         ax.set_title("Price + Bollinger Bands")
-        ax.legend(loc="upper left", fontsize=7)
 
     @staticmethod
     def _plot_volume(ax, df: pd.DataFrame) -> None:

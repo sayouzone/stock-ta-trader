@@ -16,7 +16,7 @@ from ta_trader.indicators.rsi import RSIAnalyzer
 from ta_trader.models import TradingDecision, TradingStyle
 from ta_trader.risk.manager import RiskManager
 from ta_trader.signals.composer import SignalComposer
-from ta_trader.style_config import StyleConfig, get_style_config
+from ta_trader.config.style_config import StyleConfig, get_style_config
 from ta_trader.utils.logger import get_logger
 
 from ta_trader.llm.short_prompt_builder import ShortPromptBuilder

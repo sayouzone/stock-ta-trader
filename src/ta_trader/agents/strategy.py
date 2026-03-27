@@ -26,7 +26,7 @@ from ta_trader.models.agent import (
 from ta_trader.models import Signal, TradingStyle
 from ta_trader.risk.manager import RiskManager
 from ta_trader.signals.composer import SignalComposer
-from ta_trader.style_config import StyleConfig, get_style_config
+from ta_trader.config.style_config import StyleConfig, get_style_config
 
 
 # ── 시그널 → 매매 방향 매핑 ────────────────────────────────

@@ -33,7 +33,7 @@ from ta_trader.indicators.macd import MACDAnalyzer
 from ta_trader.indicators.rsi import RSIAnalyzer
 from ta_trader.models import IndicatorResult, TradingStyle
 from ta_trader.signals.regime import detect_regime, RegimeContext
-from ta_trader.style_config import StyleConfig, get_style_config
+from ta_trader.config.style_config import StyleConfig, get_style_config
 from ta_trader.constants.short import MIN_DATA_ROWS
 
 @dataclass

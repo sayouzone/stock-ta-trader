@@ -18,7 +18,7 @@ from ta_trader.constants.short import (
     DEFAULT_STOP_LOSS_PCT, DEFAULT_TAKE_PROFIT_PCT,
 )
 from ta_trader.models import RiskLevels, Signal
-from ta_trader.style_config import StyleConfig
+from ta_trader.config.style_config import StyleConfig
 
 
 class RiskManager:

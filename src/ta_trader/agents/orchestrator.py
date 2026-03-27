@@ -39,7 +39,6 @@ from ta_trader.models.agent import (
 )
 from ta_trader.agents.risk import RiskAgent, RiskConfig
 from ta_trader.agents.strategy import StrategyAgent
-
 from ta_trader.models import TradingDecision, TradingStyle
 from ta_trader.utils.logger import get_logger
 
