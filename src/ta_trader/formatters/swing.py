@@ -158,27 +158,28 @@ def format_swing_report(results: list[SwingAnalysisResult]) -> str:
 
     # 요약 테이블 헤더
     header = (
-        f"{'종목':<12} {'가격':>10} {'시장':^8} {'등급':^4} "
-        f"{'진입':^8} {'점수':>5} {'손절':>10} {'익절':>10} "
-        f"{'RR':>5} {'수량':>6} {'종합':^8} {'점수':>5}"
+        f"{'진입':^8} {'점수':>5} {'가격':>10} {'시장':^8} "
+        f"{'등급':^4} {'손절':>10} {'익절':>10} {'RR':>5} "
+        f"{'수량':>6} {'종합':^8} {'점수':>5} {'종목':<18}"
     )
     lines.append(header)
     lines.append("─" * W)
 
     # 점수 내림차순 정렬
-    sorted_results = sorted(results, key=lambda r: r.overall_score, reverse=True)
+    #sorted_results = sorted(results, key=lambda r: r.overall_score, reverse=True)
+    sorted_results = sorted(results, key=lambda r: r.entry.score, reverse=True)
 
     for r in sorted_results:
         sig_emoji = _SIGNAL_EMOJI.get(r.overall_signal, "")
         ent_emoji = _SIGNAL_EMOJI.get(r.entry.signal, "")
-        name = r.name[:10] if len(r.name) > 10 else r.name
+        name = r.name[:18] if len(r.name) > 18 else r.name
         line = (
-            f"{name:<12} {r.current_price:>10,.0f} "
-            f"{r.market_env.environment.value:^8} {r.screening.grade.value:^4} "
             f"{ent_emoji}{r.entry.signal.value:^6} {r.entry.score:>5.0f} "
-            f"{r.position.stop_loss:>10,.0f} {r.position.take_profit:>10,.0f} "
-            f"{r.position.risk_reward_ratio:>5.1f} {r.position.position_size:>6,} "
-            f"{sig_emoji}{r.overall_signal.value:^6} {r.overall_score:>5.1f}"
+            f"{r.current_price:>10,.0f} {r.market_env.environment.value:^8} "
+            f"{r.screening.grade.value:^4} {r.position.stop_loss:>10,.0f} "
+            f"{r.position.take_profit:>10,.0f} {r.position.risk_reward_ratio:>5.1f} "
+            f"{r.position.position_size:>6,} {sig_emoji}{r.overall_signal.value:^6} "
+            f"{r.overall_score:>5.1f} {name:<18}"
         )
         lines.append(line)
 
@@ -194,7 +195,100 @@ def format_swing_report(results: list[SwingAnalysisResult]) -> str:
         lines.append(f"\n  ⏸️  현재 매수 실행 가능 종목 없음")
 
     lines.append("━" * W)
+    
+    # ── 등급별 분류 ──────────────────────────────────────
+    entry_picks = [r for r in results if r.entry.signal in (
+        SwingSignal.STRONG_ENTRY, SwingSignal.ENTRY
+    )]
+    hold_list = [r for r in results if r.entry.signal == SwingSignal.HOLD]
+    exit_list = [r for r in results if r.entry.signal in (
+        SwingSignal.PARTIAL_EXIT, SwingSignal.EXIT, SwingSignal.STRONG_EXIT
+    )]
+
+    # ── 진입 종목 상세 ──────────────────────────────
+    if entry_picks:
+        lines.append("─" * W)
+        lines.append(f"  🟢 진입 종목 ({len(entry_picks)}건)")
+        lines.append("─" * W)
+        for rank, r in enumerate(entry_picks, 1):
+            lines.extend(_format_single_swing(r, rank, brief=False))
+
+    # ── 보류 종목 상세 ──────────────────────────────
+    if hold_list:
+        lines.append("─" * W)
+        lines.append(f"  🟡 보류 종목 ({len(hold_list)}건)")
+        lines.append("─" * W)
+        for rank, r in enumerate(hold_list, 1):
+            lines.extend(_format_single_swing(r, rank, brief=False))
+
+    # ── 매도 종목 상세 ──────────────────────────────
+    if exit_list:
+        lines.append("─" * W)
+        lines.append(f"  🟡 분할 매도 종목 ({len(exit_list)}건)")
+        lines.append("─" * W)
+        for rank, r in enumerate(exit_list, 1):
+            lines.extend(_format_single_swing(r, rank, brief=False))
+    
     return "\n".join(lines)
+
+# ── 단일 종목 내부 포매터 ────────────────────────────────
+
+def _format_single_swing(
+    r: SwingAnalysisResult, rank: int, brief: bool = False,
+) -> list[str]:
+    """단일 종목 결과를 recommend/_format_single_recommendation 스타일로 포매팅"""
+    sig_emoji = _SIGNAL_EMOJI.get(r.overall_signal, "")
+    ent_emoji = _SIGNAL_EMOJI.get(r.entry.signal, "")
+    name = r.name[:18] if len(r.name) > 10 else r.name
+    lines = [
+        "",
+        f"  ┌{'─' * 66}┐",
+        f"  │  {ent_emoji}  #{rank}  {r.ticker} ({r.name})  —  "
+        f"{r.screening.grade.value} {r.overall_signal.value}  ({r.overall_score:5.1f})",
+        f"  │  현재가: {r.current_price:,.2f}",
+        f"  └{'─' * 66}┘",
+    ]
+
+    pos = r.position
+    pos_parts = []
+    pos_parts.append(f"진입가: {pos.entry_price:>9,.0f}")
+    pos_parts.append(f"손절가: {pos.stop_loss:>9,.0f} (ATR×{POSITION_ATR_SL_MULT})")
+    pos_parts.append(f"익절가: {pos.take_profit:>9,.0f} (ATR×{POSITION_ATR_TP_MULT})")
+    pos_parts.append(f"R배수: 1:{pos.risk_reward_ratio} {'✅ 적합' if pos.is_acceptable else '⚠️  부적합'}")
+    pos_parts.append(f"매수수량: {pos.position_size:>6,}주 ({pos.position_value:,.0f}원)")
+    if pos_parts:
+        lines.append(f"   💼 {' | '.join(pos_parts)}")
+
+    pos_parts = []
+    pos_parts.append(f"비중: {pos.portfolio_pct:>5.1f}% (자본금: {pos.capital:,.0f}원)")
+    pos_parts.append(f"최대손실: {pos.max_loss:>9,.0f}원 (자본의 {pos.max_loss/pos.capital*100:.1f}%)")
+    if pos.fibo_target_161 > 0:
+        pos_parts.append(f"피보목표: 161.8%={pos.fibo_target_161:,.0f} 261.8%={pos.fibo_target_261:,.0f}")
+    if pos_parts:
+        lines.append(f"      {' | '.join(pos_parts)}")
+
+    ext = r.exit_strategy
+    pos_parts = []
+    pos_parts.append(f"트레일링 스톱: {ext.trailing_stop:>9,.0f}")
+    pos_parts.append(f"1차 부분익절: {ext.partial_exit_price:>9,.0f} (50% 매도)")
+    pos_parts.append(f"전량 청산가: {ext.full_exit_price:>9,.0f}")
+    pos_parts.append(f"{ext.detail}")
+    if ext.should_partial_exit:
+        pos_parts.append(f"  ⚠️  현재 부분 익절 권장")
+    if ext.should_full_exit:
+        pos_parts.append(f"  🚨 현재 전량 청산 권장")
+    if pos_parts:
+        lines.append(f"   🚪 {' | '.join(pos_parts)}")
+
+    lines.append(f"   {sig_emoji} 종합 신호: {r.overall_signal.value}  ({r.overall_score:.1f}/100)")
+    if not brief:
+        lines.append(f"     {r.summary}")
+        if r.is_actionable:
+            lines.append(f"   ✅ 매수 실행 가능 조건 충족")
+        else:
+            lines.append(f"   ⏸️  매수 실행 조건 미충족 - 관망 권장")
+
+    return lines
 
 def make_llm_analysis(llm: Optional["LLMAnalysis"] = None) -> str:
     """LLMAnalysis 섹션만 출력"""

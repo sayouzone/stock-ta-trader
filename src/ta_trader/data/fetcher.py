@@ -108,7 +108,7 @@ class DataFetcher:
 
             stock = self._krx_fetcher.get_info(ticker)
             logger.info("종목", ticker=ticker, stock=stock)
-            name = stock.name or name
+            name = (stock.name if stock else None) or name
 
         return name, info
 

@@ -899,6 +899,7 @@ def recommend(market: str, config: str, output: str, period: str, style: str,
                                 parse_dates=["Date"],   # 날짜 컬럼 자동 변환
                                 encoding="utf-8",       # 한글 포함 시
                             )
+                            click.echo(f"CSV 로딩: {out_dir / names[0]}")
 
                     decision = analyzer.analyze(df)
 

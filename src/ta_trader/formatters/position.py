@@ -206,12 +206,14 @@ def format_position_report(results: list[PositionAnalysisResult]) -> str:
     lines.append("─" * W)
 
     # 점수 내림차순 정렬
-    sorted_results = sorted(results, key=lambda r: r.overall_score, reverse=True)
+    #sorted_results = sorted(results, key=lambda r: r.overall_score, reverse=True)
+    sorted_results = sorted(results, key=lambda r: r.entry.score, reverse=True)
 
     for r in sorted_results:
         sig_emoji = _SIGNAL_EMOJI.get(r.overall_signal, "")
         ent_emoji = _SIGNAL_EMOJI.get(r.entry.signal, "")
-        name = r.name[:10] if len(r.name) > 10 else r.name
+        name = r.name[:18] if len(r.name) > 18 else r.name
+        """
         line = (
             f"{name:<12} {r.current_price:>10,.0f} "
             f"{r.market_env.environment.value:^8} {r.sector.strength.value:^8} "
@@ -220,6 +222,15 @@ def format_position_report(results: list[PositionAnalysisResult]) -> str:
             f"{r.risk.stop_loss:>10,.0f} {r.risk.take_profit:>10,.0f} "
             f"{r.risk.risk_reward_ratio:>5.1f} {r.risk.position_size:>6,} "
             f"{sig_emoji}{r.overall_signal.value:^6} {r.overall_score:>5.1f}"
+        )
+        """
+        line = (
+            f"{ent_emoji}{r.entry.signal.value:^6} {r.entry.score:>5.0f} "
+            f"{r.current_price:>10,.0f} {r.market_env.environment.value:^8} "
+            f"{r.screening.grade.value:^4} {r.risk.stop_loss:>10,.0f} "
+            f"{r.risk.take_profit:>10,.0f} {r.risk.risk_reward_ratio:>5.1f} "
+            f"{r.risk.position_size:>6,} {sig_emoji}{r.overall_signal.value:^6} "
+            f"{r.overall_score:>5.1f} {name:<18}"
         )
         lines.append(line)
 
@@ -239,7 +250,109 @@ def format_position_report(results: list[PositionAnalysisResult]) -> str:
         lines.append(f"\n  ⏸️  현재 매수 실행 가능 종목 없음")
 
     lines.append("━" * W)
+
+    # ── 등급별 분류 ──────────────────────────────────────
+    entry_picks = [r for r in results if r.entry.signal in (
+        PositionSignal.STRONG_ENTRY, PositionSignal.ENTRY
+    )]
+    hold_list = [r for r in results if r.entry.signal == PositionSignal.HOLD]
+    exit_list = [r for r in results if r.entry.signal in (
+        PositionSignal.PARTIAL_EXIT, PositionSignal.EXIT, PositionSignal.STRONG_EXIT
+    )]
+
+    # ── 진입 종목 상세 ──────────────────────────────
+    if entry_picks:
+        lines.append("─" * W)
+        lines.append(f"  🟢 진입 종목 ({len(entry_picks)}건)")
+        lines.append("─" * W)
+        for rank, r in enumerate(entry_picks, 1):
+            lines.extend(_format_single_position(r, rank, brief=False))
+
+    # ── 보류 종목 상세 ──────────────────────────────
+    if hold_list:
+        lines.append("─" * W)
+        lines.append(f"  🟡 보류 종목 ({len(hold_list)}건)")
+        lines.append("─" * W)
+        for rank, r in enumerate(hold_list, 1):
+            lines.extend(_format_single_position(r, rank, brief=False))
+
+    # ── 매도 종목 상세 ──────────────────────────────
+    if exit_list:
+        lines.append("─" * W)
+        lines.append(f"  🟡 분할 매도 종목 ({len(exit_list)}건)")
+        lines.append("─" * W)
+        for rank, r in enumerate(exit_list, 1):
+            lines.extend(_format_single_position(r, rank, brief=False))
+
     return "\n".join(lines)
+
+# ── 단일 종목 내부 포매터 ────────────────────────────────
+
+def _format_single_position(
+    r: PositionAnalysisResult, rank: int, brief: bool = False,
+) -> list[str]:
+    """단일 종목 결과를 recommend/_format_single_recommendation 스타일로 포매팅"""
+    sig_emoji = _SIGNAL_EMOJI.get(r.overall_signal, "")
+    ent_emoji = _SIGNAL_EMOJI.get(r.entry.signal, "")
+    name = r.name[:18] if len(r.name) > 10 else r.name
+    lines = [
+        "",
+        f"  ┌{'─' * 66}┐",
+        f"  │  {ent_emoji}  #{rank}  {r.ticker} ({r.name})  —  "
+        f"{r.screening.grade.value} {r.overall_signal.value}  ({r.overall_score:5.1f})",
+        f"  │  현재가: {r.current_price:,.2f}",
+        f"  └{'─' * 66}┘",
+    ]
+
+    risk = r.risk
+    risk_parts = []
+    risk_parts.append(f"진입가: {risk.entry_price:>9,.0f}")
+    risk_parts.append(f"손절가: {risk.stop_loss:>9,.0f} (ATR×{RISK_ATR_SL_MULTIPLIER})")
+    risk_parts.append(f"익절가: {risk.take_profit:>9,.0f} (ATR×{RISK_ATR_TP_MULTIPLIER})")
+    risk_parts.append(f"R배수: 1:{risk.risk_reward_ratio} {'✅ 적합' if risk.is_acceptable else '⚠️  부적합'}")
+    if risk_parts:
+        lines.append(f"   💼 {' | '.join(risk_parts)}")
+
+    risk_parts = []
+    risk_parts.append(f"총 매수수량: {risk.position_size:>6,}주 ({risk.position_value:,.0f}원)")
+    risk_parts.append(f"1차 매수: {risk.split_buy_1:>6,}주  (피벗/풀백 확인 시)")
+    risk_parts.append(f"2차 매수: {risk.split_buy_2:>6,}주  (추가 상승 확인 시)")
+    risk_parts.append(f"3차 매수: {risk.split_buy_3:>6,}주  (추세 안착 확인 시)")
+    if risk_parts:
+        lines.append(f"      {' | '.join(risk_parts)}")
+
+    risk_parts = []
+    risk_parts.append(f"비중: {risk.portfolio_pct:>5.1f}% (자본금: {risk.capital:,.0f}원)")
+    risk_parts.append(f"최대손실: {risk.max_loss:>9,.0f}원 (자본의 {risk.max_loss/risk.capital*100:.1f}%)")
+    if risk.fibo_target_161 > 0:
+        risk_parts.append(f"피보목표:   161.8%={risk.fibo_target_161:,.0f}  261.8%={risk.fibo_target_261:,.0f}")
+    if risk_parts:
+        lines.append(f"      {' | '.join(risk_parts)}")
+
+    """
+    ext = r.exit_strategy
+    pos_parts = []
+    pos_parts.append(f"트레일링 스톱: {ext.trailing_stop:>9,.0f}")
+    pos_parts.append(f"1차 부분익절: {ext.partial_exit_price:>9,.0f} (50% 매도)")
+    pos_parts.append(f"전량 청산가: {ext.full_exit_price:>9,.0f}")
+    pos_parts.append(f"{ext.detail}")
+    if ext.should_partial_exit:
+        pos_parts.append(f"  ⚠️  현재 부분 익절 권장")
+    if ext.should_full_exit:
+        pos_parts.append(f"  🚨 현재 전량 청산 권장")
+    if pos_parts:
+        lines.append(f"   🚪 {' | '.join(pos_parts)}")
+    """
+
+    lines.append(f"   {sig_emoji} 종합 신호: {r.overall_signal.value}  ({r.overall_score:.1f}/100)")
+    if not brief:
+        lines.append(f"     {r.summary}")
+        if r.is_actionable:
+            lines.append(f"   ✅ 매수 실행 가능 조건 충족 — 1차 분할 매수를 시작")
+        else:
+            lines.append(f"   ⏸️ 매수 실행 조건 미충족 — 관망 권장")
+
+    return lines
 
 def make_llm_analysis(llm: Optional["LLMAnalysis"] = None) -> str:
     """LLMAnalysis 섹션만 출력"""

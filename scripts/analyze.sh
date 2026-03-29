@@ -2,6 +2,11 @@
 
 ANALYZE_CMD="python main.py analyze --save-chart --save-report"
 
+# ── 시작 시간 기록 ──────────────────────────────
+START_TIME=$(date +%s)
+START_FMT=$(date "+%Y-%m-%d %H:%M:%S")
+echo "🕐 시작 시간: ${START_FMT}"
+
 # ── 옵션 처리 로직 ───────────────────────────
 # $1은 스크립트 실행 시 전달되는 첫 번째 인자를 의미합니다.
 case "$1" in
@@ -51,3 +56,15 @@ case "$1" in
         exit 1
         ;;
 esac
+
+# ── 종료 시간 및 실행 시간 계산 ──────────────────────────
+END_TIME=$(date +%s)
+END_FMT=$(date "+%Y-%m-%d %H:%M:%S")
+ELAPSED=$(( END_TIME - START_TIME ))
+H=$(( ELAPSED / 3600 ))
+M=$(( (ELAPSED % 3600) / 60 ))
+S=$(( ELAPSED % 60 ))
+
+echo "🏁 종료 시간: ${END_FMT}"
+printf "⏱  실행 시간: %02d:%02d:%02d (총 %ds)\n" \
+    "$H" "$M" "$S" "$ELAPSED"
