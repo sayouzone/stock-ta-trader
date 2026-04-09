@@ -4,7 +4,7 @@ LLM Provider 팩토리
 
 지원 Provider:
     'anthropic' → AnthropicAnalyzer (ANTHROPIC_API_KEY 필요)
-    'gemini'    → GeminiAnalyzer    (GEMINI_API_KEY 필요)
+    'gemini'    → GoogleAnalyzer    (GEMINI_API_KEY 필요)
 
 사용 예:
     from ta_trader.llm.factory import create_llm_analyzer

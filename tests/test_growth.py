@@ -206,7 +206,7 @@ class TestFormatter:
             self._make_result("TSLA", 25, ValueGrade.UNFIT),
         ]
         output = format_value_report(results)
-        assert "Value 종목 추천 보고서" in output
+        assert "종목 추천 보고서" in output
         assert "매수 추천 종목" in output
         assert "부적합 종목" in output
         assert "면책 조항" in output

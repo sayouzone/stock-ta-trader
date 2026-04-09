@@ -1,5 +1,5 @@
 """
-tests/test_gemini.py
+tests/test_google.py
 Gemini LLM 분석기 단위 테스트 (Google GenAI SDK 모킹)
 """
 
@@ -16,7 +16,7 @@ from ta_trader.llm.factory import create_llm_analyzer, list_providers
 from ta_trader.analyzers.google import GoogleAnalyzer
 from ta_trader.models.llm import LLMAnalysis
 from ta_trader.models.short import (
-    IndicatorResult, MarketRegime, RiskLevels, Signal, TradingDecision,
+    IndicatorResult, MarketRegime, RiskLevels, Signal, TradingDecision, StrategyType
 )
 
 # ── 픽스처 ──────────────────────────────────────────────
@@ -25,10 +25,12 @@ from ta_trader.models.short import (
 def sample_decision() -> TradingDecision:
     return TradingDecision(
         ticker          = "NVDA",
+        name            = "Nvidia",
         date            = "2024-12-31",
         current_price   = 135.0,
         market_regime   = MarketRegime.STRONG_TREND,
         composite_score = 65.0,
+        strategy_type    = StrategyType.TREND_FOLLOWING,
         final_signal    = Signal.STRONG_BUY,
         indicators      = [IndicatorResult("ADX", 30.0, Signal.STRONG_BUY, 55.0, "ADX=30.0")],
         risk            = RiskLevels(stop_loss=128.0, take_profit=148.0, risk_reward_ratio=1.85),
@@ -57,9 +59,9 @@ _VALID_GEMINI_RESPONSE = json.dumps({
 }, ensure_ascii=False)
 
 
-# ── GeminiAnalyzer 테스트 ───────────────────────────────
+# ── GoogleAnalyzer 테스트 ───────────────────────────────
 
-class TestGeminiAnalyzer:
+class TestGoogleAnalyzer:
 
     def _make_mock_response(self, text: str) -> MagicMock:
         response             = MagicMock()
@@ -75,11 +77,11 @@ class TestGeminiAnalyzer:
         mock_client_cls.return_value = mock_client
         mock_client.models.generate_content.return_value = self._make_mock_response(_VALID_GEMINI_RESPONSE)
 
-        analyzer = GeminiAnalyzer(api_key="test-key")
+        analyzer = GoogleAnalyzer(api_key="test-key")
         result   = analyzer.analyze(sample_decision, sample_df)
 
         assert isinstance(result, LLMAnalysis)
-        assert result.provider == "gemini"
+        assert result.provider == "google"
         assert result.confidence == pytest.approx(0.82)
         assert "AI 수요" in result.overall_assessment
 
@@ -91,7 +93,7 @@ class TestGeminiAnalyzer:
         chunks = [MagicMock(text='{"overall'), MagicMock(text='_assessment": "테스트"}')]
         mock_client.models.generate_content_stream.return_value = iter(chunks)
 
-        analyzer = GeminiAnalyzer(api_key="test-key")
+        analyzer = GoogleAnalyzer(api_key="test-key")
         result   = list(analyzer.analyze_stream(sample_decision, sample_df))
 
         assert len(result) == 2
@@ -100,13 +102,13 @@ class TestGeminiAnalyzer:
     @patch("ta_trader.analyzers.google.genai.Client")
     def test_provider_name(self, mock_client_cls):
         mock_client_cls.return_value = MagicMock()
-        analyzer = GeminiAnalyzer(api_key="test-key")
-        assert analyzer.provider_name == "gemini"
+        analyzer = GoogleAnalyzer(api_key="test-key")
+        assert analyzer.provider_name == "google"
 
     def test_missing_api_key_raises(self, monkeypatch):
         monkeypatch.delenv("GEMINI_API_KEY", raising=False)
         with pytest.raises(TATraderError, match="GEMINI_API_KEY"):
-            GeminiAnalyzer(api_key=None)
+            GoogleAnalyzer(api_key=None)
 
     @patch("ta_trader.analyzers.google.genai.Client")
     def test_safety_filter_blocked_raises(self, mock_client_cls, sample_decision, sample_df):
@@ -116,7 +118,7 @@ class TestGeminiAnalyzer:
         blocked_response.candidates = []   # Safety filter가 차단한 경우
         mock_client.models.generate_content.return_value = blocked_response
 
-        analyzer = GeminiAnalyzer(api_key="test-key")
+        analyzer = GoogleAnalyzer(api_key="test-key")
         with pytest.raises(TATraderError, match="Safety Filter"):
             analyzer.analyze(sample_decision, sample_df)
 
@@ -128,9 +130,9 @@ class TestFactory:
     def test_list_providers(self):
         providers = list_providers()
         assert "anthropic" in providers
-        assert "gemini" in providers
+        assert "google" in providers
 
-    @patch("ta_trader.analyzers.anthropic.claude.Anthropic")
+    @patch("ta_trader.analyzers.anthropic.anthropic.Anthropic")
     def test_create_anthropic(self, mock_cls, monkeypatch):
         monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
         mock_cls.return_value = MagicMock()
@@ -140,12 +142,12 @@ class TestFactory:
         assert analyzer.provider_name == "anthropic"
 
     @patch("ta_trader.analyzers.google.genai.Client")
-    def test_create_gemini(self, mock_cls, monkeypatch):
+    def test_create_google(self, mock_cls, monkeypatch):
         monkeypatch.setenv("GEMINI_API_KEY", "test-key")
         mock_cls.return_value = MagicMock()
-        analyzer = create_llm_analyzer(provider="gemini")
-        assert isinstance(analyzer, GeminiAnalyzer)
-        assert analyzer.provider_name == "gemini"
+        analyzer = create_llm_analyzer(provider="google")
+        assert isinstance(analyzer, GoogleAnalyzer)
+        assert analyzer.provider_name == "google"
 
     def test_unknown_provider_raises(self):
         with pytest.raises(TATraderError, match="지원하지 않는"):
@@ -154,18 +156,18 @@ class TestFactory:
     def test_auto_detect_anthropic(self, monkeypatch):
         monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
         monkeypatch.delenv("GEMINI_API_KEY", raising=False)
-        with patch("ta_trader.analyzers.anthropic.claude.Anthropic") as mock_cls:
+        with patch("ta_trader.analyzers.anthropic.anthropic.Anthropic") as mock_cls:
             mock_cls.return_value = MagicMock()
             analyzer = create_llm_analyzer()   # provider=None → 자동 감지
             assert analyzer.provider_name == "anthropic"
 
-    def test_auto_detect_gemini(self, monkeypatch):
+    def test_auto_detect_google(self, monkeypatch):
         monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
         monkeypatch.setenv("GEMINI_API_KEY", "AIza-test")
         with patch("ta_trader.analyzers.google.genai.Client") as mock_cls:
             mock_cls.return_value = MagicMock()
             analyzer = create_llm_analyzer()
-            assert analyzer.provider_name == "gemini"
+            assert analyzer.provider_name == "google"
 
     def test_no_api_key_raises(self, monkeypatch):
         monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
@@ -179,7 +181,7 @@ class TestFactory:
 class TestProviderInterface:
     """두 Provider가 동일한 BaseLLMAnalyzer 인터페이스를 준수하는지 확인"""
 
-    @patch("ta_trader.analyzers.anthropic.claude.Anthropic")
+    @patch("ta_trader.analyzers.anthropic.anthropic.Anthropic")
     def test_anthropic_has_provider_name(self, mock_cls):
         mock_cls.return_value = MagicMock()
         from ta_trader.analyzers.anthropic import AnthropicAnalyzer
@@ -189,9 +191,9 @@ class TestProviderInterface:
         assert hasattr(a, "analyze_stream")
 
     @patch("ta_trader.analyzers.google.genai.Client")
-    def test_gemini_has_provider_name(self, mock_cls):
+    def test_google_has_provider_name(self, mock_cls):
         mock_cls.return_value = MagicMock()
-        g = GeminiAnalyzer(api_key="test")
+        g = GoogleAnalyzer(api_key="test")
         assert hasattr(g, "provider_name")
         assert hasattr(g, "analyze")
         assert hasattr(g, "analyze_stream")

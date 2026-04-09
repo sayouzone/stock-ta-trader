@@ -10,7 +10,8 @@ from ta_trader.models.swing import (
     MarketEnvironment, ScreeningGrade,
 )
 
-from typing import TYPE_CHECKING, Optional
+import unicodedata
+from typing import TYPE_CHECKING, Optional, Literal
 
 if TYPE_CHECKING:
     from ta_trader.models.llm import LLMAnalysis
@@ -150,29 +151,69 @@ def format_swing_report(results: list[SwingAnalysisResult]) -> str:
     if not results:
         return "분석 결과 없음"
 
-    W = 90
+    # ── 컬럼 레이아웃 정의 (헤더명, 화면폭, 정렬) ────────────────────────────────
+    #   "🟢🟢 강력진입" → _wlen = 2+2+1+8 = 13   →  진입/종합 컬럼 폭 14
+    #   "🟠 부분청산"   → _wlen = 2+1+8   = 11   ┘
+    #   "약한강세"      → _wlen = 8              →  시장/섹터 컬럼 폭 10
+    _COLS: list[tuple[str, int, Literal['<', '>', '^']]] = [
+        ("진입",  14, '^'),   # emoji + signal
+        ("점수",   5, '>'),
+        ("가격",  10, '>'),
+        ("시장",  10, '^'),
+        #("섹터",  10, '^'),
+        ("등급",   4, '^'),
+        ("손절",  10, '>'),
+        ("익절",  10, '>'),
+        ("RR",    5, '>'),
+        ("수량",  10, '>'),
+        ("종합",  14, '^'),   # emoji + signal
+        ("점수",   6, '>'),
+        ("종목",   0, '<'),   # 자유폭 (마지막 컬럼)
+    ]
+    _W   = 120   # 구분선 폭
+    _SEP = "  "  # 컬럼 사이 구분자
+
+    W = _W
     lines: list[str] = []
     lines.append("━" * W)
     lines.append(f"  🔄 스윙 트레이딩 스크리닝 보고서  ({len(results)}종목)")
     lines.append("━" * W)
 
     # 요약 테이블 헤더
+    """
     header = (
         f"{'진입':^8} {'점수':>5} {'가격':>10} {'시장':^8} "
         f"{'등급':^4} {'손절':>10} {'익절':>10} {'RR':>5} "
         f"{'수량':>6} {'종합':^8} {'점수':>5} {'종목':<18}"
     )
+    """
+    """
+    header = (
+        f"{'진입':^14} {'점수':>5} {'가격':>10} {'시장':^10} "
+        f"{'등급':^4} {'손절':>10} {'익절':>10} {'RR':>5} "
+        f"{'수량':>10} {'종합':^14} {'점수':>6} {'종목':<0}"
+    )
+
     lines.append(header)
+    lines.append("─" * W)
+    """
+
+    # ── 헤더 ─────────────────────────────────────────────────────────────────
+    header_parts = [_wfmt(h, w, a) for h, w, a in _COLS[:-1]]
+    header_parts.append(_COLS[-1][0])   # 종목 헤더 (패딩 없음)
+    lines.append(_SEP.join(header_parts))
     lines.append("─" * W)
 
     # 점수 내림차순 정렬
     #sorted_results = sorted(results, key=lambda r: r.overall_score, reverse=True)
-    sorted_results = sorted(results, key=lambda r: r.entry.score, reverse=True)
+    sorted_results = sorted(results, key=lambda r: (r.entry.score, r.overall_score), reverse=True)
+    #sorted_results = sorted(results, key=lambda r: (r.overall_score, r.entry.score), reverse=True)
 
     for r in sorted_results:
         sig_emoji = _SIGNAL_EMOJI.get(r.overall_signal, "")
         ent_emoji = _SIGNAL_EMOJI.get(r.entry.signal, "")
         name = r.name[:18] if len(r.name) > 18 else r.name
+        """
         line = (
             f"{ent_emoji}{r.entry.signal.value:^6} {r.entry.score:>5.0f} "
             f"{r.current_price:>10,.0f} {r.market_env.environment.value:^8} "
@@ -181,7 +222,37 @@ def format_swing_report(results: list[SwingAnalysisResult]) -> str:
             f"{r.position.position_size:>6,} {sig_emoji}{r.overall_signal.value:^6} "
             f"{r.overall_score:>5.1f} {name:<18}"
         )
+        """
+        """
+        line = (
+            f"{ent_emoji}{r.entry.signal.value:^8} {r.entry.score:>5.0f} "
+            f"{r.current_price:>10,.0f} {r.market_env.environment.value:^10} "
+            f"{r.screening.grade.value:^4} {r.position.stop_loss:>10,.0f} "
+            f"{r.position.take_profit:>10,.0f} {r.position.risk_reward_ratio:>5.1f} "
+            f"{r.position.position_size:>10,} {sig_emoji}{r.overall_signal.value:^8} "
+            f"{r.overall_score:>6.1f} {name:<18}"
+        )
+
         lines.append(line)
+        """
+        values = [
+            f"{ent_emoji} {r.entry.signal.value}",        # 진입
+            f"{r.entry.score:.0f}",                       # 점수
+            f"{r.current_price:,.0f}",                    # 가격
+            r.market_env.environment.value,               # 시장
+            #r.sector.strength.value,                     # 섹터
+            r.screening.grade.value,                      # 등급
+            f"{r.position.stop_loss:,.0f}",               # 손절
+            f"{r.position.take_profit:,.0f}",             # 익절
+            f"{r.position.risk_reward_ratio:.1f}",        # RR
+            f"{r.position.position_size:,}",              # 수량
+            f"{sig_emoji} {r.overall_signal.value}",      # 종합
+            f"{r.overall_score:.1f}",                     # 점수
+            f"{r.name} ({r.ticker})",                     # 종목명
+        ]
+        row_parts = [_wfmt(v, w, a) for v, (_, w, a) in zip(values[:-1], _COLS[:-1])]
+        row_parts.append(values[-1])   # 종목명 패딩 없이 추가
+        lines.append(_SEP.join(row_parts))
 
     lines.append("─" * W)
 
@@ -351,3 +422,20 @@ def _wrap(text: str, width: int = 62) -> list[str]:
     if line:
         lines.append(line)
     return lines
+
+# ── Wide-char 폭 보정 유틸 ────────────────────────────────────────────────────
+
+def _wlen(s: str) -> int:
+    """문자열의 화면 표시 폭 반환 (한글·CJK·이모지 = 2칸, 나머지 = 1칸)."""
+    return sum(2 if unicodedata.east_asian_width(c) in ('W', 'F') else 1 for c in s)
+
+
+def _wfmt(s: str, width: int, align: Literal['<', '>', '^'] = '<') -> str:
+    """화면 폭(display width) 기준으로 문자열을 정렬·패딩."""
+    pad = max(0, width - _wlen(s))
+    if align == '>':
+        return ' ' * pad + s
+    elif align == '^':
+        lp = pad // 2
+        return ' ' * lp + s + ' ' * (pad - lp)
+    return s + ' ' * pad  # '<'

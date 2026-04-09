@@ -1,5 +1,5 @@
 """
-ta_trader/growth/formatter.py
+ta_trader/formatters/growth.py
 GrowthAnalysisResult 터미널 출력 포매터
 
 recommend/report.py와 동일한 레이아웃:
@@ -40,7 +40,7 @@ def format_growth_report(results: list[GrowthAnalysisResult]) -> str:
     lines.append("")
     lines.append(
         f"  {'순위':>4s}  {'등급':7s}  {'종목':8s}  {'현재가':>10s}  "
-        f"{'점수':>6s}  {'S1':>5s} {'S3':>5s} {'S4':>5s} {'S5':>5s} {'S6':>5s}  {'종목명':>10s}"
+        f"{'점수':>6s}  {'S1':>5s} {'S3':>5s} {'S4':>5s} {'S5':>5s} {'S6':>5s}  {'종목명'}"
     )
     lines.append(f"  {thin[2:]}")
 
@@ -56,7 +56,7 @@ def format_growth_report(results: list[GrowthAnalysisResult]) -> str:
         lines.append(
             f"  {rank:>4d}  {r.grade.emoji} {r.grade.value:5s}  "
             f"{r.ticker:8s}  {r.current_price:>10,.2f}  "
-            f"{r.total_score:>5.1f} {s_cols:24s} {r.name:>10s}"
+            f"{r.total_score:>5.1f} {s_cols:24s} {r.name} ({r.ticker})"
         )
 
     # ── 등급별 분류 ──────────────────────────────────────

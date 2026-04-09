@@ -1,6 +1,6 @@
 """
-ta_trader/utils/formatter.py
-분석 결과 터미널 출력 포매터
+ta_trader/formatters/short.py
+단기 트레이딩 분석 결과 터미널 출력 포매터
 """
 
 from __future__ import annotations

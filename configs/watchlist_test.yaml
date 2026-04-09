@@ -1067,3 +1067,6 @@ watchlist:
   - "QYLD"        # Global X NASDAQ 100 Covered Call ETF
   # ── 종목 검토 ─────────────────────
   - "MRVL"        # Marvell Technology, Inc.
+  - "OS"          # Onestream, Inc. Class A
+  - "VIK"         # Viking Holdings Ltd
+  - "BAP"         # Credicorp Ltd.

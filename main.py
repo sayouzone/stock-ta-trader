@@ -103,6 +103,10 @@ def cli() -> None:
 @click.option("--no-chart",   is_flag=True,   help="차트 표시 안 함")
 @click.option("--save-report",is_flag=True,   help="분석결과를 reports/ 폴더에 저장")
 @click.option("--save-csv",   is_flag=True,   help="마켓과 기술지표 분석 데이터를 reports/ 폴더에 저장")
+@click.option("--save-recommend",is_flag=True,help="추천결과를 reports/ 폴더에 저장")
+@click.option("--save-screen",is_flag=True,help="추천결과를 reports/ 폴더에 저장")
+@click.option("--top-n",      default=0, type=int,          help="상위 N개만 상세 출력 (0=전체)")
+@click.option("--min-score",  default=0.0, type=float,      help="최소 점수 필터")
 @click.option("--llm",        is_flag=True,   help="Anthropic Claude LLM 해석 추가 (ANTHROPIC_API_KEY 필요)")
 @click.option("--llm-stream", is_flag=True,   help="LLM 응답을 스트리밍으로 출력")
 @click.option("--llm-provider", default=None,
@@ -111,6 +115,7 @@ def cli() -> None:
 @click.option("--llm-model",  default=None,   help="LLM 모델명 (기본값: claude-sonnet-4-20250514)")
 def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: float, style: str,
             config: str, save_chart: bool, no_chart: bool, save_report: bool, save_csv: bool,
+            save_recommend: bool, save_screen: bool, top_n: int, min_score: float,
             llm: bool, llm_stream: bool, llm_provider: str | None, llm_model: str | None) -> None:
     """단일 종목 기술적 분석
 
@@ -130,6 +135,7 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
     styles = _resolve_styles(style)
     is_multi = len(styles) > 1
 
+    market = None
     config_path = Path(config)
     if ticker in MARKETS:
         if not config_path.exists():
@@ -152,6 +158,7 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
         market_filter = MARKET_FILTERS.get(ticker)
         if market_filter:
             tickers = [t for t in tickers if market_filter(t)]
+        market = ticker
     else:
         tickers = [ticker]
 
@@ -168,6 +175,7 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
 
         style_tag = trading_style.name.lower()
 
+        decisions = []
         label = f"분석 중 ({trading_style.value})" if is_multi else "분석 중"
         with click.progressbar(tickers, label=label, show_pos=True) as bar:
             for ticker in bar:
@@ -248,6 +256,7 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
                     decision_str = make_decision(decision)
                 
                 #click.echo(decision_str)
+                decisions.append(decision)
 
                 stock_name = decision.name.replace("/", "").replace(" ", "_")
 
@@ -313,6 +322,24 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
                         
                         if save_chart and chart_path:
                             click.echo(f"차트 저장됨: {chart_path}")
+
+        report_str = _make_recommend(decisions, trading_style) if save_recommend and market else ""
+
+        if save_recommend and market:
+            style_tag = trading_style.name.lower()
+            report_path = out_dir / f"recommend_{style_tag}_{date.today().strftime('%Y%m%d')}_{market.lower()}.txt"
+            report_path.write_text(report_str, encoding="utf-8")
+            click.echo(f"보고서 저장됨: {report_path}")
+   
+        if save_screen and market:
+            screenings = [d.to_dict() for d in decisions]
+            df = pd.DataFrame(screenings).sort_values(["Score"], ascending=[False]).reset_index(drop=True)
+            click.echo("\n" + df.to_string(index=False))
+
+            style_tag = style.lower()
+            csv_path = out_dir / f"recommend_{style_tag}_{date.today().strftime('%Y%m%d')}_{market.lower()}.csv"
+            df.to_csv(csv_path, index=False, encoding="utf-8-sig")
+            click.echo(f"\n결과 저장됨: {csv_path}")
 
 
 # ── swing 명령 (6단계 스윙 트레이딩) ──────────────────────
@@ -942,6 +969,8 @@ def recommend(market: str, config: str, output: str, period: str, style: str,
                 #finally:
                 #    pass
 
+        report_str = _make_recommend(decisions, trading_style, top_n, min_score)
+        """
         if not decisions:
             click.echo("분석 가능한 종목이 없습니다.")
             continue
@@ -998,6 +1027,7 @@ def recommend(market: str, config: str, output: str, period: str, style: str,
             report_str = format_recommendation_report(trading_style, report)
         
         click.echo(report_str)
+        """
 
         if save_report:
             style_tag = trading_style.name.lower()
@@ -1446,6 +1476,68 @@ def backtest(ticker: str, period: str, interval: str, capital: float,
         except Exception as e:
             click.echo(f"⚠ 차트 저장 실패: {e}", err=True)
 
+
+def _make_recommend(
+    decisions, 
+    trading_style: TradingStyle = TradingStyle.SWING, 
+    top_n: int = 0, min_score: float = 0.0
+) -> str:
+    if not decisions:
+        click.echo("분석 가능한 종목이 없습니다.")
+        return None
+
+    if trading_style == TradingStyle.SWING:
+        # 상위 N개
+        decisions.sort(key=lambda r: r.overall_score, reverse=True)
+        if min_score > 0:
+            decisions = [r for r in decisions if r.total_score >= min_score]
+        if top_n > 0:
+            decisions = decisions[:top_n]
+        
+        report_str = format_swing_report(decisions)
+    elif trading_style == TradingStyle.POSITION:
+        # 상위 N개
+        decisions.sort(key=lambda r: r.overall_score, reverse=True)
+        if min_score > 0:
+            decisions = [r for r in decisions if r.total_score >= min_score]
+        if top_n > 0:
+            decisions = decisions[:top_n]
+        
+        report_str = format_position_report(decisions)
+    elif trading_style == TradingStyle.GROWTH:
+        # 점수 필터링 및 정렬
+        decisions.sort(key=lambda r: r.total_score, reverse=True)
+        if min_score > 0:
+            decisions = [r for r in decisions if r.total_score >= min_score]
+        if top_n > 0:
+            decisions = decisions[:top_n]
+
+        # recommend 형식 보고서 출력
+        report_str = format_growth_report(decisions)
+    elif trading_style == TradingStyle.VALUE:
+        # 점수 필터링 및 정렬
+        decisions.sort(key=lambda r: r.total_score, reverse=True)
+        if min_score > 0:
+            decisions = [r for r in decisions if r.total_score >= min_score]
+        if top_n > 0:
+            decisions = decisions[:top_n]
+
+        # recommend 형식 보고서 출력
+        report_str = format_value_report(decisions)
+    elif trading_style in [TradingStyle.SWING, TradingStyle.POSITION]:
+        engine = RecommendationEngine()
+        report = engine.analyze(decisions)
+
+        # top-n 필터링
+        if top_n > 0:
+            report.recommendations = report.recommendations[:top_n]
+            report.buy_picks = [r for r in report.buy_picks if r.rank <= top_n]
+            report.watch_list = [r for r in report.watch_list if r.rank <= top_n]
+            report.avoid_list = [r for r in report.avoid_list if r.rank <= top_n]
+
+        report_str = format_recommendation_report(trading_style, report)
+    
+    return report_str
 
 def _save_equity_chart(result, save_path: Path) -> None:
     """에쿼티 커브 차트 저장"""

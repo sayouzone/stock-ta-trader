@@ -41,8 +41,8 @@ class ValueChartVisualizer:
         fig = plt.figure(figsize=(16, 14))
         current_price = f"{result.current_price:,.0f}" if ".K" in result.ticker else f"{result.current_price:,.2f}"
         fig.suptitle(
-            f"{result.trading_style.value} 트레이딩: {result.ticker} ({result.name})  |  {result.date}  |  "
-            f"현재가:{current_price} ({result.grade.value})  (Score: {result.total_score:+.1f})",
+            f"{result.trading_style.value}: {result.ticker} ({result.name})  |  {result.date}  |  "
+            f"Price: {current_price}  |  {result.grade.value}  |  Score: {result.total_score:+.1f}",
             fontsize=14,
             fontweight="bold",
         )

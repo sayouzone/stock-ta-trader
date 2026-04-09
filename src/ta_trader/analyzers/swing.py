@@ -1,6 +1,6 @@
 """
 ta_trader/analyzers/swing.py
-스윙 트레이딩 6단계 프로세스 분석기
+SwingTradingAnalyzer - 스윙 트레이딩 6단계 프로세스 분석기
 
 6단계 프로세스:
   [1단계] 시장 환경 판단  → ADX, SMA200, ATR%

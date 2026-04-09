@@ -1,5 +1,5 @@
 """
-ta_trader/llm/prompt_builder.py
+ta_trader/llm/short_prompt_builder.py
 TradingDecision → LLM 프롬프트 변환기
 
 설계 원칙:

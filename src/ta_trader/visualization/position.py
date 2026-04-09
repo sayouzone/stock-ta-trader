@@ -39,10 +39,11 @@ class PositionChartVisualizer:
         #print(df.columns)
 
         fig = plt.figure(figsize=(16, 14))
+        current_price = f"{result.current_price:,.0f}" if ".K" in result.ticker else f"{result.current_price:,.2f}"
         fig.suptitle(
-            f"{result.trading_style.value} 트레이딩: {result.ticker} ({result.name})  |  {result.date}  |  "
-            #f"{decision.final_signal.value}  (Score: {decision.composite_score:+.1f})",
-            f"{result.overall_signal.value} ({result.market_env.environment.value})  (Score: {result.overall_score:+.1f})",
+            f"{result.trading_style.value}: {result.ticker} ({result.name})  |  {result.date}  |  "
+            f"Price: {current_price}  |  "
+            f"{result.overall_signal.value} ({result.market_env.environment.value})  |  Score: {result.overall_score:+.1f}",
             fontsize=14,
             fontweight="bold",
         )

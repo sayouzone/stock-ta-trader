@@ -1,6 +1,6 @@
 """
-ta_trader/llm/prompt_builder.py
-TradingDecision → LLM 프롬프트 변환기
+ta_trader/llm/position_prompt_builder.py
+PositionAnalysisResult → LLM 프롬프트 변환기
 
 설계 원칙:
 - 기술적 지표 수치를 구조화된 컨텍스트로 변환

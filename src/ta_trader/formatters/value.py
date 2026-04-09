@@ -1,5 +1,5 @@
 """
-ta_trader/value/formatter.py
+ta_trader/formatters/value.py
 ValueAnalysisResult 터미널 출력 포매터
 
 growth/formatter.py와 동일한 레이아웃:
@@ -40,7 +40,7 @@ def format_value_report(results: list[ValueAnalysisResult]) -> str:
     lines.append("")
     lines.append(
         f"  {'순위':>4s}  {'등급':7s}  {'종목':8s}  {'현재가':>10s}  "
-        f"{'점수':>6s}  {'S1':>5s} {'S2':>5s} {'S3':>5s} {'S4':>5s} {'S5':>5s}  {'종목명':>10s}"
+        f"{'점수':>6s}  {'S1':>5s} {'S2':>5s} {'S3':>5s} {'S4':>5s} {'S5':>5s}  {'종목명'}"
     )
     lines.append(f"  {thin[2:]}")
 
@@ -56,7 +56,7 @@ def format_value_report(results: list[ValueAnalysisResult]) -> str:
         lines.append(
             f"  {rank:>4d}  {r.grade.emoji} {r.grade.value:5s}  "
             f"{r.ticker:8s}  {r.current_price:>10,.2f}  "
-            f"{r.total_score:>5.1f} {s_cols:30s} {r.name:>10s}"
+            f"{r.total_score:>5.1f} {s_cols:30s} {r.name:>10s} ({r.ticker})"
         )
 
     # ── 등급별 분류 ──────────────────────────────────────

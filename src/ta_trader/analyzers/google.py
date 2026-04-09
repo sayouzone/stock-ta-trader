@@ -38,7 +38,7 @@ class GoogleAnalyzer(BaseLLMAnalyzer):
     Google Gemini API 기반 LLM 분석기.
 
     사용 예:
-        analyzer = GeminiAnalyzer()
+        analyzer = GoogleAnalyzer()
         result = analyzer.analyze(decision, df)
 
         # 스트리밍

@@ -11,11 +11,11 @@ from unittest.mock import MagicMock, patch
 import pandas as pd
 import pytest
 
-from ta_trader.llm.analyzer import LLMAnalyzer
+from ta_trader.analyzers import LLMAnalyzer
 from ta_trader.models.llm import LLMAnalysis
-from ta_trader.llm.prompt_builder import PromptBuilder
+from ta_trader.llm.short_prompt_builder import ShortPromptBuilder
 from ta_trader.models.short import (
-    IndicatorResult, MarketRegime, RiskLevels, Signal, TradingDecision,
+    IndicatorResult, MarketRegime, RiskLevels, Signal, TradingDecision, StrategyType
 )
 
 
@@ -25,11 +25,13 @@ from ta_trader.models.short import (
 def sample_decision() -> TradingDecision:
     return TradingDecision(
         ticker          = "005930.KS",
+        name            = "삼성전자",
         date            = "2024-12-31",
         current_price   = 62000.0,
         market_regime   = MarketRegime.STRONG_TREND,
         composite_score = 55.0,
         final_signal    = Signal.BUY,
+        strategy_type    = StrategyType.TREND_FOLLOWING,
         indicators      = [
             IndicatorResult("ADX",              28.0, Signal.BUY,        40.0, "ADX=28.0"),
             IndicatorResult("RSI",              45.0, Signal.NEUTRAL,     0.0, "RSI=45.0"),
@@ -62,28 +64,28 @@ _VALID_LLM_RESPONSE = json.dumps({
 }, ensure_ascii=False)
 
 
-# ── PromptBuilder 테스트 ────────────────────────────────
+# ── ShortPromptBuilder 테스트 ────────────────────────────────
 
 class TestPromptBuilder:
     def test_prompt_contains_ticker(self, sample_decision, sample_df):
-        prompt = PromptBuilder().build(sample_decision, sample_df)
+        prompt = ShortPromptBuilder().build(sample_decision, sample_df)
         assert "005930.KS" in prompt
 
     def test_prompt_contains_signal(self, sample_decision, sample_df):
-        prompt = PromptBuilder().build(sample_decision, sample_df)
+        prompt = ShortPromptBuilder().build(sample_decision, sample_df)
         assert "매수" in prompt
 
     def test_prompt_contains_risk_levels(self, sample_decision, sample_df):
-        prompt = PromptBuilder().build(sample_decision, sample_df)
+        prompt = ShortPromptBuilder().build(sample_decision, sample_df)
         assert "59,000" in prompt or "59000" in prompt
 
     def test_prompt_contains_json_schema(self, sample_decision, sample_df):
-        prompt = PromptBuilder().build(sample_decision, sample_df)
+        prompt = ShortPromptBuilder().build(sample_decision, sample_df)
         assert "overall_assessment" in prompt
         assert "key_risks" in prompt
 
     def test_prompt_contains_price_trend(self, sample_decision, sample_df):
-        prompt = PromptBuilder().build(sample_decision, sample_df, recent_days=10)
+        prompt = ShortPromptBuilder().build(sample_decision, sample_df, recent_days=10)
         assert "최근 10일" in prompt
 
 
@@ -123,7 +125,7 @@ class TestLLMAnalyzerMocked:
         msg.usage        = MagicMock(input_tokens=500, output_tokens=200)
         return msg
 
-    @patch("ta_trader.llm.analyzer.anthropic.Anthropic")
+    @patch("ta_trader.analyzers.anthropic.AnthropicAnalyzer")
     def test_analyze_returns_llm_analysis(self, mock_anthropic, sample_decision, sample_df):
         mock_client = MagicMock()
         mock_anthropic.return_value = mock_client
@@ -136,14 +138,18 @@ class TestLLMAnalyzerMocked:
         assert result.confidence == pytest.approx(0.78)
         assert len(result.key_risks) == 2
 
-    @patch("ta_trader.llm.analyzer.anthropic.Anthropic")
+    @patch("ta_trader.analyzers.anthropic.AnthropicAnalyzer")
     def test_analyze_calls_api_once(self, mock_anthropic, sample_decision, sample_df):
         mock_client = MagicMock()
         mock_anthropic.return_value = mock_client
         mock_client.messages.create.return_value = self._make_mock_message(_VALID_LLM_RESPONSE)
 
+        prompt_builder = ShortPromptBuilder()
+        prompt = prompt_builder.build(sample_decision, sample_df, 10)
+
         llm = LLMAnalyzer(api_key="test-key")
-        llm.analyze(sample_decision, sample_df)
+        #llm.analyze(sample_decision, sample_df)
+        llm.analyze(sample_decision.ticker, prompt)
 
         mock_client.messages.create.assert_called_once()
 

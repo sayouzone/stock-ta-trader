@@ -1,5 +1,5 @@
 """
-ta_trader/swing/models.py
+ta_trader/models/swing.py
 스윙 트레이딩 6단계 분석 데이터 모델
 """
 

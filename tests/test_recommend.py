@@ -25,6 +25,7 @@ from ta_trader.models.short import (
 from ta_trader.models.recommend import (
     Grade, Rationale, Recommendation, RecommendationReport
 )
+from ta_trader.models import TradingStyle
 from ta_trader.recommend.engine import RecommendationEngine
 from ta_trader.recommend.report import format_recommendation_report
 
@@ -399,7 +400,8 @@ class TestReportFormat:
         ]
         engine = RecommendationEngine()
         report = engine.analyze(decisions)
-        text = format_recommendation_report(report)
+        trading_style = TradingStyle.SWING
+        text = format_recommendation_report(trading_style, report)
 
         assert "AAPL" in text
         assert "TSLA" in text
@@ -407,8 +409,9 @@ class TestReportFormat:
         assert "긍정 요인" in text or "부정 요인" in text
 
     def test_format_empty(self):
+        trading_style = TradingStyle.SWING
         report = RecommendationReport(date="2024-01-01")
-        text = format_recommendation_report(report)
+        text = format_recommendation_report(trading_style, report)
         assert "추천 보고서" in text
 
 

@@ -1,5 +1,5 @@
 """
-ta_trader/agents/formatter.py
+ta_trader/formatter/agent.py
 에이전트 파이프라인 결과 터미널 포매터
 """
 
