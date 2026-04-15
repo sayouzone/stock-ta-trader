@@ -28,10 +28,11 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
 
+from ta_trader.models import OrderSide
 from ta_trader.base.agent import BaseAgent
 from ta_trader.models.agent import (
     ExecutionAlgorithm, ExecutionResult, OrderRequest,
-    OrderSide, OrderStatus, OrderType, RiskApproval,
+    OrderStatus, OrderType, RiskApproval,
 )
 
 

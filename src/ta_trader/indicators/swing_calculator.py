@@ -11,6 +11,7 @@ ta_trader/indicators/swing_calculator.py
 
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 
 from ta_trader.indicators.calculator import IndicatorCalculator
@@ -86,7 +87,6 @@ class SwingIndicatorCalculator(IndicatorCalculator):
         self._df["ema_cross"] = self._df["ema9"] - self._df["ema21"]
 
         # SMA200이 존재하는 행에 대해서만 계산
-        import numpy as np
         self._df["price_vs_sma200"] = np.where(
             self._df["sma200"].notna() & (self._df["sma200"] > 0),
             close / self._df["sma200"],

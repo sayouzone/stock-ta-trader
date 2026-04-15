@@ -3,7 +3,7 @@ ta_trader/models/value.py
 가치 투자 5단계 분석 결과 모델
 
 growth/models.py와 동일한 패턴:
-  - ValueGrade (종합 등급)
+  - OrderSide (종합 등급)
   - StageStatus / CheckItem / StageResult (단계별 결과)
   - ValueFundamentals (펀더멘털 데이터)
   - ValueAnalysisResult (종합 분석 결과)
@@ -15,39 +15,11 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
-from ta_trader.models import TradingStyle
+from ta_trader.models.base import OrderSide, TradingStyle
 
 if TYPE_CHECKING:
     from ta_trader.models.llm import LLMAnalysis
 
-
-class ValueGrade(Enum):
-    """가치 투자 종합 등급"""
-    STRONG_BUY  = "적극매수"    # ★★★★★  75+
-    BUY         = "매수"        # ★★★★   60~74
-    CONDITIONAL = "조건부매수"   # ★★★    45~59
-    WATCH       = "관심관망"    # ★★     30~44
-    UNFIT       = "부적합"      # ★      0~29
-
-    @property
-    def stars(self) -> str:
-        return {
-            ValueGrade.STRONG_BUY:  "★★★★★",
-            ValueGrade.BUY:         "★★★★☆",
-            ValueGrade.CONDITIONAL: "★★★☆☆",
-            ValueGrade.WATCH:       "★★☆☆☆",
-            ValueGrade.UNFIT:       "★☆☆☆☆",
-        }[self]
-
-    @property
-    def emoji(self) -> str:
-        return {
-            ValueGrade.STRONG_BUY:  "🟢",
-            ValueGrade.BUY:         "🔵",
-            ValueGrade.CONDITIONAL: "🟡",
-            ValueGrade.WATCH:       "⚪",
-            ValueGrade.UNFIT:       "🔴",
-        }[self]
 
 @dataclass
 class ValueFundamentals:
@@ -141,7 +113,7 @@ class ValueAnalysisResult:
 
     # 종합 평가
     total_score:      float = 0.0               # 0~100
-    grade:            ValueGrade = ValueGrade.UNFIT
+    grade:            OrderSide = OrderSide.UNFIT
     fundamentals:     Optional[ValueFundamentals] = None
 
     # 리스크 관리

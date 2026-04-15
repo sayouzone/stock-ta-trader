@@ -5,8 +5,9 @@ ta_trader/formatters/position.py
 
 from __future__ import annotations
 
+from ta_trader.models import OrderSide
 from ta_trader.models.position import (
-    PositionAnalysisResult, PositionSignal,
+    PositionAnalysisResult,
     PositionMarketEnv, PositionScreenGrade,
     SectorStrength,
 )
@@ -24,12 +25,12 @@ if TYPE_CHECKING:
 # ── 신호 이모지 ───────────────────────────────────────────
 
 _SIGNAL_EMOJI = {
-    PositionSignal.STRONG_ENTRY: "🟢🟢",
-    PositionSignal.ENTRY: "🟢",
-    PositionSignal.HOLD: "🟡",
-    PositionSignal.PARTIAL_EXIT: "🟠",
-    PositionSignal.EXIT: "🔴",
-    PositionSignal.STRONG_EXIT: "🔴🔴",
+    OrderSide.STRONG_ENTRY: "🟢🟢",
+    OrderSide.ENTRY: "🟢",
+    OrderSide.HOLD: "🟡",
+    OrderSide.PARTIAL_EXIT: "🟠",
+    OrderSide.EXIT: "🔴",
+    OrderSide.STRONG_EXIT: "🔴🔴",
 }
 
 _ENV_EMOJI = {
@@ -312,11 +313,11 @@ def format_position_report(results: list[PositionAnalysisResult]) -> str:
 
     # ── 등급별 분류 ──────────────────────────────────────
     entry_picks = [r for r in results if r.entry.signal in (
-        PositionSignal.STRONG_ENTRY, PositionSignal.ENTRY
+        OrderSide.STRONG_ENTRY, OrderSide.ENTRY
     )]
-    hold_list = [r for r in results if r.entry.signal == PositionSignal.HOLD]
+    hold_list = [r for r in results if r.entry.signal == OrderSide.HOLD]
     exit_list = [r for r in results if r.entry.signal in (
-        PositionSignal.PARTIAL_EXIT, PositionSignal.EXIT, PositionSignal.STRONG_EXIT
+        OrderSide.PARTIAL_EXIT, OrderSide.EXIT, OrderSide.STRONG_EXIT
     )]
 
     # ── 진입 종목 상세 ──────────────────────────────

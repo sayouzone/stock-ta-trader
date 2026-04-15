@@ -5,8 +5,9 @@ ta_trader/formatter/agent.py
 
 from __future__ import annotations
 
+from ta_trader.models import OrderSide
 from ta_trader.models.agent import (
-    ExecutionResult, OrderSide, OrderStatus,
+    ExecutionResult, OrderStatus,
     PipelineResult, RiskApproval, TradeSignal, VetoReason,
 )
 from ta_trader.utils.formatter import _confidence_bar, _wrap

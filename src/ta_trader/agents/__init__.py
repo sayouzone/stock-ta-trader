@@ -19,7 +19,6 @@ from ta_trader.agents.execution import (
 from ta_trader.models.agent import (
     ExecutionResult,
     MarketDataReport,
-    OrderSide,
     OrderStatus,
     OrderType,
     PipelineResult,
@@ -57,7 +56,6 @@ __all__ = [
     "ExecutionResult",
     "PipelineResult",
     # 열거형
-    "OrderSide",
     "OrderType",
     "OrderStatus",
     "VetoReason",

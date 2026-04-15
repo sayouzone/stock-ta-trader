@@ -17,6 +17,11 @@ from typing import Optional
 
 import pandas as pd
 
+from ta_trader.models.base import OrderSide
+from ta_trader.models.swing import SwingAnalysisResult, MarketEnvResult
+from ta_trader.models.position import PositionAnalysisResult
+from ta_trader.models.growth import GrowthAnalysisResult
+from ta_trader.models.value import  ValueAnalysisResult
 from ta_trader.models.short import (
     IndicatorResult, MarketRegime, RiskLevels, Signal,
     StrategyType, TradingDecision, TradingStyle,
@@ -287,6 +292,7 @@ class PipelineResult:
     4개 에이전트의 출력물을 모두 포함합니다.
     """
     ticker: str
+    name: str
     date: str
 
     # 각 에이전트 출력물
@@ -322,6 +328,7 @@ class PipelineResult:
 
         ts = self.trade_signal
         ra = self.risk_approval
+        md = self.market_data
 
         risk_levels = None
         if ra and ra.approved:
@@ -337,19 +344,47 @@ class PipelineResult:
                 risk_reward_ratio=ts.suggested_rr_ratio,
             )
 
-        return TradingDecision(
-            ticker=ts.ticker,
-            name=ts.name,
-            date=ts.date,
-            current_price=ts.current_price,
-            market_regime=ts.market_regime,
-            strategy_type=ts.strategy_type,
-            composite_score=ts.composite_score,
-            final_signal=ts.signal,
-            trading_style=ts.trading_style,
-            indicators=ts.indicator_results,
-            risk=risk_levels,
-            summary=ts.signal_rationale,
-            regime_detail=ts.regime_detail,
-            llm_analysis=ts.llm_analysis,
-        )
+        if ts.trading_style == TradingStyle.SWING:
+            return SwingAnalysisResult(
+                ticker=ts.ticker,
+                name=ts.name,
+                date=ts.date,
+                current_price=ts.current_price,
+
+                market_env=MarketEnvResult(
+                    environment=ts.strategy_type,
+                    adx_value=md.regime_context.adx_value,
+                    adx_trend_exists=False,
+                    above_sma200=False,
+                    ma_trend_score=0,
+                    atr_pct=0,
+                    score=0,
+                ),
+                #market_env=None,
+                screening=None,
+                entry=None,
+                position=None,
+                exit_strategy=None,
+                overall_signal=ts.signal,
+                overall_score=ts.composite_score,
+
+                trading_style=ts.trading_style,
+            )
+        
+        #    return TradingDecision(
+        #        ticker=ts.ticker,
+        #        name=ts.name,
+        #        date=ts.date,
+        #        current_price=ts.current_price,
+        #        market_regime=ts.market_regime,
+        #        strategy_type=ts.strategy_type,
+        #        composite_score=ts.composite_score,
+        #        final_signal=ts.signal,
+        #        trading_style=ts.trading_style,
+        #        indicators=ts.indicator_results,
+        #        risk=risk_levels,
+        #        summary=ts.signal_rationale,
+        #        regime_detail=ts.regime_detail,
+        #        llm_analysis=ts.llm_analysis,
+        #    )
+        

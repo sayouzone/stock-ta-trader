@@ -13,6 +13,7 @@ from typing import Any, Generic, TypeVar
 
 from ta_trader.data.fetcher import DataFetcher
 from ta_trader.indicators.calculator import IndicatorCalculator
+from ta_trader.indicators.swing_calculator import SwingIndicatorCalculator
 from ta_trader.utils.logger import get_logger
 
 InputT = TypeVar("InputT")
@@ -70,12 +71,13 @@ class BaseAgent(ABC, Generic[InputT, OutputT]):
 
     # ── 데이터 수집 ───────────────────────────────────────
 
-    def _fetch_data(self, ticker: str, period: str, interval: str) -> None:
+    def _fetch_data(self, ticker: str, period: str, interval: str, df: pd.DataFrame | None = None) -> None:
         """OHLCV + yfinance info 수집"""
         fetcher = DataFetcher(period=period, interval=interval)
-        self._name, self._df = fetcher.fetch(ticker)
+        self._df = fetcher.fetch(ticker) if not df else df.copy()
 
-        self._calc = IndicatorCalculator(self._df)
+        #self._calc = IndicatorCalculator(self._df)
+        self._calc = SwingIndicatorCalculator(self._df)
         self._name, self._info = fetcher.info(ticker)
 
     def on_error(self, error: Exception, input_data: InputT) -> None:

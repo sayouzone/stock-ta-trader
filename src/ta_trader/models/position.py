@@ -18,22 +18,12 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
-from ta_trader.models import TradingStyle
+from ta_trader.models.base import OrderSide, TradingStyle
 
 if TYPE_CHECKING:
     from ta_trader.models.llm import LLMAnalysis
 
 # ── 신호 Enum ────────────────────────────────────────────
-
-class PositionSignal(Enum):
-    """포지션 트레이딩 진입/청산 신호"""
-    STRONG_ENTRY = "강력진입"
-    ENTRY = "진입"
-    HOLD = "보류"
-    PARTIAL_EXIT = "부분청산"
-    EXIT = "청산"
-    STRONG_EXIT = "강력청산"
-
 
 class PositionMarketEnv(Enum):
     """시장 환경"""
@@ -150,7 +140,7 @@ class EntrySignalDetail:
 @dataclass
 class EntryResult:
     """매수 타이밍 분석 결과"""
-    signal: PositionSignal
+    signal: OrderSide
     score: float                   # 0~100
     signals: list[EntrySignalDetail] = field(default_factory=list)
     ma20_pullback: bool = False    # 20일 MA 풀백 반등
@@ -225,29 +215,32 @@ class HoldingManagementResult:
 @dataclass
 class ExitResult:
     """매도/청산 분석 결과"""
-    signal: PositionSignal
+    signal: OrderSide              # 현재 청산 신호
+
+    trailing_stop: float           # ATR 기반 트레일링 스톱
+    partial_exit_price: float      # 1차 부분 익절가
+    full_exit_price: float         # 전량 청산가
+    rsi_overbought: bool           # RSI 과매수
+
     ma50_broken: bool              # 50일 MA 종가 이탈
     ma200_broken: bool             # 200일 MA 이탈
     macd_divergence: bool          # MACD 다이버전스
     rsi_divergence: bool           # RSI 다이버전스
     adx_declining: bool            # ADX 피크 대비 하락
     volume_dry_up: bool            # 신고가 시 거래량 감소
-    rsi_overbought: bool           # RSI 과매수
-    trailing_stop_atr: float       # ATR 트레일링 스톱
-    partial_exit_price: float      # 1차 부분 익절가
-    full_exit_price: float         # 전량 청산가
+    
     score: float                   # 0~100 (높을수록 청산 권장)
     detail: str = ""
 
     @property
     def should_partial_exit(self) -> bool:
-        return self.signal == PositionSignal.PARTIAL_EXIT
+        return self.signal == OrderSide.PARTIAL_EXIT
 
     @property
     def should_full_exit(self) -> bool:
         return self.signal in (
-            PositionSignal.EXIT,
-            PositionSignal.STRONG_EXIT,
+            OrderSide.EXIT,
+            OrderSide.STRONG_EXIT,
         )
 
 
@@ -271,7 +264,7 @@ class PositionAnalysisResult:
     exit_strategy: ExitResult                # 7단계
 
     # 종합
-    overall_signal: PositionSignal
+    overall_signal: OrderSide
     overall_score:  float                     # 0~100
     summary: str = ""
     trading_style:  TradingStyle            = TradingStyle.POSITION
@@ -284,8 +277,8 @@ class PositionAnalysisResult:
             self.market_env.is_favorable
             and self.screening.is_qualified
             and self.entry.signal in (
-                PositionSignal.STRONG_ENTRY,
-                PositionSignal.ENTRY,
+                OrderSide.STRONG_ENTRY,
+                OrderSide.ENTRY,
             )
             and self.risk.is_acceptable
         )

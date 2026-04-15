@@ -63,9 +63,9 @@ from ta_trader.constants.growth import (
     GRADE_STRONG_BUY, GRADE_BUY, GRADE_CONDITIONAL, GRADE_WATCH,
     GROWTH_DEFAULT_PERIOD, GROWTH_MIN_DATA_ROWS,
 )
-from ta_trader.models.base import CheckItem, StageResult, StageStatus
+from ta_trader.models.base import OrderSide, CheckItem, StageResult, StageStatus
 from ta_trader.models.growth import (
-    FundamentalData, GrowthGrade, GrowthAnalysisResult,
+    FundamentalData, GrowthAnalysisResult,
 )
 from ta_trader.llm.growth_prompt_builder import GrowthPromptBuilder
 
@@ -805,32 +805,32 @@ class GrowthMomentumAnalyzer(BaseAnalyzer[GrowthAnalysisResult]):
         return StageStatus.FAIL
 
     @staticmethod
-    def _score_to_grade(score: float) -> GrowthGrade:
+    def _score_to_grade(score: float) -> OrderSide:
         if score >= GRADE_STRONG_BUY:
-            return GrowthGrade.STRONG_BUY
+            return OrderSide.STRONG_BUY
         if score >= GRADE_BUY:
-            return GrowthGrade.BUY
+            return OrderSide.BUY
         if score >= GRADE_CONDITIONAL:
-            return GrowthGrade.CONDITIONAL
+            return OrderSide.CONDITIONAL
         if score >= GRADE_WATCH:
-            return GrowthGrade.WATCH
-        return GrowthGrade.UNFIT
+            return OrderSide.HOLD
+        return OrderSide.UNFIT
 
     @staticmethod
-    def _determine_action(grade: GrowthGrade, stages: list[StageResult]) -> str:
+    def _determine_action(grade: OrderSide, stages: list[StageResult]) -> str:
         s3 = next((s for s in stages if s.stage_num == 3), None)
         s4 = next((s for s in stages if s.stage_num == 4), None)
         s5 = next((s for s in stages if s.stage_num == 5), None)
 
-        if grade == GrowthGrade.STRONG_BUY:
+        if grade == OrderSide.STRONG_BUY:
             return "적극 매수 진입. 피라미딩 전략 준비."
-        if grade == GrowthGrade.BUY:
+        if grade == OrderSide.BUY:
             return "매수 진입 고려. 펀더멘털 수동 확인 후 진입."
-        if grade == GrowthGrade.CONDITIONAL:
+        if grade == OrderSide.CONDITIONAL:
             if s3 and s3.status == StageStatus.PASS:
                 return "기반 패턴 형성 중. 기술적 돌파 대기."
             return "조건 부족. 관심 종목 등록 후 재확인."
-        if grade == GrowthGrade.WATCH:
+        if grade == OrderSide.HOLD:
             return "관심 종목으로 등록. 스테이지 전환 모니터링."
         return "현재 부적합. 다른 종목 탐색 권장."
 

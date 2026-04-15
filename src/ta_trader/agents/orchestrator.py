@@ -118,11 +118,12 @@ class AgentOrchestrator:
             PipelineResult: 모든 에이전트 출력물 포함
         """
         start = time.time()
-        result = PipelineResult(ticker=ticker, date="")
+        result = PipelineResult(ticker=ticker, name=None, date="")
 
         try:
             # ── Stage 1: Data & Analysis Agent ────────
             market_data = self._run_data_agent(ticker)
+            result.name = market_data.name
             result.market_data = market_data
             result.date = market_data.date
 

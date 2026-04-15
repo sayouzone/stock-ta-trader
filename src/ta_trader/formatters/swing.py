@@ -5,8 +5,9 @@ ta_trader/formatters/swing.py
 
 from __future__ import annotations
 
+from ta_trader.models import OrderSide
 from ta_trader.models.swing import (
-    SwingAnalysisResult, SwingSignal,
+    SwingAnalysisResult,
     MarketEnvironment, ScreeningGrade,
 )
 
@@ -19,12 +20,12 @@ if TYPE_CHECKING:
 # ── 신호 이모지 ───────────────────────────────────────────
 
 _SIGNAL_EMOJI = {
-    SwingSignal.STRONG_ENTRY: "🟢🟢",
-    SwingSignal.ENTRY: "🟢",
-    SwingSignal.HOLD: "🟡",
-    SwingSignal.PARTIAL_EXIT: "🟠",
-    SwingSignal.EXIT: "🔴",
-    SwingSignal.STRONG_EXIT: "🔴🔴",
+    OrderSide.STRONG_ENTRY: "🟢🟢",
+    OrderSide.ENTRY: "🟢",
+    OrderSide.HOLD: "🟡",
+    OrderSide.PARTIAL_EXIT: "🟠",
+    OrderSide.EXIT: "🔴",
+    OrderSide.STRONG_EXIT: "🔴🔴",
 }
 
 _ENV_EMOJI = {
@@ -269,11 +270,11 @@ def format_swing_report(results: list[SwingAnalysisResult]) -> str:
     
     # ── 등급별 분류 ──────────────────────────────────────
     entry_picks = [r for r in results if r.entry.signal in (
-        SwingSignal.STRONG_ENTRY, SwingSignal.ENTRY
+        OrderSide.STRONG_ENTRY, OrderSide.ENTRY
     )]
-    hold_list = [r for r in results if r.entry.signal == SwingSignal.HOLD]
+    hold_list = [r for r in results if r.entry.signal == OrderSide.HOLD]
     exit_list = [r for r in results if r.entry.signal in (
-        SwingSignal.PARTIAL_EXIT, SwingSignal.EXIT, SwingSignal.STRONG_EXIT
+        OrderSide.PARTIAL_EXIT, OrderSide.EXIT, OrderSide.STRONG_EXIT
     )]
 
     # ── 진입 종목 상세 ──────────────────────────────

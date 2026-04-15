@@ -12,12 +12,31 @@ growth/formatter.py와 동일한 레이아웃:
 
 from __future__ import annotations
 
-from ta_trader.models.base import StageResult, StageStatus
+from ta_trader.models.base import OrderSide, StageResult, StageStatus
 from ta_trader.models.value import (
-    ValueGrade, ValueAnalysisResult,
+    ValueAnalysisResult,
 )
 from ta_trader.utils.formatter import _wrap
 
+
+# ── 신호 이모지 ───────────────────────────────────────────
+
+_SIGNAL_EMOJI = {
+    OrderSide.STRONG_ENTRY: "🟢🟢",
+    OrderSide.ENTRY: "🟢",
+    OrderSide.HOLD: "🟡",
+    OrderSide.PARTIAL_EXIT: "🟠",
+    OrderSide.EXIT: "🔴",
+    OrderSide.STRONG_EXIT: "🔴🔴",
+}
+
+_SIGNAL_STARS = {
+    OrderSide.STRONG_BUY:  "★★★★★",
+    OrderSide.BUY:         "★★★★☆",
+    OrderSide.CONDITIONAL: "★★★☆☆",
+    OrderSide.HOLD:        "★★☆☆☆",
+    OrderSide.UNFIT:       "★☆☆☆☆",
+}
 
 # ── 복수 종목 보고서 (value-screen용) ─────────────────────
 
@@ -54,17 +73,17 @@ def format_value_report(results: list[ValueAnalysisResult]) -> str:
                 s_cols += "   - "
 
         lines.append(
-            f"  {rank:>4d}  {r.grade.emoji} {r.grade.value:5s}  "
+            f"  {rank:>4d}  {_SIGNAL_EMOJI.get(r.grade, '')} {r.grade.value:5s}  "
             f"{r.ticker:8s}  {r.current_price:>10,.2f}  "
             f"{r.total_score:>5.1f} {s_cols:30s} {r.name:>10s} ({r.ticker})"
         )
 
     # ── 등급별 분류 ──────────────────────────────────────
     buy_picks = [r for r in results if r.grade in (
-        ValueGrade.STRONG_BUY, ValueGrade.BUY, ValueGrade.CONDITIONAL,
+        OrderSide.STRONG_BUY, OrderSide.BUY, OrderSide.CONDITIONAL,
     )]
-    watch_list = [r for r in results if r.grade == ValueGrade.WATCH]
-    avoid_list = [r for r in results if r.grade == ValueGrade.UNFIT]
+    watch_list = [r for r in results if r.grade == OrderSide.HOLD]
+    avoid_list = [r for r in results if r.grade == OrderSide.UNFIT]
 
     # ── 매수 추천 종목 상세 ──────────────────────────────
     if buy_picks:
@@ -117,7 +136,7 @@ def format_value_result(result: ValueAnalysisResult) -> str:
         f"{bar}",
         "",
         f"  현재가:  {result.current_price:>12,.2f}",
-        f"  등급:    {result.grade.emoji} {result.grade.stars}  {result.grade.value}",
+        f"  등급:    {_SIGNAL_EMOJI.get(result.grade, '')} {_SIGNAL_STARS.get(result.grade, '')}  {result.grade.value}",
         f"  총점:    {result.total_score:>5.1f} / 100",
     ]
 
@@ -233,7 +252,7 @@ def _format_single_value(
     thin = "─" * 72
     lines = [
         f"\n  {thin[2:]}",
-        f"  #{rank}  {r.grade.emoji} {r.ticker}  {r.name}  "
+        f"  #{rank}  {_SIGNAL_EMOJI.get(r.grade, '')} {r.ticker}  {r.name}  "
         f"│ {r.total_score:.1f}점 {r.grade.value}",
     ]
     lines.append(f"  현재가: {r.current_price:,.2f}")

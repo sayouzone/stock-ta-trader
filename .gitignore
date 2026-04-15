@@ -21,6 +21,7 @@ CLAUDE.local.md
 # 자동 생성 파일
 reports/
 interests/
+backup/
 logs/
 *.png
 *.csv

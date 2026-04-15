@@ -38,9 +38,9 @@ from ta_trader.indicators.bollinger import BollingerAnalyzer
 
 from ta_trader.constants.swing import *
 from ta_trader.constants.short import BB_BANDWIDTH_SQUEEZE
-from ta_trader.models.base import CheckItem, StageResult, StageStatus
+from ta_trader.models.base import OrderSide, CheckItem, StageResult, StageStatus
 from ta_trader.models.swing import (
-    SwingAnalysisResult, SwingSignal,
+    SwingAnalysisResult,
     MarketEnvResult, MarketEnvironment,
     ScreeningResult, ScreeningGrade,
     EntryResult, EntrySignalDetail,
@@ -120,11 +120,11 @@ class SwingTradingAnalyzer(BaseAnalyzer[SwingAnalysisResult]):
         date = str(df.index[-1].date())
 
         # 1~5단계 순차 실행
-        market_env    = self._stage1_market_environment()
-        screening     = self._stage2_screening()
-        entry         = self._stage3_entry_signal()
+        market_env    = self._market_environment()          # 1단계: 시장 환경 판단
+        screening     = self._screening()                   # 2단계: 종목 스크리닝
+        entry         = self._entry_signal()
         position      = self._stage4_position_sizing(entry)
-        exit_strategy = self._stage5_exit_strategy(position)
+        exit_strategy = self._exit_strategy(position)
 
         # 6단계: 종합 점수 & 신호
         overall_score = self._compute_overall_score(
@@ -217,7 +217,7 @@ class SwingTradingAnalyzer(BaseAnalyzer[SwingAnalysisResult]):
 
     # ── 1단계: 시장 환경 판단 ─────────────────────────────
 
-    def _stage1_market_environment(self) -> MarketEnvResult:
+    def _market_environment(self) -> MarketEnvResult:
         """ADX, SMA200, 이평선 정배열, ATR%로 시장 환경 분류"""
         df = self._calc.dataframe
         row = self._calc.latest()
@@ -269,7 +269,7 @@ class SwingTradingAnalyzer(BaseAnalyzer[SwingAnalysisResult]):
 
     # ── 2단계: 종목 스크리닝 ──────────────────────────────
 
-    def _stage2_screening(
+    def _screening(
         self
     ) -> ScreeningResult:
         """거래량, ADX, DI, 이평선 정배열, 상대강도로 종목 적합성 평가"""
@@ -333,7 +333,7 @@ class SwingTradingAnalyzer(BaseAnalyzer[SwingAnalysisResult]):
 
     # ── 3단계: 진입 타이밍 ────────────────────────────────
 
-    def _stage3_entry_signal(
+    def _entry_signal(
         self
     ) -> EntryResult:
         """MACD, RSI, BB, 피보나치, EMA 크로스로 진입 타이밍 판단"""
@@ -430,11 +430,11 @@ class SwingTradingAnalyzer(BaseAnalyzer[SwingAnalysisResult]):
         total_score = min(100.0, total_score)
 
         if total_score >= ENTRY_SCORE_STRONG_BUY:
-            signal = SwingSignal.STRONG_ENTRY
+            signal = OrderSide.STRONG_ENTRY
         elif total_score >= ENTRY_SCORE_BUY:
-            signal = SwingSignal.ENTRY
+            signal = OrderSide.ENTRY
         else:
-            signal = SwingSignal.HOLD
+            signal = OrderSide.HOLD
 
         return EntryResult(
             signal=signal,
@@ -537,7 +537,7 @@ class SwingTradingAnalyzer(BaseAnalyzer[SwingAnalysisResult]):
 
     # ── 5단계: 익절/청산 전략 ─────────────────────────────
 
-    def _stage5_exit_strategy(
+    def _exit_strategy(
         self,
         position: PositionSizingResult,
     ) -> ExitStrategyResult:
@@ -580,13 +580,13 @@ class SwingTradingAnalyzer(BaseAnalyzer[SwingAnalysisResult]):
             exit_score += 15.0
 
         if exit_score >= 60:
-            signal = SwingSignal.STRONG_EXIT
+            signal = OrderSide.STRONG_EXIT
         elif exit_score >= 40:
-            signal = SwingSignal.EXIT
+            signal = OrderSide.EXIT
         elif exit_score >= 25:
-            signal = SwingSignal.PARTIAL_EXIT
+            signal = OrderSide.PARTIAL_EXIT
         else:
-            signal = SwingSignal.HOLD
+            signal = OrderSide.HOLD
 
         detail_parts = []
         detail_parts.append(f"트레일링={trailing:,.0f}")
@@ -601,7 +601,7 @@ class SwingTradingAnalyzer(BaseAnalyzer[SwingAnalysisResult]):
             rsi_overbought=rsi_ob,
             macd_dead_cross=macd_dc,
             bb_upper_touch=bb_upper,
-            current_signal=signal,
+            signal=signal,
             score=round(min(100.0, exit_score), 1),
             detail=" | ".join(detail_parts),
         )
@@ -632,22 +632,22 @@ class SwingTradingAnalyzer(BaseAnalyzer[SwingAnalysisResult]):
         market: MarketEnvResult,
         screen: ScreeningResult,
         entry: EntryResult,
-    ) -> SwingSignal:
+    ) -> OrderSide:
         """종합 점수 + 각 단계 결과로 최종 신호 결정"""
         # 시장 환경 불리 → 보류
         if not market.is_favorable:
-            return SwingSignal.HOLD
+            return OrderSide.HOLD
 
         # 스크리닝 미통과 → 보류
         if screen.grade in (ScreeningGrade.C, ScreeningGrade.F):
-            return SwingSignal.HOLD
+            return OrderSide.HOLD
 
         # 진입 신호 기반
-        if entry.signal == SwingSignal.STRONG_ENTRY and score >= 60:
-            return SwingSignal.STRONG_ENTRY
-        if entry.signal in (SwingSignal.STRONG_ENTRY, SwingSignal.ENTRY) and score >= 40:
-            return SwingSignal.ENTRY
-        return SwingSignal.HOLD
+        if entry.signal == OrderSide.STRONG_ENTRY and score >= 60:
+            return OrderSide.STRONG_ENTRY
+        if entry.signal in (OrderSide.STRONG_ENTRY, OrderSide.ENTRY) and score >= 40:
+            return OrderSide.ENTRY
+        return OrderSide.HOLD
 
     # ── 요약 생성 ─────────────────────────────────────────
 
@@ -658,17 +658,17 @@ class SwingTradingAnalyzer(BaseAnalyzer[SwingAnalysisResult]):
         entry: EntryResult,
         position: PositionSizingResult,
         exit_: ExitStrategyResult,
-        overall_signal: SwingSignal,
+        overall_signal: OrderSide,
         overall_score: float,
     ) -> str:
         """종합 요약 문자열 생성"""
         signal_desc = {
-            SwingSignal.STRONG_ENTRY: "적극 매수 진입. 적극 진입을 고려하세요.",
-            SwingSignal.ENTRY: "스윙 매수 신호입니다. 분할 진입을 권장합니다.",
-            SwingSignal.HOLD: "보류 신호입니다. 조건 개선을 기다리세요.",
-            SwingSignal.PARTIAL_EXIT: "부분 익절을 고려하세요.",
-            SwingSignal.EXIT: "포지션 청산을 권장합니다.",
-            SwingSignal.STRONG_EXIT: "즉시 청산을 강력히 권장합니다.",
+            OrderSide.STRONG_ENTRY: "적극 매수 진입. 적극 진입을 고려하세요.",
+            OrderSide.ENTRY: "스윙 매수 신호입니다. 분할 진입을 권장합니다.",
+            OrderSide.HOLD: "관망 신호입니다. 조건 개선을 기다리세요.",
+            OrderSide.PARTIAL_EXIT: "부분 익절을 고려하세요.",
+            OrderSide.EXIT: "포지션 청산을 권장합니다.",
+            OrderSide.STRONG_EXIT: "즉시 청산을 강력히 권장합니다.",
         }
 
         return (

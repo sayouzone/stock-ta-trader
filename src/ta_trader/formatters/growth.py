@@ -12,12 +12,30 @@ recommend/report.py와 동일한 레이아웃:
 
 from __future__ import annotations
 
-from ta_trader.models.base import StageResult, StageStatus
+from ta_trader.models.base import OrderSide, StageResult, StageStatus
 from ta_trader.models.growth import (
-    GrowthGrade, GrowthAnalysisResult, 
+    GrowthAnalysisResult, 
 )
 from ta_trader.utils.formatter import _wrap
 
+# ── 신호 이모지 ───────────────────────────────────────────
+
+_SIGNAL_EMOJI = {
+    OrderSide.STRONG_ENTRY: "🟢🟢",
+    OrderSide.ENTRY: "🟢",
+    OrderSide.HOLD: "🟡",
+    OrderSide.PARTIAL_EXIT: "🟠",
+    OrderSide.EXIT: "🔴",
+    OrderSide.STRONG_EXIT: "🔴🔴",
+}
+
+_SIGNAL_STARS = {
+    OrderSide.STRONG_BUY:  "★★★★★",
+    OrderSide.BUY:         "★★★★☆",
+    OrderSide.CONDITIONAL: "★★★☆☆",
+    OrderSide.HOLD:        "★★☆☆☆",
+    OrderSide.UNFIT:       "★☆☆☆☆",
+}
 
 # ── 복수 종목 보고서 (growth-screen용) ────────────────────
 
@@ -61,10 +79,10 @@ def format_growth_report(results: list[GrowthAnalysisResult]) -> str:
 
     # ── 등급별 분류 ──────────────────────────────────────
     buy_picks = [r for r in results if r.grade in (
-        GrowthGrade.STRONG_BUY, GrowthGrade.BUY, GrowthGrade.CONDITIONAL,
+        OrderSide.STRONG_BUY, OrderSide.BUY, OrderSide.CONDITIONAL,
     )]
-    watch_list = [r for r in results if r.grade == GrowthGrade.WATCH]
-    avoid_list = [r for r in results if r.grade == GrowthGrade.UNFIT]
+    watch_list = [r for r in results if r.grade == OrderSide.HOLD]
+    avoid_list = [r for r in results if r.grade == OrderSide.UNFIT]
 
     # ── 매수 추천 종목 상세 ──────────────────────────────
     if buy_picks:
@@ -128,7 +146,7 @@ def format_growth_result(result: GrowthAnalysisResult) -> str:
             s_cols += "   - "
 
     lines.append(
-        f"  {result.grade.emoji} {result.grade.value:5s}  "
+        f"  {_SIGNAL_EMOJI.get(result.grade, '')} {result.grade.value:5s}  "
         f"{result.ticker:8s}  {result.current_price:>10,.2f}  "
         f"{result.total_score:>5.1f} {s_cols}"
     )
@@ -154,8 +172,8 @@ def _format_single_growth(
     lines = [
         "",
         f"  ┌{'─' * 66}┐",
-        f"  │  {r.grade.emoji}  #{rank}  {r.ticker} ({r.name})  —  "
-        f"{r.grade.stars} {r.grade.value}  ({r.total_score:.1f}/100점)",
+        f"  │  {_SIGNAL_EMOJI.get(r.grade, '')}  #{rank}  {r.ticker} ({r.name})  —  "
+        f"{_SIGNAL_STARS.get(r.grade, '')} {r.grade.value}  ({r.total_score:.1f}/100점)",
         f"  │  현재가: {r.current_price:,.2f}",
         f"  └{'─' * 66}┘",
     ]

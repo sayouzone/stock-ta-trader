@@ -11,9 +11,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from ta_trader.models.base import CheckItem, StageResult, StageStatus
+from ta_trader.models.base import OrderSide, CheckItem, StageResult, StageStatus
 from ta_trader.models.value import (
-    ValueFundamentals, ValueGrade, ValueAnalysisResult,
+    ValueFundamentals, ValueAnalysisResult,
 )
 from ta_trader.constants.value import (
     GRADE_STRONG_BUY, GRADE_BUY, GRADE_CONDITIONAL, GRADE_WATCH,
@@ -28,23 +28,23 @@ from ta_trader.formatters.value import format_value_result, format_value_report
 
 # ── 모델 테스트 ───────────────────────────────────────────
 
-class TestValueGrade:
-    """ValueGrade Enum 테스트"""
+class TestOrderSide:
+    """OrderSide Enum 테스트"""
 
     def test_stars(self) -> None:
-        assert ValueGrade.STRONG_BUY.stars == "★★★★★"
-        assert ValueGrade.UNFIT.stars == "★☆☆☆☆"
+        assert OrderSide.STRONG_BUY.stars == "★★★★★"
+        assert OrderSide.UNFIT.stars == "★☆☆☆☆"
 
     def test_emoji(self) -> None:
-        assert ValueGrade.STRONG_BUY.emoji == "🟢"
-        assert ValueGrade.UNFIT.emoji == "🔴"
+        assert OrderSide.STRONG_BUY.emoji == "🟢"
+        assert OrderSide.UNFIT.emoji == "🔴"
 
     def test_values(self) -> None:
-        assert ValueGrade.STRONG_BUY.value == "적극매수"
-        assert ValueGrade.BUY.value == "매수"
-        assert ValueGrade.CONDITIONAL.value == "조건부매수"
-        assert ValueGrade.WATCH.value == "관심관망"
-        assert ValueGrade.UNFIT.value == "부적합"
+        assert OrderSide.STRONG_BUY.value == "적극매수"
+        assert OrderSide.BUY.value == "매수"
+        assert OrderSide.CONDITIONAL.value == "조건부매수"
+        assert OrderSide.HOLD.value == "관심관망"
+        assert OrderSide.UNFIT.value == "부적합"
 
 
 class TestStageStatus:
@@ -151,7 +151,7 @@ class TestValueAnalysisResult:
             ticker="AAPL", name="Apple", date="2025-01-01",
             current_price=150.0,
             total_score=65.0,
-            grade=ValueGrade.BUY,
+            grade=OrderSide.BUY,
             margin_of_safety=0.25,
             fundamentals=ValueFundamentals(
                 trailing_pe=15.0, pbr=3.5, roe=0.20, dividend_yield=0.015,
@@ -171,7 +171,7 @@ class TestFormatter:
         self,
         ticker: str = "AAPL",
         score: float = 70.0,
-        grade: ValueGrade = ValueGrade.BUY,
+        grade: OrderSide = OrderSide.BUY,
     ) -> ValueAnalysisResult:
         stages = [
             StageResult(stage_num=i, stage_name=f"S{i}",
@@ -201,9 +201,9 @@ class TestFormatter:
 
     def test_report_contains_table(self) -> None:
         results = [
-            self._make_result("AAPL", 80, ValueGrade.STRONG_BUY),
-            self._make_result("MSFT", 55, ValueGrade.CONDITIONAL),
-            self._make_result("TSLA", 25, ValueGrade.UNFIT),
+            self._make_result("AAPL", 80, OrderSide.STRONG_BUY),
+            self._make_result("MSFT", 55, OrderSide.CONDITIONAL),
+            self._make_result("TSLA", 25, OrderSide.UNFIT),
         ]
         output = format_value_report(results)
         assert "종목 추천 보고서" in output

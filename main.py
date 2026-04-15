@@ -1588,10 +1588,10 @@ def _save_equity_chart(result, save_path: Path) -> None:
 # ── agent-analyze 명령 ─────────────────────────────────────
 @cli.command("agent-analyze")
 @click.argument("ticker")
-@click.option("--period",     default="6mo",  show_default=True, help="데이터 기간")
+@click.option("--period",     default="1y",  show_default=True, help="데이터 기간")
 @click.option("--interval",   default="1d",   show_default=True, help="봉 간격")
 @click.option("--style",      default="swing", show_default=True,
-              type=click.Choice(["swing", "position", "all"], case_sensitive=False),
+              type=click.Choice(["swing", "position", "growth", "value", "all"], case_sensitive=False),
               help="매매 스타일")
 @click.option("--capital",    default=10_000_000, show_default=True, type=float,
               help="총 투자 자본금 (원)")
@@ -1654,21 +1654,22 @@ def agent_analyze(ticker: str, period: str, interval: str, style: str,
 
         try:
             result = orchestrator.run(ticker)
-        except Exception as e:
-            click.echo(f"❌ 분석 실패: {e}", err=True)
-            raise SystemExit(1) from e
-        #finally:
-        #    pass
+        #except Exception as e:
+        #    click.echo(f"❌ 분석 실패: {e}", err=True)
+        #    raise SystemExit(1) from e
+        finally:
+            pass
 
         output = format_pipeline_result(result)
         click.echo(output)
 
         style_tag = trading_style.name.lower()
+        stock_name = result.name.replace("/", "").replace(" ", "_")
 
         if save_report:
             out_dir = Path("reports")
             out_dir.mkdir(parents=True, exist_ok=True)
-            report_path = out_dir / f"{ticker.replace('.', '_')}_agent_{style_tag}_{result.date.replace('-','')}.txt"
+            report_path = out_dir / f"{ticker.replace('.', '_')}_agent_{style_tag}_{result.date.replace('-','')}_{stock_name}.txt"
             report_path.write_text(output, encoding="utf-8")
             click.echo(f"보고서 저장됨: {report_path}")
 
@@ -1676,10 +1677,23 @@ def agent_analyze(ticker: str, period: str, interval: str, style: str,
             decision = result.to_trading_decision()
             if decision and result.market_data:
                 chart_path = (
-                    Path("reports") / f"{ticker.replace('.', '_')}_chart_{style_tag}_{result.date.replace('-','')}.png"
+                    Path("reports") / f"{ticker.replace('.', '_')}_agent_{style_tag}_{result.date.replace('-','')}_{stock_name}.png"
                     if save_chart else None
                 )
-                ChartVisualizer().plot(
+
+                if trading_style == TradingStyle.SWING:
+                    visualizer = SwingChartVisualizer()
+                elif trading_style == TradingStyle.POSITION:
+                    visualizer = PositionChartVisualizer()
+                elif trading_style == TradingStyle.GROWTH:
+                    visualizer = GrowthChartVisualizer()
+                elif trading_style == TradingStyle.VALUE:
+                    visualizer = ValueChartVisualizer()
+                elif trading_style in [TradingStyle.SWING, TradingStyle.POSITION]:
+                    visualizer = ChartVisualizer()
+        
+                #ChartVisualizer().plot(
+                visualizer.plot(
                     decision, result.market_data.ohlcv_df,
                     save_path=chart_path, show=not save_chart,
                 )

@@ -12,6 +12,27 @@ from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
 
+class TradingStyle(Enum):
+    """매매 스타일 (보유 기간 기반)"""
+    SWING    = "스윙"       # 2일~2주: 단기 파동 포착
+    POSITION = "포지션"     # 수주~수개월: 중장기 추세 추종
+    GROWTH   = "성장"       # 
+    VALUE    = "가치"       # 
+
+class OrderSide(Enum):
+    """스윙 진입/청산 신호"""
+    BUY          = "매수"
+    CONDITIONAL  = "조건부매수"
+    UNFIT        = "부적합"
+    SELL         = "매도"
+    STRONG_BUY   = "적극매수"
+    STRONG_ENTRY = "강력진입"
+    ENTRY        = "진입"
+    HOLD         = "관망"
+    PARTIAL_EXIT = "부분청산"
+    EXIT         = "청산"
+    STRONG_EXIT  = "강력청산"
+
 class StageStatus(Enum):
     """단계별 통과 상태"""
     PASS     = "통과"

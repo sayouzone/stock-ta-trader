@@ -31,6 +31,8 @@ from ta_trader.indicators.bollinger import BollingerAnalyzer
 from ta_trader.indicators.calculator import IndicatorCalculator
 from ta_trader.indicators.macd import MACDAnalyzer
 from ta_trader.indicators.rsi import RSIAnalyzer
+from ta_trader.llm.factory import create_llm_analyzer
+#from ta_trader.llm.prompt_builder import SYSTEM_PROMPT
 from ta_trader.models import IndicatorResult, TradingStyle
 from ta_trader.signals.regime import detect_regime, RegimeContext
 from ta_trader.config.style_config import StyleConfig, get_style_config
@@ -40,7 +42,7 @@ from ta_trader.constants.short import MIN_DATA_ROWS
 class DataAgentInput:
     """DataAgent 입력 파라미터"""
     ticker: str
-    period: str = "6mo"
+    period: str = "1y"
     interval: str = "1d"
     trading_style: TradingStyle = TradingStyle.SWING
     include_fundamentals: bool = True
@@ -185,7 +187,6 @@ class DataAgent(BaseAgent[DataAgentInput, MarketDataReport]):
     ) -> str:
         """LLM 기반 시장 센티먼트 분석 (선택적)"""
         try:
-            from ta_trader.llm.factory import create_llm_analyzer
             llm = create_llm_analyzer(
                 provider=input_data.llm_provider,
                 model=input_data.llm_model,
@@ -197,7 +198,7 @@ class DataAgent(BaseAgent[DataAgentInput, MarketDataReport]):
                 f"종목 {input_data.ticker}의 최근 10일 가격 변동률: {pct_change:+.2f}%. "
                 f"현재 시장 심리를 한 문장으로 요약하세요."
             )
-            from ta_trader.llm.prompt_builder import SYSTEM_PROMPT
+            
             return llm._call_api(SYSTEM_PROMPT, prompt)
         except Exception:
             return ""

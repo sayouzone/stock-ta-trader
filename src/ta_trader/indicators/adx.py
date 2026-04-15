@@ -8,6 +8,7 @@ from __future__ import annotations
 import pandas as pd
 
 from ta_trader.constants.short import ADX_STRONG_TREND, ADX_WEAK_TREND
+from ta_trader.constants.swing import *
 from ta_trader.models import IndicatorResult, Signal
 
 
@@ -26,8 +27,9 @@ class ADXAnalyzer:
         adx_pos = float(row["adx_pos"])
         adx_neg = float(row["adx_neg"])
         di_diff = adx_pos - adx_neg
+        di_bullish = adx_pos > adx_neg
 
-        score, signal = self._score(adx, di_diff)
+        score, signal = self._score(adx, di_diff, di_bullish)
 
         desc = (
             f"ADX={adx:.1f} (+DI={adx_pos:.1f}, -DI={adx_neg:.1f}) "
@@ -42,10 +44,11 @@ class ADXAnalyzer:
         )
 
     @staticmethod
-    def _score(adx: float, di_diff: float) -> tuple[float, Signal]:
+    def _score(adx: float, di_diff: float, di_bullish: float) -> tuple[float, Signal]:
         direction = 1 if di_diff > 0 else -1
 
-        if adx >= ADX_STRONG_TREND:
+        #if adx >= ADX_STRONG_TREND:
+        if adx >= MARKET_ADX_TREND_THRESHOLD:
             raw_score = min(adx, 60.0)
             signal    = Signal.STRONG_BUY if di_diff > 0 else Signal.STRONG_SELL
         elif adx >= ADX_WEAK_TREND:

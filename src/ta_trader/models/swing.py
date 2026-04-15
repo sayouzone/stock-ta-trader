@@ -9,19 +9,11 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
-from ta_trader.models import TradingStyle
+from ta_trader.models.base import OrderSide, TradingStyle
+#from ta_trader.models import TradingStyle
 
 if TYPE_CHECKING:
     from ta_trader.models.llm import LLMAnalysis
-
-class SwingSignal(Enum):
-    """스윙 진입/청산 신호"""
-    STRONG_ENTRY = "강력진입"
-    ENTRY = "진입"
-    HOLD = "보류"
-    PARTIAL_EXIT = "부분청산"
-    EXIT = "청산"
-    STRONG_EXIT = "강력청산"
 
 
 class MarketEnvironment(Enum):
@@ -97,7 +89,7 @@ class EntrySignalDetail:
 @dataclass
 class EntryResult:
     """진입 타이밍 분석 결과"""
-    signal: SwingSignal
+    signal: OrderSide
     score: float               # 0~100
     signals: list[EntrySignalDetail] = field(default_factory=list)
     macd_golden_cross: bool = False
@@ -152,28 +144,31 @@ class PositionSizingResult:
 @dataclass
 class ExitStrategyResult:
     """익절/청산 전략 결과"""
+    signal: OrderSide          # 현재 청산 신호
+
     trailing_stop: float       # ATR 기반 트레일링 스톱
     partial_exit_price: float  # 1차 부분 익절가
     full_exit_price: float     # 전량 청산가
     rsi_overbought: bool       # RSI 과매수 상태
+    
     macd_dead_cross: bool      # MACD 데드크로스
     bb_upper_touch: bool       # BB 상단 터치
-    current_signal: SwingSignal  # 현재 청산 신호
+
     score: float               # 0~100 (높을수록 청산 권장)
     detail: str = ""
 
     @property
     def should_partial_exit(self) -> bool:
         """부분 익절 권장 여부"""
-        return self.current_signal in (
-            SwingSignal.PARTIAL_EXIT,
+        return self.signal in (
+            OrderSide.PARTIAL_EXIT,
         )
 
     @property
     def should_full_exit(self) -> bool:
         """전량 청산 권장 여부"""
-        return self.current_signal in (
-            SwingSignal.EXIT, SwingSignal.STRONG_EXIT,
+        return self.signal in (
+            OrderSide.EXIT, OrderSide.STRONG_EXIT,
         )
 
 
@@ -195,7 +190,7 @@ class SwingAnalysisResult:
     exit_strategy: ExitStrategyResult      # 5단계
 
     # 종합
-    overall_signal: SwingSignal
+    overall_signal: OrderSide
     overall_score:  float                   # 0~100
     summary: str = ""
     trading_style:  TradingStyle            = TradingStyle.SWING
@@ -207,7 +202,7 @@ class SwingAnalysisResult:
         return (
             self.market_env.is_favorable
             and self.screening.grade in (ScreeningGrade.A_PLUS, ScreeningGrade.A)
-            and self.entry.signal in (SwingSignal.STRONG_ENTRY, SwingSignal.ENTRY)
+            and self.entry.signal in (OrderSide.STRONG_ENTRY, OrderSide.ENTRY)
             and self.position.is_acceptable
         )
 

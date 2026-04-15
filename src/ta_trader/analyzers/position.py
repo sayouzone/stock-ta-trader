@@ -29,8 +29,9 @@ from ta_trader.indicators.fibonacci import (
 )
 
 from ta_trader.constants.position import *
+from ta_trader.models import OrderSide
 from ta_trader.models.position import (
-    PositionAnalysisResult, PositionSignal,
+    PositionAnalysisResult,
     MarketEnvResult, PositionMarketEnv,
     SectorResult, SectorStrength,
     ScreeningResult, PositionScreenGrade,
@@ -103,16 +104,16 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
         date = str(df.index[-1].date())
 
         # 1단계: 시장 환경 판단
-        market_env = self._step1_market_environment()
+        market_env = self._market_environment()
 
         # 2단계: 섹터/테마 선정
         sector = self._step2_sector_analysis()
 
         # 3단계: 종목 선정
-        screening = self._step3_stock_screening()
+        screening = self._screening()
 
         # 4단계: 매수 타이밍
-        entry = self._step4_entry_timing()
+        entry = self._entry_signal()
 
         # 5단계: 리스크 관리
         risk = self._step5_risk_management(entry)
@@ -121,7 +122,7 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
         holding = self._step6_holding_management(risk)
 
         # 7단계: 매도/청산
-        exit_strategy = self._step7_exit_strategy(risk)
+        exit_strategy = self._exit_strategy(risk)
 
         # 종합 점수 & 신호
         overall_score = self._compute_overall_score(
@@ -224,7 +225,7 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
 
     # ── 1단계: 시장 환경 판단 ─────────────────────────────
 
-    def _step1_market_environment(self) -> MarketEnvResult:
+    def _market_environment(self) -> MarketEnvResult:
         df = self._calc.dataframe
         row = self._calc.latest()
 
@@ -340,7 +341,7 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
 
     # ── 3단계: 종목 선정 ──────────────────────────────────
 
-    def _step3_stock_screening(self) -> ScreeningResult:
+    def _screening(self) -> ScreeningResult:
         df = self._calc.dataframe
         row = self._calc.latest()
 
@@ -431,7 +432,7 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
 
     # ── 4단계: 매수 타이밍 ────────────────────────────────
 
-    def _step4_entry_timing(self) -> EntryResult:
+    def _entry_signal(self) -> EntryResult:
         df = self._calc.dataframe
         row = self._calc.latest()
         prev = self._calc.previous()
@@ -531,11 +532,11 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
         total_score = min(STEP_MAX_SCORE, total_score)
 
         if total_score >= ENTRY_SCORE_STRONG_BUY:
-            signal = PositionSignal.STRONG_ENTRY
+            signal = OrderSide.STRONG_ENTRY
         elif total_score >= ENTRY_SCORE_BUY:
-            signal = PositionSignal.ENTRY
+            signal = OrderSide.ENTRY
         else:
-            signal = PositionSignal.HOLD
+            signal = OrderSide.HOLD
 
         return EntryResult(
             signal=signal,
@@ -712,7 +713,7 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
 
     # ── 7단계: 매도/청산 ──────────────────────────────────
 
-    def _step7_exit_strategy(
+    def _exit_strategy(
         self,
         risk: RiskManagementResult,
     ) -> ExitResult:
@@ -774,7 +775,7 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
         rsi_overbought = rsi >= EXIT_RSI_OVERBOUGHT
 
         # 트레일링 스톱 / 부분 익절가
-        trailing_stop = calc_trailing_stop(price, atr, HOLD_TRAILING_ATR_MULTIPLIER)
+        trailing = calc_trailing_stop(price, atr, HOLD_TRAILING_ATR_MULTIPLIER)
         partial_exit = round(risk.entry_price + atr * RISK_ATR_TP_MULTIPLIER * 0.5, 2)
         full_exit = risk.take_profit
 
@@ -799,13 +800,13 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
 
         # 신호 결정
         if exit_score >= 60:
-            signal = PositionSignal.STRONG_EXIT
+            signal = OrderSide.STRONG_EXIT
         elif exit_score >= 40:
-            signal = PositionSignal.EXIT
+            signal = OrderSide.EXIT
         elif exit_score >= 25:
-            signal = PositionSignal.PARTIAL_EXIT
+            signal = OrderSide.PARTIAL_EXIT
         else:
-            signal = PositionSignal.HOLD
+            signal = OrderSide.HOLD
 
         detail_parts = [
             f"SMA50{'이탈!' if ma50_broken else 'OK'}",
@@ -819,16 +820,17 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
 
         return ExitResult(
             signal=signal,
+            trailing_stop=trailing,
+            partial_exit_price=partial_exit,
+            full_exit_price=full_exit,
+            rsi_overbought=rsi_overbought,
+
             ma50_broken=ma50_broken,
             ma200_broken=ma200_broken,
             macd_divergence=macd_divergence,
             rsi_divergence=rsi_divergence,
             adx_declining=adx_declining,
             volume_dry_up=volume_dry_up,
-            rsi_overbought=rsi_overbought,
-            trailing_stop_atr=trailing_stop,
-            partial_exit_price=partial_exit,
-            full_exit_price=full_exit,
             score=round(min(STEP_MAX_SCORE, exit_score), 1),
             detail=" | ".join(detail_parts),
         )
@@ -863,28 +865,28 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
         screen: ScreeningResult,
         entry: EntryResult,
         exit_: ExitResult,
-    ) -> PositionSignal:
+    ) -> OrderSide:
         """종합 점수 + 각 단계 결과로 최종 신호 결정"""
         # 청산 신호가 강하면 우선
-        if exit_.signal in (PositionSignal.STRONG_EXIT, PositionSignal.EXIT):
+        if exit_.signal in (OrderSide.STRONG_EXIT, OrderSide.EXIT):
             return exit_.signal
-        if exit_.signal == PositionSignal.PARTIAL_EXIT:
-            return PositionSignal.PARTIAL_EXIT
+        if exit_.signal == OrderSide.PARTIAL_EXIT:
+            return OrderSide.PARTIAL_EXIT
 
         # 시장 환경 불리 → 보류
         if not market.is_favorable:
-            return PositionSignal.HOLD
+            return OrderSide.HOLD
 
         # 스크리닝 미통과 → 보류
         if screen.grade in (PositionScreenGrade.C, PositionScreenGrade.F):
-            return PositionSignal.HOLD
+            return OrderSide.HOLD
 
         # 진입 신호 기반
-        if entry.signal == PositionSignal.STRONG_ENTRY and score >= 55:
-            return PositionSignal.STRONG_ENTRY
-        if entry.signal in (PositionSignal.STRONG_ENTRY, PositionSignal.ENTRY) and score >= 40:
-            return PositionSignal.ENTRY
-        return PositionSignal.HOLD
+        if entry.signal == OrderSide.STRONG_ENTRY and score >= 55:
+            return OrderSide.STRONG_ENTRY
+        if entry.signal in (OrderSide.STRONG_ENTRY, OrderSide.ENTRY) and score >= 40:
+            return OrderSide.ENTRY
+        return OrderSide.HOLD
 
     # ── 요약 생성 ─────────────────────────────────────────
 
@@ -897,16 +899,16 @@ class PositionTradingAnalyzer(BaseAnalyzer[PositionAnalysisResult]):
         risk: RiskManagementResult,
         holding: HoldingManagementResult,
         exit_: ExitResult,
-        overall_signal: PositionSignal,
+        overall_signal: OrderSide,
         overall_score: float,
     ) -> str:
         signal_desc = {
-            PositionSignal.STRONG_ENTRY: "강력한 포지션 매수 신호입니다. 분할 진입을 시작하세요.",
-            PositionSignal.ENTRY: "포지션 매수 신호입니다. 1차 분할 매수를 고려하세요.",
-            PositionSignal.HOLD: "보류 신호입니다. 조건 개선을 기다리세요.",
-            PositionSignal.PARTIAL_EXIT: "부분 익절을 고려하세요. 추세 약화 조짐이 있습니다.",
-            PositionSignal.EXIT: "포지션 청산을 권장합니다. 주요 지지선이 이탈했습니다.",
-            PositionSignal.STRONG_EXIT: "즉시 청산을 강력히 권장합니다.",
+            OrderSide.STRONG_ENTRY: "강력한 포지션 매수 신호입니다. 분할 진입을 시작하세요.",
+            OrderSide.ENTRY: "포지션 매수 신호입니다. 1차 분할 매수를 고려하세요.",
+            OrderSide.HOLD: "관망 신호입니다. 조건 개선을 기다리세요.",
+            OrderSide.PARTIAL_EXIT: "부분 익절을 고려하세요. 추세 약화 조짐이 있습니다.",
+            OrderSide.EXIT: "포지션 청산을 권장합니다. 주요 지지선이 이탈했습니다.",
+            OrderSide.STRONG_EXIT: "즉시 청산을 강력히 권장합니다.",
         }
 
         return (

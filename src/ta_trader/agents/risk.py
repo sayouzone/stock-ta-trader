@@ -21,9 +21,10 @@ import math
 from dataclasses import dataclass
 from typing import Optional
 
+from ta_trader.models import OrderSide
 from ta_trader.base.agent import BaseAgent
 from ta_trader.models.agent import (
-    OrderSide, PositionSize, RiskApproval,
+    PositionSize, RiskApproval,
     TradeSignal, VetoReason,
 )
 from ta_trader.models import Signal

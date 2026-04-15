@@ -67,9 +67,9 @@ from ta_trader.constants.value import (
     GRADE_STRONG_BUY, GRADE_BUY, GRADE_CONDITIONAL, GRADE_WATCH,
     VALUE_DEFAULT_PERIOD, VALUE_MIN_DATA_ROWS,
 )
-from ta_trader.models.base import CheckItem, StageResult, StageStatus
+from ta_trader.models.base import OrderSide, CheckItem, StageResult, StageStatus
 from ta_trader.models.value import (
-    ValueFundamentals, ValueGrade, ValueAnalysisResult,
+    ValueFundamentals, ValueAnalysisResult,
 )
 from ta_trader.llm.value_prompt_builder import ValuePromptBuilder
 
@@ -1076,28 +1076,28 @@ class ValueInvestingAnalyzer(BaseAnalyzer[ValueAnalysisResult]):
         return StageStatus.FAIL
 
     @staticmethod
-    def _score_to_grade(score: float) -> ValueGrade:
+    def _score_to_grade(score: float) -> OrderSide:
         if score >= GRADE_STRONG_BUY:
-            return ValueGrade.STRONG_BUY
+            return OrderSide.STRONG_BUY
         if score >= GRADE_BUY:
-            return ValueGrade.BUY
+            return OrderSide.BUY
         if score >= GRADE_CONDITIONAL:
-            return ValueGrade.CONDITIONAL
+            return OrderSide.CONDITIONAL
         if score >= GRADE_WATCH:
-            return ValueGrade.WATCH
-        return ValueGrade.UNFIT
+            return OrderSide.HOLD
+        return OrderSide.UNFIT
 
     @staticmethod
-    def _determine_action(grade: ValueGrade, stages: list[StageResult]) -> str:
-        if grade == ValueGrade.STRONG_BUY:
+    def _determine_action(grade: OrderSide, stages: list[StageResult]) -> str:
+        if grade == OrderSide.STRONG_BUY:
             return "적극 매수: 밸류에이션·재무·안전마진 모두 우수. 분할 매수 추천"
-        if grade == ValueGrade.BUY:
+        if grade == OrderSide.BUY:
             return "매수 고려: 가치 투자 기준 충족. 추가 리서치 후 진입"
-        if grade == ValueGrade.CONDITIONAL:
+        if grade == OrderSide.CONDITIONAL:
             weak = [s for s in stages if s.status == StageStatus.FAIL]
             weak_names = ", ".join(s.stage_name for s in weak[:2])
             return f"조건부 매수: {weak_names} 개선 시 재평가"
-        if grade == ValueGrade.WATCH:
+        if grade == OrderSide.HOLD:
             return "관심 관망: 밸류에이션 추가 하락 시 재검토"
         return "부적합: 현재 가치 투자 기준 미충족"
 

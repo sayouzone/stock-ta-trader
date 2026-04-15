@@ -9,38 +9,10 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
-from ta_trader.models import TradingStyle
+from ta_trader.models.base import OrderSide, TradingStyle
 
 if TYPE_CHECKING:
     from ta_trader.models.llm import LLMAnalysis
-
-class GrowthGrade(Enum):
-    """종합 등급"""
-    STRONG_BUY  = "적극매수"    # ★★★★★  75+
-    BUY         = "매수"        # ★★★★   60~74
-    CONDITIONAL = "조건부매수"   # ★★★    45~59
-    WATCH       = "관심관망"    # ★★     30~44
-    UNFIT       = "부적합"      # ★      0~29
-
-    @property
-    def stars(self) -> str:
-        return {
-            GrowthGrade.STRONG_BUY:  "★★★★★",
-            GrowthGrade.BUY:         "★★★★☆",
-            GrowthGrade.CONDITIONAL: "★★★☆☆",
-            GrowthGrade.WATCH:       "★★☆☆☆",
-            GrowthGrade.UNFIT:       "★☆☆☆☆",
-        }[self]
-
-    @property
-    def emoji(self) -> str:
-        return {
-            GrowthGrade.STRONG_BUY:  "🟢",
-            GrowthGrade.BUY:         "🔵",
-            GrowthGrade.CONDITIONAL: "🟡",
-            GrowthGrade.WATCH:       "⚪",
-            GrowthGrade.UNFIT:       "🔴",
-        }[self]
 
 
 @dataclass
@@ -78,7 +50,7 @@ class GrowthAnalysisResult:
 
     # 종합 평가
     total_score:      float = 0.0               # 0~100
-    grade:            GrowthGrade = GrowthGrade.UNFIT
+    grade:            OrderSide = OrderSide.UNFIT
     fundamentals:     Optional[FundamentalData] = None
 
     # 리스크 관리
