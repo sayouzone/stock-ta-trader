@@ -1,5 +1,5 @@
 """
-ta_trader/visualization/chart.py
+ta_trader/visualization/swing.py
 5패널 기술적 분석 차트 시각화
 """
 

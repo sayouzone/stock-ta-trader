@@ -38,6 +38,8 @@ from ta_trader.models import TradingStyle
 from ta_trader.recommend import RecommendationEngine, format_recommendation_report
 from ta_trader.visualization.chart import ChartVisualizer
 from ta_trader.visualization.swing import SwingChartVisualizer
+from ta_trader.visualization.swing_volume import SwingVolumeChartVisualizer
+from ta_trader.visualization.park import ParkChartVisualizer
 from ta_trader.visualization.position import PositionChartVisualizer
 from ta_trader.visualization.growth import GrowthChartVisualizer
 from ta_trader.visualization.value import ValueChartVisualizer
@@ -62,6 +64,8 @@ def _parse_style(style_str: str | None) -> TradingStyle:
         return TradingStyle.GROWTH
     if style_str.lower() in ("value", "가치"):
         return TradingStyle.VALUE
+    if style_str.lower() in ("park", "박병창"):
+        return TradingStyle.PARK
     return TradingStyle.SWING
 
 
@@ -96,11 +100,14 @@ def cli() -> None:
 @click.option("--risk-pct",   default=0.02, show_default=True, type=float,
               help="1회 거래 최대 손실 비율 (0.02 = 2%)")
 @click.option("--style",      default="swing", show_default=True,
-              type=click.Choice(["swing", "position", "growth", "value", "all"], case_sensitive=False),
-              help="매매 스타일: swing / position / all(양쪽 모두)")
+              type=click.Choice(["swing", "position", "growth", "value", "park", "all"], case_sensitive=False),
+              help="매매 스타일: swing / position / growth / value / park / all(양쪽 모두)")
 @click.option("--config",     default="configs/watchlist.yaml", show_default=True, help="종목 목록 YAML")
 @click.option("--save-chart", is_flag=True,   help="차트를 reports/ 폴더에 저장")
 @click.option("--no-chart",   is_flag=True,   help="차트 표시 안 함")
+@click.option("--chart-type",default="price+volume", show_default=True,
+              type=click.Choice(["price/volume", "price+volume"], case_sensitive=False),
+              help="차트 종류: volume / single")
 @click.option("--save-report",is_flag=True,   help="분석결과를 reports/ 폴더에 저장")
 @click.option("--save-csv",   is_flag=True,   help="마켓과 기술지표 분석 데이터를 reports/ 폴더에 저장")
 @click.option("--save-recommend",is_flag=True,help="추천결과를 reports/ 폴더에 저장")
@@ -114,8 +121,8 @@ def cli() -> None:
               help="LLM Provider (기본값: 환경변수 자동 감지)")
 @click.option("--llm-model",  default=None,   help="LLM 모델명 (기본값: claude-sonnet-4-20250514)")
 def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: float, style: str,
-            config: str, save_chart: bool, no_chart: bool, save_report: bool, save_csv: bool,
-            save_recommend: bool, save_screen: bool, top_n: int, min_score: float,
+            config: str, save_chart: bool, no_chart: bool, chart_type: str, save_report: bool,
+            save_csv: bool, save_recommend: bool, save_screen: bool, top_n: int, min_score: float,
             llm: bool, llm_stream: bool, llm_provider: str | None, llm_model: str | None) -> None:
     """단일 종목 기술적 분석
 
@@ -174,6 +181,7 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
             click.echo(f"{'━'*68}")
 
         style_tag = trading_style.name.lower()
+        print(style_tag)
 
         decisions = []
         label = f"분석 중 ({trading_style.value})" if is_multi else "분석 중"
@@ -183,7 +191,7 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
                 name, _ = fetcher.info(ticker)
                 click.echo(f"\nTicker {ticker} ({name})")
                 try:
-                    if trading_style == TradingStyle.SWING:
+                    if trading_style == TradingStyle.SWING or trading_style == TradingStyle.PARK:
                         analyzer = SwingTradingAnalyzer(
                             ticker, name=name, period=period, interval=interval,
                             capital=capital, risk_pct=risk_pct,
@@ -244,7 +252,7 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
                 finally:
                         pass
 
-                if trading_style == TradingStyle.SWING:
+                if trading_style == TradingStyle.SWING or trading_style == TradingStyle.PARK:
                     decision_str = format_swing_result(decision)
                 elif trading_style == TradingStyle.POSITION:
                     decision_str = format_position_result(decision)
@@ -307,8 +315,10 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
                     )
                     df = analyzer.calculator.dataframe if analyzer.calculator else None
                     if df is not None:
-                        if trading_style == TradingStyle.SWING:
+                        if trading_style == TradingStyle.SWING and chart_type == "price/volume":
                             visualizer = SwingChartVisualizer()
+                        elif trading_style == TradingStyle.SWING and chart_type == "price+volume":
+                            visualizer = SwingVolumeChartVisualizer()
                         elif trading_style == TradingStyle.POSITION:
                             visualizer = PositionChartVisualizer()
                         elif trading_style == TradingStyle.GROWTH:
@@ -317,7 +327,10 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
                             visualizer = ValueChartVisualizer()
                         elif trading_style in [TradingStyle.SWING, TradingStyle.POSITION]:
                             visualizer = ChartVisualizer()
+                        elif trading_style == TradingStyle.PARK:
+                            visualizer = ParkChartVisualizer()
                         
+                        #print("decision", decision)
                         visualizer.plot(decision, df, save_path=chart_path, show=not save_chart)
                         
                         if save_chart and chart_path:

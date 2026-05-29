@@ -41,9 +41,10 @@ class MarketRegime(Enum):
 class TradingStyle(Enum):
     """매매 스타일 (보유 기간 기반)"""
     SWING    = "스윙"       # 2일~2주: 단기 파동 포착
-    POSITION = "포지션"     # 수주~수개월: 중장기 추세 추종
+    POSITION = "포지션"      # 수주~수개월: 중장기 추세 추종
     GROWTH   = "성장"       # 
     VALUE    = "가치"       # 
+    PARK     = "박병창"      # 박병창의 매매의 기술
 
     @property
     def description(self) -> str:
@@ -52,6 +53,7 @@ class TradingStyle(Enum):
             TradingStyle.POSITION: "포지션 트레이딩 (수주~수개월, 중장기 추세 추종)",
             TradingStyle.GROWTH:   "성장 트레이딩",
             TradingStyle.VALUE:    "가치 트레이딩",
+            TradingStyle.PARK:     "박병창의 매매기술",
         }[self]
 
 

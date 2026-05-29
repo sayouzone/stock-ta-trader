@@ -3238,7 +3238,7 @@ watchlist:
   - "EQPT"        # EquipmentShare.com, Inc. Class A
 
   # ── 보유종목 ─────────────────────
-  - "NNDM"        # Nano Dimension Ltd
+  #- "NNDM"        # Nano Dimension Ltd
   - "INUV"        # Inuvo, Inc.
   - "MVIS"        # Microvision Inc
   - "ARKG"        # ARK Genomic Revolution ETF

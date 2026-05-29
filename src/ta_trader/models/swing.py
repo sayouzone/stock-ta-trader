@@ -56,6 +56,19 @@ class MarketEnvResult:
             MarketEnvironment.BULLISH_WEAK,
         )
 
+    @classmethod
+    def from_dict(cls, d: dict) -> "MarketEnvResult":
+        return cls(
+            environment      = _restore_enum(MarketEnvironment, d["environment"]),
+            adx_value        = float(d["adx_value"]),
+            adx_trend_exists = bool(d["adx_trend_exists"]),
+            above_sma200     = bool(d["above_sma200"]),
+            ma_trend_score   = int(d["ma_trend_score"]),
+            atr_pct          = float(d["atr_pct"]),
+            score            = float(d["score"]),
+            detail           = d.get("detail", ""),
+        )
+
 
 # ── 2단계: 종목 스크리닝 ──────────────────────────────────
 
@@ -74,6 +87,22 @@ class ScreeningResult:
     checks_total: int = 5
     detail: str = ""
 
+    @classmethod
+    def from_dict(cls, d: dict) -> "ScreeningResult":
+        return cls(
+            grade          = _restore_enum(ScreeningGrade, d["grade"]),
+            volume_surge   = bool(d["volume_surge"]),
+            volume_ratio   = float(d["volume_ratio"]),
+            adx_sufficient = bool(d["adx_sufficient"]),
+            di_bullish     = bool(d["di_bullish"]),
+            ma_aligned     = bool(d["ma_aligned"]),
+            rs_positive    = bool(d["rs_positive"]),
+            score          = float(d["score"]),
+            checks_passed  = int(d.get("checks_passed", 0)),
+            checks_total   = int(d.get("checks_total", 5)),
+            detail         = d.get("detail", ""),
+        )
+
 
 # ── 3단계: 진입 타이밍 ────────────────────────────────────
 
@@ -84,6 +113,15 @@ class EntrySignalDetail:
     triggered: bool            # 발동 여부
     score: float               # 기여 점수
     description: str = ""
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "EntrySignalDetail":
+        return cls(
+            name        = d["name"],
+            triggered   = bool(d["triggered"]),
+            score       = float(d["score"]),
+            description = d.get("description", ""),
+        )
 
 
 @dataclass
@@ -103,6 +141,24 @@ class EntryResult:
     @property
     def triggered_count(self) -> int:
         return sum(1 for s in self.signals if s.triggered)
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "EntryResult":
+        return cls(
+            signal              = _restore_enum(OrderSide, d["signal"]),
+            score               = float(d["score"]),
+            signals             = [
+                EntrySignalDetail.from_dict(s)
+                for s in d.get("signals", [])
+            ],
+            macd_golden_cross   = bool(d.get("macd_golden_cross",   False)),
+            rsi_oversold_bounce = bool(d.get("rsi_oversold_bounce", False)),
+            bb_lower_bounce     = bool(d.get("bb_lower_bounce",     False)),
+            bb_squeeze_breakout = bool(d.get("bb_squeeze_breakout", False)),
+            fibo_golden_zone    = bool(d.get("fibo_golden_zone",    False)),
+            ema_golden_cross    = bool(d.get("ema_golden_cross",    False)),
+            detail              = d.get("detail", ""),
+        )
 
 
 # ── 4단계: 포지션 사이징/리스크 ───────────────────────────
@@ -138,6 +194,26 @@ class PositionSizingResult:
         """기대 수익 금액"""
         return abs(self.take_profit - self.entry_price) * self.position_size
 
+    @classmethod
+    def from_dict(cls, d: dict) -> "PositionSizingResult":
+        return cls(
+            entry_price       = float(d["entry_price"]),
+            stop_loss         = float(d["stop_loss"]),
+            take_profit       = float(d["take_profit"]),
+            risk_reward_ratio = float(d["risk_reward_ratio"]),
+            risk_per_share    = float(d["risk_per_share"]),
+            position_size     = int(d["position_size"]),
+            position_value    = float(d["position_value"]),
+            portfolio_pct     = float(d["portfolio_pct"]),
+            capital           = float(d["capital"]),
+            atr               = float(d["atr"]),
+            is_acceptable     = bool(d["is_acceptable"]),
+            score             = float(d["score"]),
+            detail            = d.get("detail", ""),
+            fibo_target_161   = float(d.get("fibo_target_161", 0.0)),
+            fibo_target_261   = float(d.get("fibo_target_261", 0.0)),
+        )
+
 
 # ── 5단계: 익절/청산 전략 ─────────────────────────────────
 
@@ -169,6 +245,20 @@ class ExitStrategyResult:
         """전량 청산 권장 여부"""
         return self.signal in (
             OrderSide.EXIT, OrderSide.STRONG_EXIT,
+        )
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "ExitStrategyResult":
+        return cls(
+            signal             = _restore_enum(OrderSide, d["signal"]),
+            trailing_stop      = float(d["trailing_stop"]),
+            partial_exit_price = float(d["partial_exit_price"]),
+            full_exit_price    = float(d["full_exit_price"]),
+            rsi_overbought     = bool(d["rsi_overbought"]),
+            macd_dead_cross    = bool(d["macd_dead_cross"]),
+            bb_upper_touch     = bool(d["bb_upper_touch"]),
+            score              = float(d["score"]),
+            detail             = d.get("detail", ""),
         )
 
 
@@ -229,3 +319,50 @@ class SwingAnalysisResult:
             d["LLM_Confidence"] = self.llm_analysis.confidence
             d["LLM_Assessment"] = self.llm_analysis.overall_assessment[:80] + "..."
         return d
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "SwingAnalysisResult":
+        """
+        직렬화된 dict → SwingAnalysisResult 완전 복원.
+
+        저장 시 _to_serializable() 또는 dataclasses.asdict()로
+        직렬화된 dict를 받아 모든 서브 dataclass와 Enum을 재구성한다.
+
+        Args:
+            d: JSON 역직렬화 dict
+
+        Returns:
+            SwingAnalysisResult 인스턴스
+
+        Example::
+
+            with open("005930.KS_2026-04-30.json") as f:
+                payload = json.load(f)
+            result = SwingAnalysisResult.from_dict(payload["analysis"])
+        """
+        # LLMAnalysis는 순환 참조 방지를 위해 런타임에 import
+        llm_analysis: Optional["LLMAnalysis"] = None
+        if d.get("llm_analysis") is not None:
+            try:
+                from ta_trader.models.llm import LLMAnalysis
+                llm_analysis = LLMAnalysis.from_dict(d["llm_analysis"])
+            except (ImportError, Exception):
+                # LLM 모듈 없거나 역직렬화 실패 시 None 유지
+                llm_analysis = None
+
+        return cls(
+            ticker         = str(d["ticker"]),
+            name           = str(d["name"]),
+            date           = str(d["date"]),
+            current_price  = float(d["current_price"]),
+            market_env     = MarketEnvResult.from_dict(d["market_env"]),
+            screening      = ScreeningResult.from_dict(d["screening"]),
+            entry          = EntryResult.from_dict(d["entry"]),
+            position       = PositionSizingResult.from_dict(d["position"]),
+            exit_strategy  = ExitStrategyResult.from_dict(d["exit_strategy"]),
+            overall_signal = _restore_enum(OrderSide, d["overall_signal"]),
+            overall_score  = float(d["overall_score"]),
+            summary        = d.get("summary", ""),
+            trading_style  = _restore_enum(TradingStyle, d.get("trading_style", TradingStyle.SWING.value)),
+            llm_analysis   = llm_analysis,
+        )
