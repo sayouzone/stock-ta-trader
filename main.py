@@ -93,8 +93,8 @@ def cli() -> None:
 # ── analyze 명령 ──────────────────────────────────────────
 @cli.command()
 @click.argument("ticker")
-@click.option("--period",     default="1y",  show_default=True, help="데이터 기간 (예: 3mo, 6mo, 1y)")
-@click.option("--interval",   default="1d",   show_default=True, help="봉 간격 (예: 1d, 1wk)")
+@click.option("--period",     default="1y",  show_default=True, help="데이터 기간 (예: 5d, 3mo, 6mo, 1y)")
+@click.option("--interval",   default="1d",   show_default=True, help="봉 간격 (예: 5m, 1d, 1wk)")
 @click.option("--capital",    default=10_000_000, show_default=True, type=float,
               help="투입 자본금 (원)")
 @click.option("--risk-pct",   default=0.02, show_default=True, type=float,

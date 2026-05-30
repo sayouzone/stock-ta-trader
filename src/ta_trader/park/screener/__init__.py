@@ -10,6 +10,7 @@ from ta_trader.park.screener.base import (
     ScreenResult,
 )
 from ta_trader.park.screener.premarket import (
+    TechnicalContext,
     PreMarketScreener,
 )
 from ta_trader.park.screener.intraday import (
@@ -24,6 +25,7 @@ __all__ = [
     "CheckResult",
     "ScreenResult",
     # premarket
+    "TechnicalContext",
     "PreMarketScreener",
     # intraday
     "IntradayScreener",

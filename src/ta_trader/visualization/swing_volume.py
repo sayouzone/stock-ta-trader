@@ -72,10 +72,14 @@ class SwingVolumeChartVisualizer:
             f"Grade: {result.screening.grade.value}, Score: {result.overall_score:+.1f}",
             fontsize=13,
             fontweight="bold",
+            y=0.945,   # 타이틀을 아래로 내려 첫 패널과의 간격 축소
         )
 
         # 4행: [가격(+거래량)] / MACD / RSI / ADX
-        gs = gridspec.GridSpec(4, 1, figure=fig, hspace=0.38, height_ratios=[3, 1, 1, 1])
+        # top을 0.91로 올려(타이틀 바로 아래) 타이틀-패널 간격을 좁힘
+        # left/right로 차트 좌우 마진 확대
+        gs = gridspec.GridSpec(4, 1, figure=fig, hspace=0.38, height_ratios=[3, 1, 1, 1],
+                               top=0.90, bottom=0.05, left=0.10, right=0.90)
         ax_p = fig.add_subplot(gs[0])               # 가격 (캔들+BB+MA)
         ax_v = ax_p.twinx()                         # 거래량 (하단 겹침)
         ax_macd = fig.add_subplot(gs[1], sharex=ax_p)
@@ -126,6 +130,13 @@ class SwingVolumeChartVisualizer:
         else:
             ax.plot(x, df["Close"], color="black", lw=1.2, label="Close", zorder=3)
 
+
+        # 최소 날짜와 최대 날짜 구하기
+        # 기간이 30일 이상인 경우에만 손절/익절 라인 그리기
+        start_date = pd.to_datetime(df.index.min()).date()
+        end_date = pd.to_datetime(df.index.max()).date()
+        period = int((end_date - start_date).days)
+
         # 4) 손절/익절 라인 (우측 범례)
         right_handles = []
         es, pos = result.exit_strategy, result.position
@@ -135,7 +146,7 @@ class SwingVolumeChartVisualizer:
             (getattr(pos, "stop_loss", None), "#ef6c00", ":", "손절"),
             (getattr(es, "trailing_stop", None), "#c62828", "--", "트레일링 스톱"),
         ):
-            if value:
+            if period > 30 and value:
                 ln = ax.axhline(value, color=color, lw=0.9, ls=ls, label=f"{name} {fmt(value)}", zorder=4)
                 right_handles.append(ln)
 
@@ -156,17 +167,36 @@ class SwingVolumeChartVisualizer:
         ax.grid(True, axis="y", ls=":", alpha=0.3)
         ax.margins(x=0.01)
 
+        # 가격 y축 범위를 인위적으로 확대해 캔들이 차지하는 세로 폭을 줄인다.
+        # 데이터의 실제 고저 범위를 구한 뒤, 위아래로 패딩을 크게 부여.
+        price_hi = float(df[hi_col].max())
+        price_lo = float(df[lo_col].min())
+        # 손절/익절 수평선도 범위에 포함시켜 잘리지 않게 함
+        line_vals = [getattr(es, "full_exit_price", None),
+                     getattr(es, "partial_exit_price", None),
+                     getattr(pos, "stop_loss", None),
+                     getattr(es, "trailing_stop", None)]
+        line_vals = [v for v in line_vals if v]
+        if line_vals:
+            price_hi = max(price_hi, max(line_vals))
+            price_lo = min(price_lo, min(line_vals))
+        span = price_hi - price_lo
+        # 아래 25% / 위 35% 여백 → 캔들이 화면 중앙~상단에 납작하게 모임
+        y_low = price_lo - span * 0.15
+        y_high = price_hi + span * 0.07
+        ax.set_ylim(y_low, y_high)
+
         # 범례: 좌측(지표) / 우측(손절익절)
         left_handles, left_labels = [], []
         for h, l in zip(*ax.get_legend_handles_labels()):
             if h not in right_handles:
                 left_handles.append(h); left_labels.append(l)
         ax.add_artist(ax.legend(left_handles, left_labels, loc="upper left", fontsize=7, ncol=2, framealpha=0.9))
-        if right_handles:
+        if period > 30 and right_handles:
             ax.legend(right_handles, [h.get_label() for h in right_handles],
                       loc="upper right", fontsize=7, framealpha=0.9)
 
-        ax.set_title("Price + Bollinger Bands + Volume", fontsize=11, pad=8)
+        ax.set_title("Price + Bollinger Bands + Volume", fontsize=11, pad=4)
 
     @staticmethod
     def _draw_candles(ax, df, x) -> None:
@@ -274,4 +304,6 @@ class SwingVolumeChartVisualizer:
         ticks, labels = ticks[1:], labels[1:]
         ax.set_xticks(ticks)
         ax.set_xticklabels(labels, rotation=0, fontsize=8)
-        ax.set_xlim(-1, len(df))
+        # 좌우 마진 확대: 양쪽에 전체 길이의 3%씩 여백
+        pad = max(2, len(df) * 0.03)
+        ax.set_xlim(-pad, len(df) - 1 + pad)

@@ -8,6 +8,7 @@ from __future__ import annotations
 import os
 import pandas as pd
 import yfinance as yf
+from typing import Optional
 
 from ta_trader.data.krx_stock_fetcher import KRXStockFetcher
 from sayou.stock.opendart import OpenDartCrawler
@@ -24,9 +25,15 @@ class DataFetcher:
 
     def __init__(
         self,
+        stock_path: Optional[str] = "data/stocks/krx_stock_data_4420_20260530.csv",
+        etf_path: Optional[str] = "data/stocks/krx_etf_data_4918_20260530.csv",
+        etn_path: Optional[str] = "data/stocks/krx_etn_data_5200_20260530.csv",
         period: str = DEFAULT_PERIOD,
         interval: str = DEFAULT_INTERVAL,
     ) -> None:
+        self._stock_path = stock_path
+        self._etf_path = etf_path
+        self._etn_path = etn_path
         self.period   = period
         self.interval = interval
         self._krx_fetcher = None
@@ -103,7 +110,11 @@ class DataFetcher:
             corp_name = crawler.fetch_corp_name(corp_code)
             """
             if not self._krx_fetcher:
-                self._krx_fetcher = KRXStockFetcher()
+                self._krx_fetcher = KRXStockFetcher(
+                    stock_path=self._stock_path,
+                    etf_path=self._etf_path,
+                    etn_path=self._etn_path,
+                )
                 self._krx_fetcher.load()
 
             stock = self._krx_fetcher.get_info(ticker)

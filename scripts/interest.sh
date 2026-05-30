@@ -8,12 +8,13 @@ interests=(
     "329180.KS"   # HD현대중공업
     "042700.KS"   # 한미반도체
     "009150.KS"   # 삼성전기
+    "001820.KS"   # 삼화콘덴서
     "006800.KS"   # 미래에셋증권
     "034020.KS"   # 두산에너빌리티
     "012450.KS"   # 한화에어로스페이스
     "042660.KS"   # 한화오션
     "064350.KS"   # 현대로템
-    "079550.KS"   # LIG넥스원
+    "079550.KS"   # LIG디펜스앤에어로스페이스
     "066570.KS"   # LG전자
     "AMD"         # Advanced Micro Devices, Inc.
     "INTC"        # Intel Corporation
@@ -24,8 +25,10 @@ interests=(
     "TSM"         # Taiwan Semiconductor Manufacturing Company Limited
     "META"        # Meta Platforms, Inc.
     "AVGO"        # Broadcom Inc.
+    "PLTR"        # Palantir Technologies Inc.
     "LITE"        # Lumentum Holdings, Inc.
     "MRVL"        # Marvell Technology, Inc.
+    "SNDK"        # Sandisk Corporation
     "IONQ"        # IonQ, Inc.
     "DOW"         # Dow, Inc.
     "INUV"        # Inuvo, Inc.
@@ -35,7 +38,7 @@ interests=(
     "JEPI"        # JPMorgan Equity Premium Income ETF
     "KBWY"        # Invesco KBW Premium Yield Equity REIT ETF
     "RA"          # Brookfield Real Assets Income Fund Inc
-    "QYLD"        # Global X NASDAQ 100 Covered Call ETF
+    #"QYLD"        # Global X NASDAQ 100 Covered Call ETF
     "recommend"
 )
 

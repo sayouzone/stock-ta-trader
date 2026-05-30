@@ -77,6 +77,7 @@ class KRXStockFetcher:
         self, 
         stock_path: Optional[str] = "data/stocks/krx_stock_data_4128_20260319.csv",
         etf_path: Optional[str] = "data/stocks/krx_etf_data_0437_20260319.csv",
+        etn_path: Optional[str] = "data/stocks/krx_etn_data_5200_20260530.csv",
     ) -> None:
         """
         Args:
@@ -87,6 +88,7 @@ class KRXStockFetcher:
         """
         self._stock_path = Path(stock_path) if stock_path else None
         self._etf_path = Path(etf_path) if etf_path else None
+        self._etn_path = Path(etn_path) if etn_path else None
         self._stocks: dict[str, StockInfo] = {}       # name -> StockInfo
         self._code_map: dict[str, StockInfo] = {}     # code -> StockInfo
         self._loaded = False
@@ -129,6 +131,16 @@ class KRXStockFetcher:
             if self._etf_path:
                 self._save_to_csv(self._etf_path)
                 logger.info("캐시 파일 저장 완료: %s", self._etf_path)
+
+        if self._etn_path and self._etn_path.exists() and not force_refresh:
+            logger.info("ETN 파일에서 종목 데이터 로드: %s", self._etn_path)
+            self._load_etfs_from_csv(self._etn_path)
+        else:
+            logger.info("KRX API에서 종목 데이터 가져오는 중...")
+            self._fetch_from_krx()
+            if self._etn_path:
+                self._save_to_csv(self._etn_path)
+                logger.info("캐시 파일 저장 완료: %s", self._etn_path)
  
         self._loaded = True
         logger.info("총 %d개 종목 로드 완료", len(self._stocks))
