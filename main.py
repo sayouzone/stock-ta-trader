@@ -20,6 +20,7 @@ import yaml
 
 from datetime import date
 from pathlib import Path
+from typing import Optional
 
 # PYTHONPATH=src 설정 없이도 동작하도록 보험용 경로 추가
 sys.path.insert(0, str(Path(__file__).parent / "src"))
@@ -51,8 +52,9 @@ from ta_trader.agents.execution import DryRunBackend, ExecutionConfig
 from ta_trader.formatters.agent import format_screening_results
 from ta_trader.formatters.agent import format_pipeline_result
 from ta_trader.backtest import BacktestConfig, BacktestEngine, format_backtest_report
+from ta_trader.utils.sector_filter import filter_stocks, load_data, SECTORS, THEMES
 
-MARKETS = ["KOSPI", "KOSDAQ", "KRX", "US"]
+MARKETS = ["KOSPI", "KOSDAQ", "KRX", "ETF", "US", "PARK"]
 
 def _parse_style(style_str: str | None) -> TradingStyle:
     """CLI 문자열을 TradingStyle로 변환"""
@@ -74,6 +76,7 @@ def _resolve_styles(style_str: str | None) -> list[TradingStyle]:
     if style_str and style_str.lower() in ("all", "전체"):
         return [TradingStyle.SWING, TradingStyle.POSITION, TradingStyle.GROWTH, TradingStyle.VALUE]
     return [_parse_style(style_str)]
+
 
 @click.group()
 @click.version_option("1.5.0")
@@ -160,12 +163,26 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
             "KOSPI": lambda t: ".KS" in t,
             "KOSDAQ": lambda t: ".KQ" in t,
             "KRX": lambda t: ".KS" in t or ".KQ" in t,
+            "ETF": lambda t: ".KS" in t,
             "US": lambda t: ".KS" not in t and ".KQ" not in t,
+            "PARK": lambda t: True,
         }
         market_filter = MARKET_FILTERS.get(ticker)
         if market_filter:
             tickers = [t for t in tickers if market_filter(t)]
+        
         market = ticker
+
+        if ticker == "KOSPI":
+            df = load_data("data/all_sectors_themed.csv")
+            # ETF 섹터 전체
+            kospi = filter_stocks(df, market="KOSPI", exclude_sectors=["ETF/기타"])
+            tickers = kospi["ticker"].tolist()
+        elif ticker == "ETF":
+            df = load_data("data/all_sectors_themed.csv")
+            # ETF 섹터 전체
+            etf = filter_stocks(df, market="KOSPI", sector="ETF/기타")
+            tickers = etf["ticker"].tolist()
     else:
         tickers = [ticker]
 
@@ -191,9 +208,15 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
                 name, _ = fetcher.info(ticker)
                 click.echo(f"\nTicker {ticker} ({name})")
                 try:
-                    if trading_style == TradingStyle.SWING or trading_style == TradingStyle.PARK:
+                    if trading_style == TradingStyle.SWING:
                         analyzer = SwingTradingAnalyzer(
                             ticker, name=name, period=period, interval=interval,
+                            capital=capital, risk_pct=risk_pct,
+                            last_trading_day=last_trading_day,
+                        )
+                    elif trading_style == TradingStyle.PARK:
+                        analyzer = SwingTradingAnalyzer(
+                            ticker, name=name, period="4mo", interval="1d",
                             capital=capital, risk_pct=risk_pct,
                             last_trading_day=last_trading_day,
                         )
@@ -219,6 +242,7 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
                             trading_style=trading_style)
 
                     df = None
+                    df1 = None
                     if save_csv:
                         last_trading_day = analyzer.last_trading_day
                         csv_path = f"{ticker.replace('.', '_')}_technical_{last_trading_day.replace('-','')}_*.csv"
@@ -240,6 +264,14 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
                             stream=llm_stream)
                     else:
                         decision = analyzer.analyze(df)
+
+                        if trading_style == TradingStyle.PARK:
+                            analyzer1 = SwingTradingAnalyzer(
+                                ticker, name=name, period="5d", interval="5m",
+                                capital=capital, risk_pct=risk_pct,
+                                last_trading_day=last_trading_day,
+                            )
+                            decision1 = analyzer1.analyze(df1)
                     
                 except Exception as e:
                     if llm or llm_stream:
@@ -252,7 +284,7 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
                 finally:
                         pass
 
-                if trading_style == TradingStyle.SWING or trading_style == TradingStyle.PARK:
+                if trading_style == TradingStyle.SWING:
                     decision_str = format_swing_result(decision)
                 elif trading_style == TradingStyle.POSITION:
                     decision_str = format_position_result(decision)
@@ -268,7 +300,7 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
 
                 stock_name = decision.name.replace("/", "").replace(" ", "_")
 
-                if save_report:
+                if save_report and trading_style != TradingStyle.PARK:
                     report_path = out_dir / f"{ticker.replace('.', '_')}_{style_tag}_{decision.date.replace('-','')}_{stock_name}.txt"
                     report_path.write_text(decision_str, encoding="utf-8")
                     click.echo(f"보고서 저장됨: {report_path}")
@@ -278,7 +310,7 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
                     #    with summary_path.open("a", encoding="utf-8") as file:
                     #        file.write(make_summary(decision) + "\n")
 
-                if save_csv:
+                if save_csv and trading_style != TradingStyle.PARK:
                     csv_path = out_dir / f"{ticker.replace('.', '_')}_technical_{decision.date.replace('-','')}_{stock_name}.csv"
                     df = analyzer.calculator.dataframe if analyzer.calculator else None
                     #print(df)
@@ -307,6 +339,15 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
 
                     click.echo(f"PostgreSQL 저장됨")
                     """
+                elif save_csv and trading_style == TradingStyle.PARK:
+                    csv_path = out_dir / f"{ticker.replace('.', '_')}_technical_{decision.date.replace('-','')}_{stock_name}.csv"
+                    df = analyzer.calculator.dataframe if analyzer.calculator else None
+                    df1 = analyzer1.calculator.dataframe if analyzer1.calculator else None
+
+                    if not csv_path.is_file():
+                        df.to_csv(csv_path, index=True)
+                        df1.to_csv(csv_path, index=True)
+                        click.echo(f"CSV 저장됨: {csv_path}")
 
                 if not no_chart:
                     chart_path = (
@@ -331,7 +372,12 @@ def analyze(ticker: str, period: str, interval: str, capital: float, risk_pct: f
                             visualizer = ParkChartVisualizer()
                         
                         #print("decision", decision)
-                        visualizer.plot(decision, df, save_path=chart_path, show=not save_chart)
+                        if trading_style != TradingStyle.PARK:
+                            visualizer.plot(decision, df, save_path=chart_path, show=not save_chart)
+                        else:
+                            df = analyzer.calculator.dataframe if analyzer.calculator else None
+                            df1 = analyzer1.calculator.dataframe if analyzer1.calculator else None
+                            visualizer.plot(decision, df, df1, save_path=chart_path, show=not save_chart)
                         
                         if save_chart and chart_path:
                             click.echo(f"차트 저장됨: {chart_path}")

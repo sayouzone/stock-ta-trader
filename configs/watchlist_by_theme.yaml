@@ -1,0 +1,142 @@
+# 2025-2026 핵심 주도 테마별 종목 (한국+미국)
+# 박병창식 "강세 테마 집중 공략"용
+# confidence: high(핵심)/medium/low(ETF·간접)
+
+themes:
+  AI반도체:  # (29종목)
+    - "000660.KS"  # SK하이닉스 [KOSPI]
+    - "000990.KS"  # DB하이텍 [KOSPI]
+    - "005290.KQ"  # 동진쎄미켐 [KOSDAQ]
+    - "005930.KS"  # 삼성전자 [KOSPI]
+    - "007660.KS"  # 이수페타시스 [KOSPI]
+    - "036930.KQ"  # 주성엔지니어링 [KOSDAQ]
+    - "042700.KS"  # 한미반도체 [KOSPI]
+    - "058470.KQ"  # 리노공업 [KOSDAQ]
+    - "166090.KQ"  # 하나머티리얼즈 [KOSDAQ]
+    - "240810.KQ"  # 원익IPS [KOSDAQ]
+    - "357780.KQ"  # 솔브레인 [KOSDAQ]
+    - "403870.KQ"  # HPSP [KOSDAQ]
+    - "AMAT"  # Applied Materials, Inc. [US]
+    - "AMD"  # Advanced Micro Devices, Inc. [US]
+    - "ARM"  # ARM Holdings PLC Sponsored ADR [US]
+    - "ASML"  # ASML Holding N.V. [US]
+    - "AVGO"  # Broadcom Inc. [US]
+    - "KLAC"  # KLA Corporation [US]
+    - "LRCX"  # Lam Research Corporation [US]
+    - "MRVL"  # Marvell Technology, Inc. [US]
+    - "MU"  # Micron Technology, Inc. [US]
+    - "NVDA"  # NVIDIA Corporation [US]
+    - "TSM"  # Taiwan Semiconductor Manufacturing Company Limited [US]
+    - "039030.KQ"  # 이오테크닉스 [KOSDAQ]  # ?medium
+    - "095610.KQ"  # 테스 [KOSDAQ]  # ?medium
+    - "140860.KQ"  # 파크시스템스 [KOSDAQ]  # ?medium
+    - "MBLY"  # Mobileye Global, Inc. Class A [US]  # ?medium
+    - "QCOM"  # QUALCOMM Incorporated [US]  # ?medium
+    - "TER"  # Teradyne, Inc. [US]  # ?medium
+
+  AI인프라:  # (17종목)
+    - "007660.KS"  # 이수페타시스 [KOSPI]
+    - "010120.KS"  # LS ELECTRIC [KOSPI]
+    - "103590.KS"  # 일진전기 [KOSPI]
+    - "267260.KS"  # HD현대일렉트릭 [KOSPI]
+    - "298040.KS"  # 효성중공업 [KOSPI]
+    - "ANET"  # Arista Networks, Inc. [US]
+    - "DELL"  # Dell Technologies, Inc. Class C [US]
+    - "ETN"  # Eaton Corporation, PLC [US]
+    - "GEV"  # GE Vernova Inc. [US]
+    - "SMCI"  # Super Micro Computer, Inc. [US]
+    - "VRT"  # Vertiv Holdings Co. Class A [US]
+    - "062040.KS"  # 산일전기 [KOSPI]  # ?medium
+    - "CIEN"  # Ciena Corporation [US]  # ?medium
+    - "CSCO"  # Cisco Systems, Inc. [US]  # ?medium
+    - "GLW"  # Corning Inc [US]  # ?medium
+    - "PLTR"  # Palantir Technologies Inc. [US]  # ?medium
+    - "PWR"  # Quanta Services, Inc. [US]  # ?medium
+
+  원전전력:  # (20종목)
+    - "034020.KS"  # 두산에너빌리티 [KOSPI]
+    - "051600.KS"  # 한전KPS [KOSPI]
+    - "052690.KS"  # 한전기술 [KOSPI]
+    - "CEG"  # Constellation Energy Corporation [US]
+    - "GEV"  # GE Vernova Inc. [US]
+    - "OKLO"  # Oklo Inc. Class A [US]
+    - "UEC"  # Uranium Energy Corp. [US]
+    - "VST"  # Vistra Corp. [US]
+    - "0123G0.KS"  # TIGER 미국AI전력SMR [KOSPI]  # ?medium
+    - "015760.KS"  # 한국전력 [KOSPI]  # ?medium
+    - "336260.KS"  # 두산퓨얼셀 [KOSPI]  # ?medium
+    - "NEE"  # NextEra Energy, Inc. [US]  # ?medium
+    - "SO"  # Southern Company [US]  # ?medium
+    - "0051G0.KS"  # SOL 미국원자력SMR [KOSPI]  # ?low
+    - "0091P0.KS"  # TIGER 코리아원자력 [KOSPI]  # ?low
+    - "0092B0.KS"  # SOL 한국원자력SMR [KOSPI]  # ?low
+    - "0098F0.KS"  # KODEX 원자력SMR [KOSPI]  # ?low
+    - "433500.KS"  # ACE 원자력TOP10 [KOSPI]  # ?low
+    - "434730.KS"  # HANARO 원자력iSelect [KOSPI]  # ?low
+    - "442320.KS"  # RISE 글로벌원자력 [KOSPI]  # ?low
+
+  로봇:  # (33종목)
+    - "056080.KQ"  # 유진로봇 [KOSDAQ]
+    - "059270.KQ"  # 해성에어로보틱스 [KOSDAQ]
+    - "066430.KQ"  # 아이로보틱스 [KOSDAQ]
+    - "079900.KS"  # 전진건설로봇 [KOSPI]
+    - "090360.KQ"  # 로보스타 [KOSDAQ]
+    - "108490.KQ"  # 로보티즈 [KOSDAQ]
+    - "117730.KQ"  # 티로보틱스 [KOSDAQ]
+    - "138360.KQ"  # 앤로보틱스 [KOSDAQ]
+    - "215100.KQ"  # 로보로보 [KOSDAQ]
+    - "232680.KQ"  # 라온로보틱스 [KOSDAQ]
+    - "277810.KQ"  # 레인보우로보틱스 [KOSDAQ]
+    - "348340.KQ"  # 뉴로메카 [KOSDAQ]
+    - "381620.KQ"  # 제닉스로보틱스 [KOSDAQ]
+    - "388720.KQ"  # 유일로보틱스 [KOSDAQ]
+    - "389500.KQ"  # 에스비비테크 [KOSDAQ]
+    - "454910.KS"  # 두산로보틱스 [KOSPI]
+    - "455900.KQ"  # 엔젤로보틱스 [KOSDAQ]
+    - "459510.KQ"  # 나우로보틱스 [KOSDAQ]
+    - "460940.KQ"  # 피앤에스로보틱스 [KOSDAQ]
+    - "466100.KQ"  # 클로봇 [KOSDAQ]
+    - "484810.KQ"  # 티엑스알로보틱스 [KOSDAQ]
+    - "160190.KQ"  # 하이젠알앤엠 [KOSDAQ]  # ?medium
+    - "ISRG"  # Intuitive Surgical, Inc. [US]  # ?medium
+    - "TER"  # Teradyne, Inc. [US]  # ?medium
+    - "TSLA"  # Tesla, Inc. [US]  # ?medium
+    - "0038A0.KS"  # KODEX 미국휴머노이드로봇 [KOSPI]  # ?low
+    - "0048K0.KS"  # KODEX 차이나휴머노이드로봇 [KOSPI]  # ?low
+    - "0053L0.KS"  # TIGER 차이나휴머노이드로봇 [KOSPI]  # ?low
+    - "0148J0.KS"  # TIGER 코리아휴머노이드로봇산업 [KOSPI]  # ?low
+    - "445290.KS"  # KODEX 로봇액티브 [KOSPI]  # ?low
+    - "464310.KS"  # TIGER 글로벌AI&로보틱스 INDXX [KOSPI]  # ?low
+    - "469070.KS"  # RISE AI&로봇 [KOSPI]  # ?low
+    - "471040.KS"  # KoAct 글로벌AI&로봇액티브 [KOSPI]  # ?low
+
+  방산우주:  # (22종목)
+    - "012450.KS"  # 한화에어로스페이스 [KOSPI]
+    - "047810.KS"  # 한국항공우주 [KOSPI]
+    - "064350.KS"  # 현대로템 [KOSPI]
+    - "079550.KS"  # LIG디펜스앤에어로스페이스 [KOSPI]
+    - "272210.KS"  # 한화시스템 [KOSPI]
+    - "CDP"  # COPT Defense Properties [US]
+    - "GD"  # General Dynamics Corporation [US]
+    - "GE"  # GE Aerospace [US]
+    - "HWM"  # Howmet Aerospace Inc. [US]
+    - "KTOS"  # Kratos Defense & Security Solutions, Inc. [US]
+    - "LHX"  # L3Harris Technologies Inc [US]
+    - "LMT"  # Lockheed Martin Corporation [US]
+    - "NOC"  # Northrop Grumman Corp. [US]
+    - "RKLB"  # Rocket Lab Corporation [US]
+    - "RTX"  # RTX Corporation [US]
+    - "099320.KQ"  # 쎄트렉아이 [KOSDAQ]  # ?medium
+    - "ASTS"  # AST SpaceMobile, Inc. Class A [US]  # ?medium
+    - "BA"  # Boeing Company [US]  # ?medium
+    - "PLTR"  # Palantir Technologies Inc. [US]  # ?medium
+    - "TDG"  # TransDigm Group Incorporated [US]  # ?medium
+    - "0131V0.KS"  # 1Q 미국우주항공테크 [KOSPI]  # ?low
+    - "421320.KS"  # PLUS 우주항공&UAM [KOSPI]  # ?low
+
+  양자컴퓨팅:  # (5종목)
+    - "IONQ"  # IonQ, Inc. [US]
+    - "QBTS"  # D-Wave Quantum Inc. [US]
+    - "RGTI"  # Rigetti Computing, Inc. [US]
+    - "0023A0.KS"  # SOL 미국양자컴퓨팅TOP10 [KOSPI]  # ?low
+    - "498270.KS"  # KIWOOM 미국양자컴퓨팅 [KOSPI]  # ?low

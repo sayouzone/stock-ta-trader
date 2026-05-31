@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for type in swing position growth value technical; do
+for type in swing position growth value park technical; do
     for prefix in '?' '??' '???' '????' '?????' '??????' '??????_K?' 'recommend'; do
         rm reports/${prefix}_${type}_"$1"*.* 2>/dev/null
         rm interests/${prefix}_${type}_"$1"*.* 2>/dev/null

@@ -43,7 +43,7 @@ interests=(
 )
 
 #for type in swing position growth value technical; do
-for type in swing technical; do
+for type in swing park technical; do
     for prefix in "${interests[@]}"; do
         prefix="${prefix//./_}"
         cp reports/${prefix}_${type}_"$1"*.* interests/ 2>/dev/null

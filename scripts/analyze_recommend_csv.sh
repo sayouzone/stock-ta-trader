@@ -37,6 +37,15 @@ case "$1" in
         echo "" # 줄바꿈
         $ANALYZE_CMD --style value KRX
         ;;
+    ETF)
+        $ANALYZE_CMD --style swing ETF
+        echo "" # 줄바꿈
+        $ANALYZE_CMD --style position ETF
+        echo "" # 줄바꿈
+        $ANALYZE_CMD --style growth ETF
+        echo "" # 줄바꿈
+        $ANALYZE_CMD --style value ETF
+        ;;
     US|"")
         $ANALYZE_CMD --style swing US
         echo "" # 줄바꿈
