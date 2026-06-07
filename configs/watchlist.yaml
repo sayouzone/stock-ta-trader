@@ -638,7 +638,7 @@ watchlist:
   - "014580.KS"   # 태경비케이
   - "000230.KS"   # 일동홀딩스
   - "015590.KS"   # DKME
-  # ── ETF ─────────────────────
+  # ── ETF/ETN ─────────────────────
   - "069500.KS"   # KODEX 200
   - "360200.KS"   # ACE 미국S&P500
   - "148020.KS"   # RISE 200
@@ -3239,13 +3239,15 @@ watchlist:
   # ── 보유종목 ─────────────────────
   #- "NNDM"        # Nano Dimension Ltd
   - "INUV"        # Inuvo, Inc.
-  - "MVIS"        # Microvision Inc
-  - "ARKG"        # ARK Genomic Revolution ETF
   - "SPY"         # SPDR S&P 500 Trust ETF
   # ── 배당 보유종목 ─────────────────────
   - "JEPI"        # JPMorgan Equity Premium Income ETF
+  - "JEPQ"        # JPMorgan Nasdaq Equity Premium Income ETF
   - "KBWY"        # Invesco KBW Premium Yield Equity REIT ETF
   - "RA"          # Brookfield Real Assets Income Fund Inc
   - "QYLD"        # Global X NASDAQ 100 Covered Call ETF
+  - "SCHD"        # Schwab US Dividend Equity ETF
+  - "DGRO"        # iShares Core Dividend Growth ETF
+  - "DIVO"        # Amplify CWP Enhanced Dividend Income ETF
   # ── 종목 검토 ─────────────────────
 

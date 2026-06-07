@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import click
 import sys
+import yaml
 
 from pathlib import Path
 
@@ -11,7 +12,10 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from ta_trader.data.fetcher import DataFetcher
 from ta_trader.park.rules.core import CoreRuleEngine
+from ta_trader.park.rules.bollinger_rule import BollingerRule, compare_signals
 
+
+MARKETS = ["KOSPI", "KOSDAQ", "KRX", "ETF", "US", "PARK"]
 
 @click.group()
 @click.version_option("1.5.0")
@@ -48,6 +52,54 @@ def rules(ticker: str, period: str, interval: str) -> None:
     print("=" * 68)
     print(verdict.summary())
     print()
+
+
+# ── Park's Core Rule Engine 명령 ───────────────────────────────────────────
+@cli.command()
+@click.argument("ticker")
+@click.option("--config",     default="configs/watchlist_park.yaml", show_default=True, help="종목 목록 YAML")
+@click.option("--period",  default="3mo",                    show_default=True)
+@click.option("--interval",   default="1d",                  show_default=True, help="봉 간격 (예: 1d, 1wk, 5m)")
+def bollinger(ticker: str, config: str, period: str, interval: str) -> None:
+    fetcher = DataFetcher(period=period, interval=interval)
+
+    if ticker in MARKETS:
+        config_path = Path(config)
+
+        if not config_path.exists():
+            click.echo(f"설정 파일을 찾을 수 없습니다: {config}", err=True)
+            sys.exit(1)
+
+        cfg = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+        tickers = cfg.get("watchlist", [])
+
+        if not tickers:
+            click.echo("watchlist 항목이 없습니다.", err=True)
+            sys.exit(1)
+
+        MARKET_FILTERS = {
+            "KOSPI": lambda t: ".KS" in t,
+            "KOSDAQ": lambda t: ".KQ" in t,
+            "KRX": lambda t: ".KS" in t or ".KQ" in t,
+            "ETF": lambda t: ".KS" in t,
+            "US": lambda t: ".KS" not in t and ".KQ" not in t,
+            "PARK": lambda t: True,
+        }
+        market_filter = MARKET_FILTERS.get(ticker)
+        if market_filter:
+            tickers = [t for t in tickers if market_filter(t)]
+    else:
+        tickers = [ticker]
+
+    comparisons = []
+    for ticker in tickers:
+        df = fetcher.fetch(ticker)
+        name, info = fetcher.info(ticker)
+
+        comparison = compare_signals(ticker, name, df)
+        comparisons.append(comparison)
+
+    print("\n".join(comparisons))
 
 
 if __name__ == "__main__":

@@ -154,6 +154,18 @@ python main.py analyze --save-chart --save-report --style position KOSDAQ
 python main.py analyze --save-chart --save-report --style position US
 ```
 
+배당주 투자 분석
+
+```bash
+python main.py analyze --save-chart --save-report --save-csv --style swing --period 5y AGNC
+```
+
+박병창 매매기술 차트
+
+```bash
+python main.py analyze --save-chart --config configs/watchlist_park.yaml --style park PARK
+```
+
 ```bash
 # 기술적 분석 + LLM 해석
 python main.py analyze 005930.KS --llm

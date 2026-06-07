@@ -9,6 +9,7 @@ watchlist:
   - "005380.KS"   # 현대차
   - "000270.KS"   # 기아자동차
   - "329180.KS"   # HD현대중공업
+  - "035420.KS"   # NAVER
   - "042700.KS"   # 한미반도체
   - "009150.KS"   # 삼성전기
   - "001820.KS"   # 삼화콘덴서
@@ -19,8 +20,10 @@ watchlist:
   - "064350.KS"   # 현대로템
   - "079550.KS"   # LIG디펜스앤에어로스페이스
   - "066570.KS"   # LG전자
+  - "454910.KS"   # 두산로보틱스
   # ── ETF/ETN ─────────────────────
   # ── KOSDAQ ─────────────────────
+  - "277810.KQ"   # 레인보우로보틱스
 
   # ── 미국 ───────────────────────────
   - "NVDA"        # NVIDIA Corporation
@@ -29,19 +32,18 @@ watchlist:
   - "AAPL"        # Apple Inc.
   - "GOOG"        # Alphabet Inc.
   - "MSFT"        # Microsoft Corporation
+  - "AMZN"        # Amazon.com, Inc.
   - "TSM"         # Taiwan Semiconductor Manufacturing Company Limited
   - "META"        # Meta Platforms, Inc.
   - "AVGO"        # Broadcom Inc.
   - "PLTR"        # Palantir Technologies Inc.
   - "LITE"        # Lumentum Holdings, Inc.
   - "MRVL"        # Marvell Technology, Inc.
+  - "MU"          # Micron Technology, Inc.
   - "SNDK"        # Sandisk Corporation
   - "IONQ"        # IonQ, Inc.
-  - "DOW"         # Dow, Inc.
   # ── 보유종목 ─────────────────────
   - "INUV"        # Inuvo, Inc.
-  - "MVIS"        # Microvision Inc
-  - "ARKG"        # ARK Genomic Revolution ETF
   - "SPY"         # SPDR S&P 500 Trust ETF
   # ── 배당 보유종목 ─────────────────────
   - "JEPI"        # JPMorgan Equity Premium Income ETF
@@ -49,4 +51,8 @@ watchlist:
   - "RA"          # Brookfield Real Assets Income Fund Inc
   - "QYLD"        # Global X NASDAQ 100 Covered Call ETF
   # ── 종목 검토 ─────────────────────
-
+  - "O"           # Realty Income Corporation
+  - "JEPQ"        # JPMorgan Nasdaq Equity Premium Income ETF
+  - "SCHD"        # Schwab US Dividend Equity ETF
+  - "DGRO"        # iShares Core Dividend Growth ETF
+  - "DIVO"        # Amplify CWP Enhanced Dividend Income ETF

@@ -29,6 +29,10 @@ from ta_trader.utils.font import setup_korean_font
 # ── 색상 상수 (한국 HTS 관례) ──────────────────────────────
 COLOR_UP = "#d92b2b"     # 양봉 (종가 ≥ 시가)
 COLOR_DOWN = "#1f63d6"   # 음봉 (종가 < 시가)
+COLOR_FULL_EXIT_PRICE = "#00838f"     # 전량익절: 진한 청록 (최상단 목표)
+COLOR_PARTIAL_EXIT_PRICE = "#558b2f"  # 부분익절: 올리브그린 (중간 목표)
+COLOR_STOP_LOSS = "#e65100"           # 손절: 진한 주황
+COLOR_TRAILING_STOP = "#6a1b9a"       # 트레일링 스톱: 보라 (양봉 빨강과 구분)
 
 # 이동평균선 (기간, 색상, 두께)
 MA_SPECS = [
@@ -137,18 +141,70 @@ class SwingVolumeChartVisualizer:
         end_date = pd.to_datetime(df.index.max()).date()
         period = int((end_date - start_date).days)
 
+        """
         # 4) 손절/익절 라인 (우측 범례)
         right_handles = []
         es, pos = result.exit_strategy, result.position
         for value, color, ls, name in (
-            (getattr(es, "full_exit_price", None), "#1565c0", "--", "전량익절"),
-            (getattr(es, "partial_exit_price", None), "#2e7d32", ":", "부분익절"),
-            (getattr(pos, "stop_loss", None), "#ef6c00", ":", "손절"),
-            (getattr(es, "trailing_stop", None), "#c62828", "--", "트레일링 스톱"),
+            (getattr(es, "full_exit_price", None),    COLOR_FULL_EXIT_PRICE, "--", "전량익절"),
+            (getattr(es, "partial_exit_price", None), COLOR_PARTIAL_EXIT_PRICE, ":", "부분익절"),
+            (getattr(pos, "stop_loss", None),         COLOR_STOP_LOSS, ":", "손절"),
+            (getattr(es, "trailing_stop", None),      COLOR_TRAILING_STOP, "--", "트레일링 스톱"),
         ):
             if period > 30 and value:
                 ln = ax.axhline(value, color=color, lw=0.9, ls=ls, label=f"{name} {fmt(value)}", zorder=4)
                 right_handles.append(ln)
+        """
+
+        # 4) 손절/익절 라인 (우측 범례)
+        right_handles = []
+        es, pos = result.exit_strategy, result.position
+        # (값, 색, 선스타일, 이름) — 선스타일도 4종 모두 다르게
+        line_specs = [
+            (getattr(es, "full_exit_price", None), COLOR_FULL_EXIT_PRICE, (0, (6, 2)), "전량익절"),
+            (getattr(es, "partial_exit_price", None), COLOR_PARTIAL_EXIT_PRICE, (0, (1, 1.5)), "부분익절"),
+            (getattr(pos, "stop_loss", None), COLOR_STOP_LOSS, (0, (4, 1, 1, 1)), "손절"),
+            (getattr(es, "trailing_stop", None), COLOR_TRAILING_STOP, (0, (3, 1, 1, 1, 1, 1)), "트레일링 스톱"),
+        ]
+        # 유효한 것만, 값 기준 정렬 (라벨 분산 계산용)
+        valid = [(v, c, s, nm) for v, c, s, nm in line_specs if v]
+        # 라인 먼저 그리기
+        for value, color, ls, name in valid:
+            ax.hlines(value, x[-50], x[-1], color=color, lw=1.4, ls=ls, alpha=0.9, zorder=5)
+
+        # 라벨 y위치 분산: 값이 가까우면 텍스트가 겹치므로 최소 간격 확보
+        if valid:
+            ylo, yhi = ax.get_ylim() if ax.get_ylim()[1] > ax.get_ylim()[0] else (
+                min(v for v, *_ in valid), max(v for v, *_ in valid))
+            # set_ylim이 아직 호출 전이므로 데이터 범위로 추정
+            span_est = float(df[("High" if has_ohlc else "Close")].max()
+                             - df[("Low" if has_ohlc else "Close")].min())
+            min_gap = span_est * 0.03   # 라벨 간 최소 세로 간격 (겹칠 때만 분산)
+            # 값 큰 것부터 위에서 아래로 배치하며 겹치면 끌어올림
+            order = sorted(valid, key=lambda t: t[0], reverse=True)
+            label_y = []
+            for value, color, ls, name in order:
+                ly = value
+                for prev in label_y:
+                    if abs(ly - prev) < min_gap:
+                        ly = prev - min_gap   # 아래로 밀기
+                label_y.append(ly)
+            for (value, color, ls, name), ly in zip(order, label_y):
+                # 라벨은 라인 우측 끝 안쪽에. 분산된 ly로 겹침 방지.
+                ax.annotate(f"{name}",
+                            xy=(x[-50], ly),
+                            xytext=(-2, 3), textcoords="offset points",
+                            ha="left", va="baseline",                                 # 'top', 'bottom', 'center', 'baseline', 'center_baseline'
+                            fontsize=6, color=color, fontweight="normal", zorder=4,
+                            bbox=dict(boxstyle="round,pad=0.15", facecolor="white",
+                                      edgecolor="none", alpha=0.5))
+                ax.annotate(f"{fmt(value)}",
+                            xy=(x[-20], ly),
+                            xytext=(-3, 0), textcoords="offset points",
+                            ha="right", va="baseline",
+                            fontsize=8, color=color, fontweight="bold", zorder=6,
+                            bbox=dict(boxstyle="round,pad=0.15", facecolor="white",
+                                      edgecolor="none", alpha=0.9))
 
         # 5) 최고/최저 주석 (HTS 스타일)
         hi_col, lo_col = ("High", "Low") if has_ohlc else ("Close", "Close")
@@ -293,15 +349,32 @@ class SwingVolumeChartVisualizer:
     @staticmethod
     def _format_xaxis(ax, df, x) -> None:
         idx = df.index
+        # 전체 기간(일수)으로 표시 단위 결정
+        span_days = (idx[-1] - idx[0]).days
+
+        if span_days <= 365:          # 1년 이하 → 매월
+            tick_months = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+            label_fmt = "%Y-%m"
+        elif span_days <= 365 * 3:    # 1~3년 → 분기별 (1, 4, 7, 10월)
+            tick_months = {1, 4, 7, 10}
+            label_fmt = "%Y-%m"
+        else:                          # 3년 초과 → 1년 단위 (1월)
+            tick_months = {1}
+            label_fmt = "%Y"
+
         ticks, labels, prev = [], [], None
         for i in range(len(idx)):
             key = (idx[i].year, idx[i].month)
-            if key != prev:
+            # 해당 월이 표시 대상이고, 직전 눈금과 같은 (연,월)이 아닐 때만
+            if idx[i].month in tick_months and key != prev:
                 ticks.append(i)
-                labels.append(idx[i].strftime("%Y-%m"))
+                labels.append(idx[i].strftime(label_fmt))
                 prev = key
-        # 제일 왼쪽 시작 년-월 라벨은 출력하지 않음
-        ticks, labels = ticks[1:], labels[1:]
+
+        # 제일 왼쪽 시작 라벨은 출력하지 않음 (잘림 방지)
+        if ticks:
+            ticks, labels = ticks[1:], labels[1:]
+
         ax.set_xticks(ticks)
         ax.set_xticklabels(labels, rotation=0, fontsize=8)
         # 좌우 마진 확대: 양쪽에 전체 길이의 3%씩 여백

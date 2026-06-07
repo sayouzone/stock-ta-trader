@@ -117,8 +117,6 @@ def screener(config: str, output: str, period: str, interval: str, style: str) -
     ]
     
     stocks = []
-
-
     df = None
     fetcher = DataFetcher(period=period, interval=interval)
     for ticker in ["005930.KS", "000660.KS", "035720.KS", "051910.KS"]:

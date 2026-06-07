@@ -6,6 +6,7 @@ interests=(
     "005380.KS"   # 현대차
     "000270.KS"   # 기아자동차
     "329180.KS"   # HD현대중공업
+    "035420.KS"   # NAVER
     "042700.KS"   # 한미반도체
     "009150.KS"   # 삼성전기
     "001820.KS"   # 삼화콘덴서
@@ -28,17 +29,20 @@ interests=(
     "PLTR"        # Palantir Technologies Inc.
     "LITE"        # Lumentum Holdings, Inc.
     "MRVL"        # Marvell Technology, Inc.
+    "MU"          # Micron Technology, Inc.
     "SNDK"        # Sandisk Corporation
     "IONQ"        # IonQ, Inc.
-    "DOW"         # Dow, Inc.
     "INUV"        # Inuvo, Inc.
-    "MVIS"        # Microvision Inc
-    "ARKG"        # ARK Genomic Revolution ETF
     "SPY"         # SPDR S&P 500 Trust ETF
     "JEPI"        # JPMorgan Equity Premium Income ETF
     "KBWY"        # Invesco KBW Premium Yield Equity REIT ETF
     "RA"          # Brookfield Real Assets Income Fund Inc
-    #"QYLD"        # Global X NASDAQ 100 Covered Call ETF
+    "QYLD"        # Global X NASDAQ 100 Covered Call ETF
+    "O"           # Realty Income Corporation
+    "JEPQ"        # JPMorgan Nasdaq Equity Premium Income ETF
+    "SCHD"        # Schwab US Dividend Equity ETF
+    "DGRO"        # iShares Core Dividend Growth ETF
+    "DIVO"        # Amplify CWP Enhanced Dividend Income ETF
     "recommend"
 )
 
