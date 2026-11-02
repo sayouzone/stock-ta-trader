@@ -3027,7 +3027,6 @@ watchlist:
   - "MTCH"        # Match Group, Inc.
   - "AL"          # Air Lease Corporation Class A
   - "IBP"         # Installed Building Products, Inc.
-  - "LBRDA"       # Liberty Broadband Corp. Class A
   - "AAOI"        # Applied Optoelectronics, Inc.
   - "SANM"        # Sanmina Corporation
   - "BIO"         # Bio-Rad Laboratories, Inc. Class A
@@ -3238,14 +3237,13 @@ watchlist:
 
   # ── 보유종목 ─────────────────────
   #- "NNDM"        # Nano Dimension Ltd
-  - "INUV"        # Inuvo, Inc.
+  #- "INUV"        # Inuvo, Inc.
   - "SPY"         # SPDR S&P 500 Trust ETF
   # ── 배당 보유종목 ─────────────────────
   - "JEPI"        # JPMorgan Equity Premium Income ETF
   - "JEPQ"        # JPMorgan Nasdaq Equity Premium Income ETF
-  - "KBWY"        # Invesco KBW Premium Yield Equity REIT ETF
-  - "RA"          # Brookfield Real Assets Income Fund Inc
-  - "QYLD"        # Global X NASDAQ 100 Covered Call ETF
+  #- "RA"          # Brookfield Real Assets Income Fund Inc
+  #- "QYLD"        # Global X NASDAQ 100 Covered Call ETF
   - "SCHD"        # Schwab US Dividend Equity ETF
   - "DGRO"        # iShares Core Dividend Growth ETF
   - "DIVO"        # Amplify CWP Enhanced Dividend Income ETF

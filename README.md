@@ -154,6 +154,12 @@ python main.py analyze --save-chart --save-report --style position KOSDAQ
 python main.py analyze --save-chart --save-report --style position US
 ```
 
+```bash
+python main.py analyze --save-chart --save-report --save-csv --save-recommend --style swing KOSPI
+python main.py analyze --save-chart --save-report --save-csv --save-recommend --style swing KOSDAQ
+python main.py analyze --save-chart --save-report --save-csv --save-recommend --style swing US
+```
+
 배당주 투자 분석
 
 ```bash

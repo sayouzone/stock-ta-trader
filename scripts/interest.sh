@@ -17,6 +17,7 @@ interests=(
     "064350.KS"   # 현대로템
     "079550.KS"   # LIG디펜스앤에어로스페이스
     "066570.KS"   # LG전자
+    "036930.KQ"   # 주성엔지니어링
     "AMD"         # Advanced Micro Devices, Inc.
     "INTC"        # Intel Corporation
     "NVDA"        # NVIDIA Corporation
@@ -32,10 +33,8 @@ interests=(
     "MU"          # Micron Technology, Inc.
     "SNDK"        # Sandisk Corporation
     "IONQ"        # IonQ, Inc.
-    "INUV"        # Inuvo, Inc.
     "SPY"         # SPDR S&P 500 Trust ETF
     "JEPI"        # JPMorgan Equity Premium Income ETF
-    "KBWY"        # Invesco KBW Premium Yield Equity REIT ETF
     "RA"          # Brookfield Real Assets Income Fund Inc
     "QYLD"        # Global X NASDAQ 100 Covered Call ETF
     "O"           # Realty Income Corporation
@@ -43,6 +42,8 @@ interests=(
     "SCHD"        # Schwab US Dividend Equity ETF
     "DGRO"        # iShares Core Dividend Growth ETF
     "DIVO"        # Amplify CWP Enhanced Dividend Income ETF
+    "SKHY"        # SK하이닉스
+    "SPCX"        # 스페이스X
     "recommend"
 )
 

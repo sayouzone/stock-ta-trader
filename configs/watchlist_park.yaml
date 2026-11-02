@@ -21,9 +21,13 @@ watchlist:
   - "079550.KS"   # LIG디펜스앤에어로스페이스
   - "066570.KS"   # LG전자
   - "454910.KS"   # 두산로보틱스
+  - "036930.KQ"   # 주성엔지니어링
   # ── ETF/ETN ─────────────────────
   # ── KOSDAQ ─────────────────────
+  - "069960.KS"   # 현대백화점
+  - "004170.KS"   # 신세계
   - "277810.KQ"   # 레인보우로보틱스
+  - "108490.KQ"   # 로보티즈
 
   # ── 미국 ───────────────────────────
   - "NVDA"        # NVIDIA Corporation
@@ -43,16 +47,14 @@ watchlist:
   - "SNDK"        # Sandisk Corporation
   - "IONQ"        # IonQ, Inc.
   # ── 보유종목 ─────────────────────
-  - "INUV"        # Inuvo, Inc.
   - "SPY"         # SPDR S&P 500 Trust ETF
   # ── 배당 보유종목 ─────────────────────
   - "JEPI"        # JPMorgan Equity Premium Income ETF
-  - "KBWY"        # Invesco KBW Premium Yield Equity REIT ETF
-  - "RA"          # Brookfield Real Assets Income Fund Inc
-  - "QYLD"        # Global X NASDAQ 100 Covered Call ETF
   # ── 종목 검토 ─────────────────────
   - "O"           # Realty Income Corporation
   - "JEPQ"        # JPMorgan Nasdaq Equity Premium Income ETF
   - "SCHD"        # Schwab US Dividend Equity ETF
   - "DGRO"        # iShares Core Dividend Growth ETF
   - "DIVO"        # Amplify CWP Enhanced Dividend Income ETF
+  - "SKHY"        # SK하이닉스
+  - "SPCX"        # 스페이스X
